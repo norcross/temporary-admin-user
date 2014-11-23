@@ -1,0 +1,56 @@
+
+div.tempadmin-message-hidden {
+	display: none;
+}
+
+div.tempadmin-new-user-box {
+	width: 100%;
+	max-width: 800px;
+	display: block;
+	padding: 10px 0;
+}
+
+div.tempadmin-new-user-box div.tempadmin-new-user-field {
+	display: inline-block;
+	vertical-align: top;
+	width: auto;
+	margin-right: 20px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+div.tempadmin-new-user-box div.tempadmin-new-user-name {
+	width: 200px;
+}
+
+div.tempadmin-new-user-box div.tempadmin-new-user-email {
+	width: 280px;
+}
+
+div.tempadmin-new-user-box div.tempadmin-new-user-time {
+	width: 130px;
+}
+
+div.tempadmin-new-user-box div.tempadmin-new-user-submit {
+	width: 100px;
+	margin-right: 0;
+}
+
+div.tempadmin-new-user-box div.tempadmin-new-user-field label {
+	margin: 0;
+	padding: 1px 0 0 3px;
+	cursor: text;
+	font-weight: 600;
+	display: block;
+	width: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+div.tempadmin-new-user-box div.tempadmin-new-user-field input,
+div.tempadmin-new-user-box div.tempadmin-new-user-field select {
+	display: block;
+	width: 100%;
+}
