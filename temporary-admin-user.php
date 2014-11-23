@@ -827,7 +827,8 @@ class TempAdminUser_Core
 	 */
 	public function check_user_statuses() {
 
-//		if( false === get_transient( 'tempadmin_status_check' )  ) {
+		// check for transient, run every hour (for now)
+		if( false === get_transient( 'tempadmin_status_check' )  ) {
 
 			// get my users
 			$users  = self::get_temp_users();
@@ -853,9 +854,8 @@ class TempAdminUser_Core
 
 			}
 
-//			set_transient( 'tempadmin_status_check', 1, HOUR_IN_SECONDS );
-//		}
-
+			set_transient( 'tempadmin_status_check', 1, HOUR_IN_SECONDS );
+		}
 	}
 
 	/**
