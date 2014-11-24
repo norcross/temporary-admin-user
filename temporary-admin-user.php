@@ -216,15 +216,39 @@ class TempAdminUser_Core
 			echo '</div>';
 
 			// display our existing active users
-			echo '<div class="tempadmin-settings-box tempadmin-users-active">';
-				echo '<h3>' . __( 'Active User Accounts', 'temporary-admin-user' ) . '</h3>';
-				echo self::existing_user_list( 'administrator' );
+			echo '<div id="tempadmin-users-active" class="tempadmin-settings-box tempadmin-users-list-box">';
+
+				echo '<div class="tempadmin-users-list-title-row">';
+					echo '<h3>';
+						echo '<span class="tempadmin-users-title-text">' . __( 'Active User Accounts', 'temporary-admin-user' ) . ' </span>';
+						echo '<span class="tempadmin-users-list-action tempadmin-users-active-action">';
+							echo get_submit_button( __( 'Demote Selected Users', 'temporary-admin-user' ), array( 'delete', 'small', 'tempadmin-action-button-red' ), '', false, array( 'id' => 'tempadmin-users-demote' ) );
+						echo '</span>';
+					echo '</h3>';
+				echo '</div>';
+
+				echo '<div class="tempadmin-users-list-data">';
+					echo self::existing_user_list( 'administrator' );
+				echo '</div>';
+
 			echo '</div>';
 
 			// display our existing expired users
-			echo '<div class="tempadmin-settings-box tempadmin-users-expired">';
-				echo '<h3>' . __( 'Expired User Accounts', 'temporary-admin-user' ) . '</h3>';
-				echo self::existing_user_list( 'subscriber' );
+			echo '<div id="tempadmin-users-expired" class="tempadmin-settings-box tempadmin-users-list-box">';
+
+				echo '<div class="tempadmin-users-list-title-row">';
+					echo '<h3>';
+						echo '<span class="tempadmin-users-title-text">' . __( 'Expired User Accounts', 'temporary-admin-user' ) . ' </span>';
+						echo '<span class="tempadmin-users-list-action tempadmin-users-expired-action">';
+							echo get_submit_button( __( 'Delete Selected Users', 'temporary-admin-user' ), array( 'delete', 'small', 'tempadmin-action-button-red' ), '', false, array( 'id' => 'tempadmin-users-delete' ) );
+						echo '</span>';
+					echo '</h3>';
+				echo '</div>';
+
+				echo '<div class="tempadmin-users-list-data">';
+					echo self::existing_user_list( 'subscriber' );
+				echo '</div>';
+
 			echo '</div>';
 
 		// close the markup for the settings page
@@ -566,7 +590,7 @@ class TempAdminUser_Core
 		// set my table header
 		$table .= '<thead>';
 			// my individual headers
-			$table .= '<th class="manage-column column-cb check-column" id="cb" scope="col"><input type="checkbox" id="tempadmin-all"></th>';
+			$table .= '<th class="manage-column column-cb check-column" id="cb" scope="col"><input class="tempadmin-user-check" type="checkbox" id="tempadmin-all"></th>';
 			$table .= '<th class="manage-column column-username">' . __( 'Username', 'temporary-admin-user' ) . '</th>';
 			$table .= '<th class="manage-column column-email">' . __( 'Email Address', 'temporary-admin-user' ) . '</th>';
 			$table .= '<th class="manage-column column-created">' . __( 'Date Created', 'temporary-admin-user' ) . '</th>';
@@ -600,7 +624,7 @@ class TempAdminUser_Core
 				// markup the user
 				$table .= '<tr class="' . esc_html( $class ) . '">';
 					$table .= '<th class="check-column" scope="row">';
-						$table .= '<input type="checkbox" value="' . absint( $user->ID ) . '" id="user_' . absint( $user->ID ) . '" name="users[]">';
+						$table .= '<input class="tempadmin-user-check" type="checkbox" value="' . absint( $user->ID ) . '" id="user_' . absint( $user->ID ) . '" name="users[]">';
 					$table .= '</th>';
 					$table .= '<td class="username column-username">' . esc_attr( $user->user_login ) . '</td>';
 					$table .= '<td class="email column-email">' . sanitize_email( $user->user_email ) . '</td>';

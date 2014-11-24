@@ -54,3 +54,40 @@ div.tempadmin-new-user-box div.tempadmin-new-user-field select {
 	display: block;
 	width: 100%;
 }
+
+div.tempadmin-users-list-box {
+	padding: 10px 0;
+	margin: 0 0 20px;
+}
+
+div.tempadmin-users-list-box h3 {
+	margin: 0 0 10px;
+	padding: 0 0 10px;
+	border-bottom: 1px dotted #ccc;
+	position: relative;
+}
+
+div.tempadmin-users-list-box h3 span {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+div.tempadmin-users-list-box h3 span.tempadmin-users-title-text {
+}
+
+div.tempadmin-users-list-box h3 span.tempadmin-users-list-action {
+	position: absolute;
+	right: 0;
+	font-weight: normal;
+	visibility: hidden;
+}
+
+div.tempadmin-users-list-box h3 span.tempadmin-users-list-action input.tempadmin-action-button-red {
+	background: #d54e21;
+	color: #fff;
+	border-color: #d54e21;
+	text-decoration: none;
+	-webkit-box-shadow: inset 0 1px 0 rgba( 213, 78, 33, 0.5), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+	-moz-box-shadow: inset 0 1px 0 rgba( 213, 78, 33, 0.5), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+	box-shadow: inset 0 1px 0 rgba( 213, 78, 33, 0.5 ), 0 1px 0 rgba( 0, 0, 0, 0.15 );
+}
