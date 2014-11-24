@@ -64,7 +64,7 @@ class TempAdminUser_Admin {
 		wp_localize_script( 'tempadmin-user', 'tempAdminData', array(
 			'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
 			'makeNonce' => wp_create_nonce( 'tempadmin_make_js' ),
-			'noEmail'   => TempAdminUser_Utilities::get_admin_messages( 'email' )
+			'noEmail'   => TempAdminUser_Utilities::get_admin_messages( 'noemail' )
 		));
 	}
 
@@ -110,7 +110,12 @@ class TempAdminUser_Admin {
 
 			case 'NO_EMAIL':
 
-				$text   = TempAdminUser_Utilities::get_admin_messages( 'email' );
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'noemail' );
+				break;
+
+			case 'USED_EMAIL':
+
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'usedemail' );
 				break;
 
 			case 'NO_USER':
@@ -166,12 +171,12 @@ class TempAdminUser_Admin {
 
 			// display our existing active users
 			echo '<div id="tempadmin-users-active" class="tempadmin-settings-box tempadmin-users-list-box">';
-
+			echo '<form method="post">';
 				echo '<div class="tempadmin-users-list-title-row">';
 					echo '<h3>';
 						echo '<span class="tempadmin-users-title-text">' . __( 'Active User Accounts', 'temporary-admin-user' ) . ' </span>';
 						echo '<span class="tempadmin-users-list-action tempadmin-users-active-action">';
-							echo get_submit_button( __( 'Demote Selected Users', 'temporary-admin-user' ), array( 'delete', 'small', 'tempadmin-action-button-red' ), '', false, array( 'id' => 'tempadmin-users-demote' ) );
+							echo TempAdminUser_Layout::user_action_button( __( 'Demote Selected Users', 'temporary-admin-user' ), 'demote' );
 						echo '</span>';
 					echo '</h3>';
 				echo '</div>';
@@ -180,16 +185,18 @@ class TempAdminUser_Admin {
 					echo TempAdminUser_Layout::existing_user_list( 'administrator' );
 				echo '</div>';
 
+			echo '</form>';
 			echo '</div>';
 
 			// display our existing expired users
 			echo '<div id="tempadmin-users-expired" class="tempadmin-settings-box tempadmin-users-list-box">';
+			echo '<form method="post">';
 
 				echo '<div class="tempadmin-users-list-title-row">';
 					echo '<h3>';
 						echo '<span class="tempadmin-users-title-text">' . __( 'Expired User Accounts', 'temporary-admin-user' ) . ' </span>';
 						echo '<span class="tempadmin-users-list-action tempadmin-users-expired-action">';
-							echo get_submit_button( __( 'Delete Selected Users', 'temporary-admin-user' ), array( 'delete', 'small', 'tempadmin-action-button-red' ), '', false, array( 'id' => 'tempadmin-users-delete' ) );
+							echo TempAdminUser_Layout::user_action_button( __( 'Delete Selected Users', 'temporary-admin-user' ), 'delete' );
 						echo '</span>';
 					echo '</h3>';
 				echo '</div>';
@@ -198,6 +205,7 @@ class TempAdminUser_Admin {
 					echo TempAdminUser_Layout::existing_user_list( 'subscriber' );
 				echo '</div>';
 
+			echo '</form>';
 			echo '</div>';
 
 		// close the markup for the settings page

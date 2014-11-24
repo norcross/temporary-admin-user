@@ -38,7 +38,8 @@ class TempAdminUser_Utilities {
 		$text   = array(
 			'success'   => __( 'Success! A new user was created.', 'temporary-admin-user' ),
 			'nonce'     => __( 'Nonce failed.', 'temporary-admin-user' ),
-			'email'     => __( 'Please enter a valid email address.', 'temporary-admin-user' ),
+			'noemail'   => __( 'Please enter a valid email address.', 'temporary-admin-user' ),
+			'usedemail' => __( 'This email address already exists. Please use another.', 'temporary-admin-user' ),
 			'nouser'    => __( 'No user account was created.', 'temporary-admin-user' ),
 			'default'   => __( 'There was an error with your submission.', 'temporary-admin-user' ),
 		);
@@ -178,8 +179,15 @@ class TempAdminUser_Utilities {
 		$args   = array(
 			'fields'       => $fields,
 			'role'         => $role,
-			'meta_key'     => '_tempadmin_user',
-			'meta_value'   => true,
+			'meta_key'     => '_tempadmin_expire',
+			'order'        => 'ASC',
+			'orderby'      => 'meta_value',
+			'meta_query'   => array(
+				0 => array(
+					'key'     => '_tempadmin_user',
+					'value'   => true
+				)
+			)
 		);
 
 		// get my users

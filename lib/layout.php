@@ -103,7 +103,7 @@ class TempAdminUser_Layout {
 		// we have users. start building a table
 		$table  = '';
 
-		// start the markup
+		// start the table wrapper markup
 		$table .= '<table class="wp-list-table widefat fixed users">';
 
 		// set my table header
@@ -135,11 +135,39 @@ class TempAdminUser_Layout {
 
 		$table .= '</tbody>';
 
-		// close the table
+		// close the table wrapper
 		$table .= '</table>';
 
 		// return the table
 		return $table;
+	}
+
+	/**
+	 * [user_action_button description]
+	 * @param  string $title [description]
+	 * @param  string $type  [description]
+	 * @return [type]        [description]
+	 */
+	public static function user_action_button( $title = '', $type = '' ) {
+
+		// set all my classes in an array
+		$class  = array( 'delete', 'small', 'tempadmin-user-action', 'tempadmin-action-button-red' );
+
+		// cast my type to make sure it doesn't mess anything up
+		$type   = ! empty( $type ) ? esc_sql( $type ) : 'unknown';
+
+		// make my name and ID for the button
+		$button_name    = 'tempadmin-user-action[' . $type . ']';
+		$button_id      = 'tempadmin-user-action-' . $type;
+
+		// build the button
+		$button	= get_submit_button( $title, $class, $button_name, false, array( 'id' => $button_id, 'data-type' => $type ) );
+
+		// add our nonce for non JS saving
+		$nonce  = wp_nonce_field( 'tempadmin_' . $type . '_nojs', 'tempadmin-manual-' . $type . '-nonce', true, false );
+
+		// return them both
+		return $button . $nonce;
 	}
 
 	/**
@@ -168,7 +196,12 @@ class TempAdminUser_Layout {
 	 * @param  string $class [description]
 	 * @return [type]        [description]
 	 */
-	public static function single_user_row( $user = OBJECT, $class = '' ) {
+	public static function single_user_row( $user = OBJECT, $class = 'standard' ) {
+
+		// check if we recieved just the user ID and fetch the object
+		if ( is_numeric( $user ) && ! is_object( $user ) ) {
+			$user   = get_user_by( 'id', $user );
+		}
 
 		// get some user meta
 		$create = get_user_meta( $user->ID, '_tempadmin_created', true );
@@ -182,14 +215,18 @@ class TempAdminUser_Layout {
 			$row   .= '<th class="check-column" scope="row">';
 				$row   .= '<input class="tempadmin-user-check" type="checkbox" value="' . absint( $user->ID ) . '" id="user_' . absint( $user->ID ) . '" name="users[]">';
 			$row   .= '</th>';
-			$row   .= '<td class="username column-username">' . esc_attr( $user->user_login ) . '</td>';
-			$row   .= '<td class="email column-email">' . sanitize_email( $user->user_email ) . '</td>';
+			$row   .= '<td class="username column-username column-clickable">' . esc_attr( $user->user_login ) . '</td>';
+			$row   .= '<td class="email column-email column-clickable">' . sanitize_email( $user->user_email ) . '</td>';
 			$row   .= '<td class="created column-created">';
+			if ( ! empty( $create ) ) {
 				$row   .= TempAdminUser_Utilities::format_date_display( $create, 'date-format' ) . ' @ ' . TempAdminUser_Utilities::format_date_display( $create, 'time-format' );
+			}
 			$row   .= '</td>';
 
 			$row   .= '<td class="expired column-expired">';
+			if ( ! empty( $expire ) ) {
 				$row   .= TempAdminUser_Utilities::format_date_display( $expire, 'date-format' ) . ' @ ' . TempAdminUser_Utilities::format_date_display( $expire, 'time-format' );
+			}
 			$row   .= '</td>';
 
 		$row   .= '</tr>';

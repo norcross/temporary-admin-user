@@ -32,6 +32,7 @@ class TempAdminUser_Process {
 	public function __construct() {
 		add_action( 'init',                             array( $this, 'check_user_statuses'     ),  9999    );
 		add_action( 'admin_init',                       array( $this, 'create_user_nojs'        )           );
+		add_action( 'admin_init',                       array( $this, 'demote_users_nojs'       )           );
 		add_action( 'wp_ajax_create_user_js',           array( $this, 'create_user_js'          )           );
 	}
 
@@ -68,6 +69,15 @@ class TempAdminUser_Process {
 			exit();
 		}
 
+		// check for existing email
+		if ( ! empty( $data['email'] ) && email_exists( $data['email'] ) ) {
+			// get our redirect link
+			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'USED_EMAIL' ) );
+			// do the redirect
+			wp_redirect( $fail, 302 );
+			exit();
+		}
+
 		// if our time isn't passed for some reason, make it one day
 		$time	= ! empty( $data['time'] ) ? $data['time'] : 'day';
 
@@ -89,6 +99,15 @@ class TempAdminUser_Process {
 		// do the redirect
 		wp_redirect( $good, 302 );
 		exit();
+	}
+
+	/**
+	 * our user demotion function to go on non-ajax
+	 *
+	 * @return null
+	 */
+	public function demote_users_nojs() {
+
 	}
 
 	/**
@@ -114,7 +133,16 @@ class TempAdminUser_Process {
 		if( empty( $_POST['email'] ) ) {
 			$ret['success'] = false;
 			$ret['errcode'] = 'NO_EMAIL';
-			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'email' );
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'noemail' );
+			echo json_encode( $ret );
+			die();
+		}
+
+		// check to make sure our email isn't already used
+		if( ! empty( $_POST['email'] ) && email_exists( $_POST['email'] ) ) {
+			$ret['success'] = false;
+			$ret['errcode'] = 'USED_EMAIL';
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'usedemail' );
 			echo json_encode( $ret );
 			die();
 		}
@@ -147,6 +175,7 @@ class TempAdminUser_Process {
 		if( ! empty( $user ) ) {
 			$ret['success'] = true;
 			$ret['errcode'] = null;
+			$ret['newrow']  = TempAdminUser_Layout::single_user_row( $user );
 			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'success' );
 			echo json_encode( $ret );
 			die();
