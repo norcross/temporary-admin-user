@@ -84,6 +84,33 @@ class TempAdminUser_Layout {
 	}
 
 	/**
+	 * [user_action_button description]
+	 * @param  string $title [description]
+	 * @param  string $type  [description]
+	 * @return [type]        [description]
+	 */
+	public static function user_action_button( $title = '', $type = '' ) {
+
+		// set all my classes in an array
+		$class  = array( 'delete', 'small', 'tempadmin-user-action', 'tempadmin-action-button-red' );
+
+		// cast my type to make sure it doesn't mess anything up
+		$type   = ! empty( $type ) ? esc_sql( $type ) : 'unknown';
+
+		// build the button
+		$button	= get_submit_button( $title, $class, '', false, array( 'id' => 'tempadmin-user-action-' . $type, 'data-type' => $type ) );
+
+		// add a hidden field to indicate which action is happening
+		$hidden = '<input type="hidden" name="tempadmin-user-action" value="' . $type . '">';
+
+		// add our nonce for non JS saving
+		$nonce  = wp_nonce_field( 'tempadmin_' . $type . '_nojs', 'tempadmin-manual-' . $type . '-nonce', true, false );
+
+		// return them both
+		return $button . $hidden . $nonce;
+	}
+
+	/**
 	 * construct the HTML for the existing user portion of the admin page
 	 *
 	 * @param  string  $role      which subset of users to get based on user role (current or expired)
@@ -94,11 +121,6 @@ class TempAdminUser_Layout {
 
 		// get my users
 		$users  = TempAdminUser_Utilities::get_temp_users( $role, 'all' );
-
-		// if no users, just return a nice message
-		if ( empty( $users ) ) {
-			return '<p class="description">' . __( 'There are no current users in this group.', 'temporary-admin-user' ) . '</p>';
-		}
 
 		// we have users. start building a table
 		$table  = '';
@@ -118,6 +140,14 @@ class TempAdminUser_Layout {
 
 		// set the table body
 		$table .= '<tbody>';
+		// if no users, just show an empty row
+		if ( empty( $users ) ) {
+			$table .= '<tr class="tempadmin-single-user-row tempadmin-empty-users-row standard">';
+				$table .= '<td colspan="4">';
+					$table .= '<span class="description">' . __( 'There are no users currently in this group.', 'temporary-admin-user' ) . '</span>';
+				$table .= '</td>';
+			$table .= '</tr>';
+		} else {
 			// set a counter
 			$i = 1;
 			// loop the users
@@ -132,7 +162,7 @@ class TempAdminUser_Layout {
 				// and increment our counter
 				$i++;
 			}
-
+		}
 		$table .= '</tbody>';
 
 		// close the table wrapper
@@ -140,34 +170,6 @@ class TempAdminUser_Layout {
 
 		// return the table
 		return $table;
-	}
-
-	/**
-	 * [user_action_button description]
-	 * @param  string $title [description]
-	 * @param  string $type  [description]
-	 * @return [type]        [description]
-	 */
-	public static function user_action_button( $title = '', $type = '' ) {
-
-		// set all my classes in an array
-		$class  = array( 'delete', 'small', 'tempadmin-user-action', 'tempadmin-action-button-red' );
-
-		// cast my type to make sure it doesn't mess anything up
-		$type   = ! empty( $type ) ? esc_sql( $type ) : 'unknown';
-
-		// make my name and ID for the button
-		$button_name    = 'tempadmin-user-action[' . $type . ']';
-		$button_id      = 'tempadmin-user-action-' . $type;
-
-		// build the button
-		$button	= get_submit_button( $title, $class, $button_name, false, array( 'id' => $button_id, 'data-type' => $type ) );
-
-		// add our nonce for non JS saving
-		$nonce  = wp_nonce_field( 'tempadmin_' . $type . '_nojs', 'tempadmin-manual-' . $type . '-nonce', true, false );
-
-		// return them both
-		return $button . $nonce;
 	}
 
 	/**
@@ -211,7 +213,7 @@ class TempAdminUser_Layout {
 		$row    = '';
 
 		// markup the user
-		$row   .= '<tr class="tempadmin-single-user-row ' . esc_html( $class ) . '">';
+		$row   .= '<tr id="single-user-' . absint( $user->ID ) . '" class="tempadmin-single-user-row ' . esc_html( $class ) . '">';
 			$row   .= '<th class="check-column" scope="row">';
 				$row   .= '<input class="tempadmin-user-check" type="checkbox" value="' . absint( $user->ID ) . '" id="user_' . absint( $user->ID ) . '" name="users[]">';
 			$row   .= '</th>';

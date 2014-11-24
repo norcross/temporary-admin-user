@@ -87,8 +87,12 @@ class TempAdminUser_Admin {
 		// if we have success, just return that and go on your way
 		if ( ! empty( $_REQUEST['success'] ) ) {
 
+			// get my success type
+			$type   = ! empty( $_REQUEST['type'] ) ? $_REQUEST['type'] : 'created';
+
+			// display the message
 			echo '<div id="message" class="updated below-h2 tempadmin-message">';
-				echo '<p>' . TempAdminUser_Utilities::get_admin_messages( 'success' ) . '</p>';
+				echo '<p>' . TempAdminUser_Utilities::get_admin_messages( $type ) . '</p>';
 			echo '</div>';
 
 			return;
@@ -118,9 +122,24 @@ class TempAdminUser_Admin {
 				$text   = TempAdminUser_Utilities::get_admin_messages( 'usedemail' );
 				break;
 
-			case 'NO_USER':
+			case 'NO_CREATE':
 
-				$text   = TempAdminUser_Utilities::get_admin_messages( 'nouser' );
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'nocreate' );
+				break;
+
+			case 'NO_USERS':
+
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'nousers' );
+				break;
+
+			case 'NO_DEMOTE':
+
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'nodemote' );
+				break;
+
+			case 'NO_DELETE':
+
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'nodelete' );
 				break;
 
 			default:

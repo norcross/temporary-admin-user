@@ -32,7 +32,7 @@ class TempAdminUser_Process {
 	public function __construct() {
 		add_action( 'init',                             array( $this, 'check_user_statuses'     ),  9999    );
 		add_action( 'admin_init',                       array( $this, 'create_user_nojs'        )           );
-		add_action( 'admin_init',                       array( $this, 'demote_users_nojs'       )           );
+		add_action( 'admin_init',                       array( $this, 'update_users_nojs'       )           );
 		add_action( 'wp_ajax_create_user_js',           array( $this, 'create_user_js'          )           );
 	}
 
@@ -87,14 +87,14 @@ class TempAdminUser_Process {
 		// check for error on user creation
 		if ( ! empty( $user['error'] ) ) {
 			// get our redirect link
-			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_USER' ) );
+			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_CREATE' ) );
 			// do the redirect
 			wp_redirect( $fail, 302 );
 			exit();
 		}
 
 		// get our redirect link
-		$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'id' => absint( $user ) ) );
+		$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'id' => absint( $user ), 'type' => 'created' ) );
 
 		// do the redirect
 		wp_redirect( $good, 302 );
@@ -102,12 +102,150 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * our user demotion function to go on non-ajax
+	 * our user demote or delete function to go on non-ajax
 	 *
 	 * @return null
 	 */
-	public function demote_users_nojs() {
+	public function update_users_nojs() {
 
+		// make sure we have an allowed action type before moving forward
+		if( empty( $_POST['tempadmin-user-action'] ) || ! in_array( $_POST['tempadmin-user-action'], array( 'demote', 'delete' ) ) ) {
+			return;
+		}
+
+		// set our type as a variable
+		$type   = $_POST['tempadmin-user-action'];
+
+		// do the nonce verification
+		if ( ! wp_verify_nonce( $_POST['tempadmin-manual-' . $type . '-nonce'], 'tempadmin_' . $type . '_nojs' ) ) {
+			// get our redirect link
+			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NONCE_FAILED' ) );
+			// do the redirect
+			wp_redirect( $fail, 302 );
+			exit();
+		}
+
+		// check for empty users
+		if ( empty( $_POST['users'] ) ) {
+			// get our redirect link
+			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_USERS' ) );
+			// do the redirect
+			wp_redirect( $fail, 302 );
+			exit();
+		}
+
+		// make sure my users are an array
+		$users  = ! is_array( $_POST['users'] ) ? (array) $_POST['users'] : $_POST['users'];
+
+		// demote users if requested
+		if ( $type == 'demote' ) {
+			self::demote_users( $users );
+		}
+
+		// delete users if requested
+		if ( $type == 'delete' ) {
+			self::delete_users( $users );
+		}
+
+		// and just be done
+		return;
+	}
+
+	/**
+	 * [demote_users description]
+	 * @param  array  $users [description]
+	 * @return [type]        [description]
+	 */
+	protected static function demote_users( $users = array() ) {
+
+		// set a flag first
+		$result = true;
+
+		// loop them
+		foreach( $users as $user_id ) {
+
+			// run the reset
+			$action = self::reset_user_status( $user_id );
+
+			// check for failure
+			if ( $action === false ) {
+
+				// set my result flag false
+				$result = false;
+
+				// and break
+				break;
+			}
+		}
+
+		// handle our redirect for failure
+		if ( $result === false ) {
+
+			// get our redirect link
+			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_DEMOTE' ) );
+			// do the redirect
+			wp_redirect( $fail, 302 );
+			exit();
+		}
+
+		// handle our redirect for success
+		if ( $result === true ) {
+
+			// get our redirect link
+			$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'type' => 'demoted' ) );
+			// do the redirect
+			wp_redirect( $good, 302 );
+			exit();
+		}
+	}
+
+
+	/**
+	 * [delete_users description]
+	 * @param  array  $users [description]
+	 * @return [type]        [description]
+	 */
+	protected static function delete_users( $users = array() ) {
+
+		// set a flag first
+		$result = true;
+
+		// loop them
+		foreach( $users as $user_id ) {
+
+			// run the reset
+			$action = self::remove_user( $user_id );
+
+			// check for failure
+			if ( $action === false ) {
+
+				// set my result flag false
+				$result = false;
+
+				// and break
+				break;
+			}
+		}
+
+		// handle our redirect for failure
+		if ( $result === false ) {
+
+			// get our redirect link
+			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_DELETE' ) );
+			// do the redirect
+			wp_redirect( $fail, 302 );
+			exit();
+		}
+
+		// handle our redirect for success
+		if ( $result === true ) {
+
+			// get our redirect link
+			$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'type' => 'deleted' ) );
+			// do the redirect
+			wp_redirect( $good, 302 );
+			exit();
+		}
 	}
 
 	/**
@@ -166,7 +304,7 @@ class TempAdminUser_Process {
 		if( empty( $user ) ) {
 			$ret['success'] = false;
 			$ret['errcode'] = 'NO_USER';
-			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'nouser' );
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'nocreate' );
 			echo json_encode( $ret );
 			die();
 		}
@@ -176,7 +314,7 @@ class TempAdminUser_Process {
 			$ret['success'] = true;
 			$ret['errcode'] = null;
 			$ret['newrow']  = TempAdminUser_Layout::single_user_row( $user );
-			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'success' );
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'created' );
 			echo json_encode( $ret );
 			die();
 		}
@@ -287,7 +425,7 @@ class TempAdminUser_Process {
 	/**
 	 * update the user to a specified role
 	 *
-	 * @param  integer $user_id   the user object being modified
+	 * @param  integer $user_id   the user ID being modified
 	 * @param  string  $role      the status being changed to
 	 *
 	 * @return bool               the result of the update
@@ -297,8 +435,34 @@ class TempAdminUser_Process {
 		// set a quick setup string
 		$update = wp_update_user( array( 'ID' => absint( $user_id ), 'role' => $role ) );
 
-		// send back true / false bool
-		return ! is_wp_error( $update ) ? true : false;
+		// return false if we got an error
+		if ( is_wp_error( $update ) ) {
+			return false;
+		}
+
+		// update the timestamp if we are bumping down to subscriber
+		if ( $role == 'subscriber' ) {
+			update_user_meta( $user_id, '_tempadmin_expire', time() );
+		}
+
+		// send back true
+		return true;
+	}
+
+	/**
+	 * delete the user
+	 *
+	 * @param  integer $user_id   the user ID being deleted
+	 *
+	 * @return bool               the result of the update
+	 */
+	protected static function remove_user( $user_id = 0 ) {
+
+		// set a quick setup string
+		$delete = wp_delete_user( absint( $user_id ), get_current_user_id() );
+
+		// return true / false bool if we got an error
+		return is_wp_error( $delete ) ? false : true;
 	}
 
 	/**

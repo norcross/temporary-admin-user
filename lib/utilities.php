@@ -36,11 +36,16 @@ class TempAdminUser_Utilities {
 
 		// set an array of messages
 		$text   = array(
-			'success'   => __( 'Success! A new user was created.', 'temporary-admin-user' ),
+			'created'   => __( 'Success! A new user was created.', 'temporary-admin-user' ),
+			'demoted'   => __( 'The selected accounts were demoted.', 'temporary-admin-user' ),
+			'deleted'   => __( 'The selected accounts were deleted.', 'temporary-admin-user' ),
 			'nonce'     => __( 'Nonce failed.', 'temporary-admin-user' ),
 			'noemail'   => __( 'Please enter a valid email address.', 'temporary-admin-user' ),
 			'usedemail' => __( 'This email address already exists. Please use another.', 'temporary-admin-user' ),
-			'nouser'    => __( 'No user account was created.', 'temporary-admin-user' ),
+			'nocreate'  => __( 'No user account was created.', 'temporary-admin-user' ),
+			'nousers'   => __( 'No user accounts were selected.', 'temporary-admin-user' ),
+			'nodemote'  => __( 'Some user accounts could not be demoted. Please try again.', 'temporary-admin-user' ),
+			'nodelete'  => __( 'Some user accounts could not be deleted. Please try again.', 'temporary-admin-user' ),
 			'default'   => __( 'There was an error with your submission.', 'temporary-admin-user' ),
 		);
 
