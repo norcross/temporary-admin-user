@@ -108,22 +108,12 @@ class TempAdminUser_Layout {
 
 		// set my table header
 		$table .= '<thead>';
-			// my individual headers
-			$table .= '<th class="manage-column column-cb check-column" id="cb" scope="col"><input class="tempadmin-user-check" type="checkbox" id="tempadmin-all"></th>';
-			$table .= '<th class="manage-column column-username">' . __( 'Username', 'temporary-admin-user' ) . '</th>';
-			$table .= '<th class="manage-column column-email">' . __( 'Email Address', 'temporary-admin-user' ) . '</th>';
-			$table .= '<th class="manage-column column-created">' . __( 'Date Created', 'temporary-admin-user' ) . '</th>';
-			$table .= '<th class="manage-column column-expired">' . __( 'Expiration', 'temporary-admin-user' ) . '</th>';
+		$table .= self::user_head_foot_row();
 		$table .= '</thead>';
 
 		// set my table footer
 		$table .= '<tfoot>';
-			// my individual headers
-			$table .= '<th class="manage-column column-cb check-column" id="cb" scope="col"><input type="checkbox" id="tempadmin-all"></th>';
-			$table .= '<th class="manage-column column-username">' . __( 'Username', 'temporary-admin-user' ) . '</th>';
-			$table .= '<th class="manage-column column-email">' . __( 'Email Address', 'temporary-admin-user' ) . '</th>';
-			$table .= '<th class="manage-column column-created">' . __( 'Date Created', 'temporary-admin-user' ) . '</th>';
-			$table .= '<th class="manage-column column-expired">' . __( 'Expiration', 'temporary-admin-user' ) . '</th>';
+		$table .= self::user_head_foot_row();
 		$table .= '</tfoot>';
 
 		// set the table body
@@ -136,26 +126,9 @@ class TempAdminUser_Layout {
 				// get my alternating class
 				$class  = $i & 1 ? 'alternate' : 'standard';
 
-				// get some user meta
-				$create = get_user_meta( $user->ID, '_tempadmin_created', true );
-				$expire = get_user_meta( $user->ID, '_tempadmin_expire', true );
+				// pull the row markup
+				$table .= self::single_user_row( $user, $class );
 
-				// markup the user
-				$table .= '<tr class="' . esc_html( $class ) . '">';
-					$table .= '<th class="check-column" scope="row">';
-						$table .= '<input class="tempadmin-user-check" type="checkbox" value="' . absint( $user->ID ) . '" id="user_' . absint( $user->ID ) . '" name="users[]">';
-					$table .= '</th>';
-					$table .= '<td class="username column-username">' . esc_attr( $user->user_login ) . '</td>';
-					$table .= '<td class="email column-email">' . sanitize_email( $user->user_email ) . '</td>';
-					$table .= '<td class="created column-created">';
-						$table .= TempAdminUser_Utilities::format_date_display( $create, 'date-format' ) . ' @ ' . TempAdminUser_Utilities::format_date_display( $create, 'time-format' );
-					$table .= '</td>';
-
-					$table .= '<td class="expired column-expired">';
-						$table .= TempAdminUser_Utilities::format_date_display( $expire, 'date-format' ) . ' @ ' . TempAdminUser_Utilities::format_date_display( $expire, 'time-format' );
-					$table .= '</td>';
-
-				$table .= '</tr>';
 				// and increment our counter
 				$i++;
 			}
@@ -167,6 +140,62 @@ class TempAdminUser_Layout {
 
 		// return the table
 		return $table;
+	}
+
+	/**
+	 * load the table header and footer
+	 *
+	 * @return [type]        [description]
+	 */
+	public static function user_head_foot_row() {
+
+		// make an empty
+		$row    = '';
+
+		$row   .= '<th class="manage-column column-cb check-column" id="cb" scope="col"><input class="tempadmin-user-check" type="checkbox" id="tempadmin-all"></th>';
+		$row   .= '<th class="manage-column column-username">' . __( 'Username', 'temporary-admin-user' ) . '</th>';
+		$row   .= '<th class="manage-column column-email">' . __( 'Email Address', 'temporary-admin-user' ) . '</th>';
+		$row   .= '<th class="manage-column column-created">' . __( 'Date Created', 'temporary-admin-user' ) . '</th>';
+		$row   .= '<th class="manage-column column-expired">' . __( 'Expiration', 'temporary-admin-user' ) . '</th>';
+
+		// send it back
+		return $row;
+	}
+
+	/**
+	 * [single_user_row description]
+	 * @param  [type] $user  [description]
+	 * @param  string $class [description]
+	 * @return [type]        [description]
+	 */
+	public static function single_user_row( $user = OBJECT, $class = '' ) {
+
+		// get some user meta
+		$create = get_user_meta( $user->ID, '_tempadmin_created', true );
+		$expire = get_user_meta( $user->ID, '_tempadmin_expire', true );
+
+		// make an empty
+		$row    = '';
+
+		// markup the user
+		$row   .= '<tr class="tempadmin-single-user-row ' . esc_html( $class ) . '">';
+			$row   .= '<th class="check-column" scope="row">';
+				$row   .= '<input class="tempadmin-user-check" type="checkbox" value="' . absint( $user->ID ) . '" id="user_' . absint( $user->ID ) . '" name="users[]">';
+			$row   .= '</th>';
+			$row   .= '<td class="username column-username">' . esc_attr( $user->user_login ) . '</td>';
+			$row   .= '<td class="email column-email">' . sanitize_email( $user->user_email ) . '</td>';
+			$row   .= '<td class="created column-created">';
+				$row   .= TempAdminUser_Utilities::format_date_display( $create, 'date-format' ) . ' @ ' . TempAdminUser_Utilities::format_date_display( $create, 'time-format' );
+			$row   .= '</td>';
+
+			$row   .= '<td class="expired column-expired">';
+				$row   .= TempAdminUser_Utilities::format_date_display( $expire, 'date-format' ) . ' @ ' . TempAdminUser_Utilities::format_date_display( $expire, 'time-format' );
+			$row   .= '</td>';
+
+		$row   .= '</tr>';
+
+		// return the row
+		return $row;
 	}
 
 	/**

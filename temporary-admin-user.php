@@ -97,8 +97,6 @@ class TempAdminUser_Core
 		}
 	}
 
-
-
 /// end class
 }
 
