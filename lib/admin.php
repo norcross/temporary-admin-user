@@ -64,6 +64,8 @@ class TempAdminUser_Admin {
 		wp_localize_script( 'tempadmin-user', 'tempAdminData', array(
 			'ajaxUrl'   => admin_url( 'admin-ajax.php' ),
 			'makeNonce' => wp_create_nonce( 'tempadmin_make_js' ),
+			'deltNonce' => wp_create_nonce( 'tempadmin_delete_js' ),
+			'demtNonce' => wp_create_nonce( 'tempadmin_demote_js' ),
 			'noEmail'   => TempAdminUser_Utilities::get_admin_messages( 'noemail' )
 		));
 	}
@@ -120,6 +122,16 @@ class TempAdminUser_Admin {
 			case 'USED_EMAIL':
 
 				$text   = TempAdminUser_Utilities::get_admin_messages( 'usedemail' );
+				break;
+
+			case 'NO_TYPE':
+
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'notype' );
+				break;
+
+			case 'BAD_TYPE':
+
+				$text   = TempAdminUser_Utilities::get_admin_messages( 'badtype' );
 				break;
 
 			case 'NO_CREATE':

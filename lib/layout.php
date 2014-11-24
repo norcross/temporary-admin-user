@@ -142,11 +142,7 @@ class TempAdminUser_Layout {
 		$table .= '<tbody>';
 		// if no users, just show an empty row
 		if ( empty( $users ) ) {
-			$table .= '<tr class="tempadmin-single-user-row tempadmin-empty-users-row standard">';
-				$table .= '<td colspan="4">';
-					$table .= '<span class="description">' . __( 'There are no users currently in this group.', 'temporary-admin-user' ) . '</span>';
-				$table .= '</td>';
-			$table .= '</tr>';
+			$table .= self::empty_user_row();
 		} else {
 			// set a counter
 			$i = 1;
@@ -187,6 +183,26 @@ class TempAdminUser_Layout {
 		$row   .= '<th class="manage-column column-email">' . __( 'Email Address', 'temporary-admin-user' ) . '</th>';
 		$row   .= '<th class="manage-column column-created">' . __( 'Date Created', 'temporary-admin-user' ) . '</th>';
 		$row   .= '<th class="manage-column column-expired">' . __( 'Expiration', 'temporary-admin-user' ) . '</th>';
+
+		// send it back
+		return $row;
+	}
+
+	/**
+	 * load the row for empty user list
+	 *
+	 * @return [type]        [description]
+	 */
+	public static function empty_user_row() {
+
+		// make an empty
+		$row    = '';
+
+		$row   .= '<tr class="tempadmin-single-user-row tempadmin-empty-users-row standard">';
+			$row   .= '<td colspan="4">';
+				$row   .= '<span class="description">' . __( 'There are no users currently in this group.', 'temporary-admin-user' ) . '</span>';
+			$row   .= '</td>';
+		$row   .= '</tr>';
 
 		// send it back
 		return $row;

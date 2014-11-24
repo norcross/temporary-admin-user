@@ -34,6 +34,7 @@ class TempAdminUser_Process {
 		add_action( 'admin_init',                       array( $this, 'create_user_nojs'        )           );
 		add_action( 'admin_init',                       array( $this, 'update_users_nojs'       )           );
 		add_action( 'wp_ajax_create_user_js',           array( $this, 'create_user_js'          )           );
+		add_action( 'wp_ajax_update_users_js',          array( $this, 'update_users_js'         )           );
 	}
 
 	/**
@@ -139,113 +140,62 @@ class TempAdminUser_Process {
 
 		// demote users if requested
 		if ( $type == 'demote' ) {
-			self::demote_users( $users );
+
+			// do the demotion
+			$action = self::demote_users( $users );
+
+			// handle our redirect for failure
+			if ( $action === false ) {
+
+				// get our redirect link
+				$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_DEMOTE' ) );
+				// do the redirect
+				wp_redirect( $fail, 302 );
+				exit();
+			}
+
+			// handle our redirect for success
+			if ( $action === true ) {
+
+				// get our redirect link
+				$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'type' => 'demoted' ) );
+				// do the redirect
+				wp_redirect( $good, 302 );
+				exit();
+			}
+
 		}
 
 		// delete users if requested
 		if ( $type == 'delete' ) {
-			self::delete_users( $users );
+
+			// do the deletion
+			$action = self::delete_users( $users );
+
+			// handle our redirect for failure
+			if ( $action === false ) {
+
+				// get our redirect link
+				$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_DELETE' ) );
+				// do the redirect
+				wp_redirect( $fail, 302 );
+				exit();
+			}
+
+			// handle our redirect for success
+			if ( $action === true ) {
+
+				// get our redirect link
+				$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'type' => 'deleted' ) );
+				// do the redirect
+				wp_redirect( $good, 302 );
+				exit();
+			}
+
 		}
 
 		// and just be done
 		return;
-	}
-
-	/**
-	 * [demote_users description]
-	 * @param  array  $users [description]
-	 * @return [type]        [description]
-	 */
-	protected static function demote_users( $users = array() ) {
-
-		// set a flag first
-		$result = true;
-
-		// loop them
-		foreach( $users as $user_id ) {
-
-			// run the reset
-			$action = self::reset_user_status( $user_id );
-
-			// check for failure
-			if ( $action === false ) {
-
-				// set my result flag false
-				$result = false;
-
-				// and break
-				break;
-			}
-		}
-
-		// handle our redirect for failure
-		if ( $result === false ) {
-
-			// get our redirect link
-			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_DEMOTE' ) );
-			// do the redirect
-			wp_redirect( $fail, 302 );
-			exit();
-		}
-
-		// handle our redirect for success
-		if ( $result === true ) {
-
-			// get our redirect link
-			$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'type' => 'demoted' ) );
-			// do the redirect
-			wp_redirect( $good, 302 );
-			exit();
-		}
-	}
-
-
-	/**
-	 * [delete_users description]
-	 * @param  array  $users [description]
-	 * @return [type]        [description]
-	 */
-	protected static function delete_users( $users = array() ) {
-
-		// set a flag first
-		$result = true;
-
-		// loop them
-		foreach( $users as $user_id ) {
-
-			// run the reset
-			$action = self::remove_user( $user_id );
-
-			// check for failure
-			if ( $action === false ) {
-
-				// set my result flag false
-				$result = false;
-
-				// and break
-				break;
-			}
-		}
-
-		// handle our redirect for failure
-		if ( $result === false ) {
-
-			// get our redirect link
-			$fail   = TempAdminUser_Utilities::get_admin_page_link( 'error', array( 'errcode' => 'NO_DELETE' ) );
-			// do the redirect
-			wp_redirect( $fail, 302 );
-			exit();
-		}
-
-		// handle our redirect for success
-		if ( $result === true ) {
-
-			// get our redirect link
-			$good   = TempAdminUser_Utilities::get_admin_page_link( 'success', array( 'type' => 'deleted' ) );
-			// do the redirect
-			wp_redirect( $good, 302 );
-			exit();
-		}
 	}
 
 	/**
@@ -327,6 +277,126 @@ class TempAdminUser_Process {
 		die();
 	}
 
+	/**
+	 * [update_users_js description]
+	 * @return [type] [description]
+	 */
+	public function update_users_js() {
+
+		// set up return array for ajax responses
+		$ret = array();
+
+		// die fast without a nonce
+		if( empty( $_POST['nonce'] ) ) {
+			$ret['success'] = false;
+			$ret['errcode'] = 'NO_NONCE';
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'nonce' );
+			echo json_encode( $ret );
+			die();
+		}
+
+		// check to make sure we got a type
+		if( empty( $_POST['type'] ) ) {
+			$ret['success'] = false;
+			$ret['errcode'] = 'NO_TYPE';
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'notype' );
+			echo json_encode( $ret );
+			die();
+		}
+
+		// check to make sure we got a type that is allowed
+		if( ! in_array( $_POST['type'], array( 'demote', 'delete' ) ) ) {
+			$ret['success'] = false;
+			$ret['errcode'] = 'BAD_TYPE';
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'badtype' );
+			echo json_encode( $ret );
+			die();
+		}
+
+		// check to make sure we got users
+		if( empty( $_POST['users'] ) ) {
+			$ret['success'] = false;
+			$ret['errcode'] = 'NO_USERS';
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'nousers' );
+			echo json_encode( $ret );
+			die();
+		}
+
+		// set our type as a variable
+		$type   = $_POST['type'];
+
+		// check to see if our nonce failed
+		if( false === check_ajax_referer( 'tempadmin_' . $type . '_js', 'nonce', false ) ) {
+			$ret['success'] = false;
+			$ret['errcode'] = 'NONCE_FAILED';
+			$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'nonce' );
+			echo json_encode($ret);
+			die();
+		}
+
+		// make sure my users are an array
+		$users  = ! is_array( $_POST['users'] ) ? (array) $_POST['users'] : $_POST['users'];
+
+		// demote users if requested
+		if ( $type == 'demote' ) {
+
+			// do the action
+			$action = self::demote_users( $users );
+
+			// return error if demotion failed
+			if( $action === false ) {
+				$ret['success'] = false;
+				$ret['errcode'] = 'NO_DEMOTE';
+				$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'nodemote' );
+				echo json_encode( $ret );
+				die();
+			}
+
+			// return success if users were demoted
+			if( $action === true ) {
+				$ret['success'] = true;
+				$ret['errcode'] = null;
+				$ret['remrows'] = $users;
+				$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'demoted' );
+				echo json_encode( $ret );
+				die();
+			}
+
+		}
+
+		// delete users if requested
+		if ( $type == 'delete' ) {
+
+			// do the action itself
+	//		$action = self::delete_users( $users );
+$action === true;
+			// return error if deletion failed
+			if( $action === false ) {
+				$ret['success'] = false;
+				$ret['errcode'] = 'NO_DELETE';
+				$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'nodelete' );
+				echo json_encode( $ret );
+				die();
+			}
+
+			// return success if users were deleted
+			if( $action === true ) {
+				$ret['success'] = true;
+				$ret['errcode'] = null;
+				$ret['remrows'] = $users;
+				$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'deleted' );
+				echo json_encode( $ret );
+				die();
+			}
+		}
+
+		// unknown error
+		$ret['success'] = false;
+		$ret['errcode'] = 'UNKNOWN_ERROR';
+		$ret['message'] = TempAdminUser_Utilities::get_admin_messages( 'default' );
+		echo json_encode($ret);
+		die();
+	}
 
 	/**
 	 * [check_user_statuses description]
@@ -447,6 +517,69 @@ class TempAdminUser_Process {
 
 		// send back true
 		return true;
+	}
+
+
+	/**
+	 * [demote_users description]
+	 * @param  array  $users [description]
+	 * @return [type]        [description]
+	 */
+	protected static function demote_users( $users = array() ) {
+
+		// set a flag first
+		$result = true;
+
+		// loop them
+		foreach( $users as $user_id ) {
+
+			// run the reset
+			$action = self::reset_user_status( $user_id );
+
+			// check for failure
+			if ( $action === false ) {
+
+				// set my result flag false
+				$result = false;
+
+				// and break
+				break;
+			}
+		}
+
+		// send back the result
+		return $result;
+	}
+
+	/**
+	 * [delete_users description]
+	 * @param  array  $users [description]
+	 * @return [type]        [description]
+	 */
+	protected static function delete_users( $users = array() ) {
+
+		// set a flag first
+		$result = true;
+
+		// loop them
+		foreach( $users as $user_id ) {
+
+			// run the reset
+			$action = self::remove_user( $user_id );
+
+			// check for failure
+			if ( $action === false ) {
+
+				// set my result flag false
+				$result = false;
+
+				// and break
+				break;
+			}
+		}
+
+		// send back the result
+		return $result;
 	}
 
 	/**
