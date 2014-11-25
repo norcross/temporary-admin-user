@@ -38,11 +38,16 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * our user creation function to go on non-ajax
+	 * create a new user from the settings page with the non-ajax call
 	 *
-	 * @return null
+	 * @return null               redirects to settings page with success or error message
 	 */
 	public function create_user_nojs() {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// make sure we have our actions before moving forward
 		if( empty( $_POST['tempadmin-data'] ) || empty( $_POST['tempadmin-manual-nonce'] ) ) {
@@ -103,11 +108,17 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * our user demote or delete function to go on non-ajax
+	 * update a group of users (either demote or delete) from
+	 * the settings page with the non-ajax call
 	 *
-	 * @return null
+	 * @return null               redirects to settings page with success or error message
 	 */
 	public function update_users_nojs() {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// make sure we have an allowed action type before moving forward
 		if( empty( $_POST['tempadmin-user-action'] ) || ! in_array( $_POST['tempadmin-user-action'], array( 'demote', 'delete' ) ) ) {
@@ -199,11 +210,16 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * our user creation function to go on ajax
+	 * create a new user the settings page via ajax call
 	 *
-	 * @return null
+	 * @return array   $ret       the JSON encoded response for the ajax call
 	 */
 	public function create_user_js() {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// set up return array for ajax responses
 		$ret = array();
@@ -278,10 +294,17 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * [update_users_js description]
-	 * @return [type] [description]
+	 * update a group of users (either demote or delete) from
+	 * the settings page via ajax call
+	 *
+	 * @return array   $ret       the JSON encoded response for the ajax call
 	 */
 	public function update_users_js() {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// set up return array for ajax responses
 		$ret = array();
@@ -399,8 +422,11 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * [check_user_statuses description]
-	 * @return [type] [description]
+	 * loop through all the temporary users and check
+	 * the expiration time against the current server time
+	 * and update user status if need be
+	 *
+	 * @return null
 	 */
 	public function check_user_statuses() {
 
@@ -444,6 +470,11 @@ class TempAdminUser_Process {
 	 * @return integer $user      the newly created user ID
 	 */
 	protected static function create_new_user( $email = '', $time = '' ) {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// first get our password, since we use it in multiple places
 		$password   = TempAdminUser_Utilities::generate_password();
@@ -493,39 +524,19 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * update the user to a specified role
+	 * demote a group of users by passing each user ID
+	 * to the reset user status function
 	 *
-	 * @param  integer $user_id   the user ID being modified
-	 * @param  string  $role      the status being changed to
+	 * @param  array   $users     the array of user IDs
 	 *
 	 * @return bool               the result of the update
 	 */
-	protected static function reset_user_status( $user_id = 0, $role = 'subscriber' ) {
-
-		// set a quick setup string
-		$update = wp_update_user( array( 'ID' => absint( $user_id ), 'role' => $role ) );
-
-		// return false if we got an error
-		if ( is_wp_error( $update ) ) {
-			return false;
-		}
-
-		// update the timestamp if we are bumping down to subscriber
-		if ( $role == 'subscriber' ) {
-			update_user_meta( $user_id, '_tempadmin_expire', time() );
-		}
-
-		// send back true
-		return true;
-	}
-
-
-	/**
-	 * [demote_users description]
-	 * @param  array  $users [description]
-	 * @return [type]        [description]
-	 */
 	protected static function demote_users( $users = array() ) {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// set a flag first
 		$result = true;
@@ -552,11 +563,19 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * [delete_users description]
-	 * @param  array  $users [description]
-	 * @return [type]        [description]
+	 * delete a group of users by passing each user ID
+	 * to the individual remove user function
+	 *
+	 * @param  array   $users     the array of user IDs
+	 *
+	 * @return bool               the result of the update
 	 */
 	protected static function delete_users( $users = array() ) {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// set a flag first
 		$result = true;
@@ -583,13 +602,50 @@ class TempAdminUser_Process {
 	}
 
 	/**
-	 * delete the user
+	 * update the user to a specified role
+	 *
+	 * @param  integer $user_id   the user ID being modified
+	 * @param  string  $role      the status being changed to
+	 *
+	 * @return bool               the result of the update
+	 */
+	protected static function reset_user_status( $user_id = 0, $role = 'subscriber' ) {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
+
+		// set a quick setup string
+		$update = wp_update_user( array( 'ID' => absint( $user_id ), 'role' => $role ) );
+
+		// return false if we got an error
+		if ( is_wp_error( $update ) ) {
+			return false;
+		}
+
+		// update the timestamp to now if we are bumping down to subscriber
+		if ( $role == 'subscriber' ) {
+			update_user_meta( $user_id, '_tempadmin_expire', time() );
+		}
+
+		// send back true
+		return true;
+	}
+
+	/**
+	 * delete a temporary user account
 	 *
 	 * @param  integer $user_id   the user ID being deleted
 	 *
 	 * @return bool               the result of the update
 	 */
 	protected static function remove_user( $user_id = 0 ) {
+
+		// make sure the user calling the action has permission to do so
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
 
 		// set a quick setup string
 		$delete = wp_delete_user( absint( $user_id ), get_current_user_id() );

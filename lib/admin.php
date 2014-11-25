@@ -72,8 +72,9 @@ class TempAdminUser_Admin {
 	}
 
 	/**
-	 * display message on saved settings
-	 * @return [HTML] message above page
+	 * check the query string to display an admin message for various actions
+	 *
+	 * @return html               the HTML formatted admin page message
 	 */
 	public function admin_notices() {
 
@@ -175,6 +176,13 @@ class TempAdminUser_Admin {
 	 * @return null
 	 */
 	public function admin_menu() {
+
+		// don't even show the menu page for temp users
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
+			return;
+		}
+
+		// add the menu item and call the function
 		add_users_page( __( 'Temporary Users', 'temporary-admin-user' ), __( 'Temporary Users', 'temporary-admin-user' ), apply_filters( 'tempadmin_user_cap', 'manage_options' ), 'temporary-admin-user', array( __class__, 'admin_settings' ) );
 	}
 
@@ -186,7 +194,7 @@ class TempAdminUser_Admin {
 	public static function admin_settings() {
 
 		// check our user permissions again
-		if ( ! current_user_can( apply_filters( 'tempadmin_user_cap', 'manage_options' ) ) ) {
+		if ( false === TempAdminUser_Utilities::check_user_perm() ) {
 			echo __( 'You do not have permission to access this page.', 'temporary-admin-user' );
 			die();
 		}

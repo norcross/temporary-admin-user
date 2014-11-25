@@ -252,10 +252,12 @@ class TempAdminUser_Utilities {
 	}
 
 	/**
-	 * [format_date_display description]
-	 * @param  integer $stamp [description]
-	 * @param  string  $type  [description]
-	 * @return [type]         [description]
+	 * take our timestamp and format it to the stored WP
+	 * value, adjusted for timezone if set
+	 *
+	 * @param  integer $stamp     the epoch timestamp
+	 *
+	 * @return string             the formatted date / time
 	 */
 	public static function format_date_display( $stamp = 0, $type = 'date-format' ) {
 
@@ -341,6 +343,61 @@ class TempAdminUser_Utilities {
 
 		// return it
 		return $link;
+	}
+
+	/**
+	 * check the user ID against the allowed permissions
+	 * to prevent temp admins from adding / deleting
+	 * users and other actions on site
+	 *
+	 * @param  integer $user_id   the epoch timestamp
+	 *
+	 * @return boolean            false if the use is a temp (or none at all), true otherwise
+	 */
+	public static function check_user_perm( $user_id = 0 ) {
+
+		// if user ID is missing, fetch the current logged in
+		if ( empty( $user_id ) ) {
+			$user_id    = get_current_user_id();
+		}
+
+		// bail without an ID
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		// fetch the meta key
+		$check  = get_user_meta( $user_id, '_tempadmin_user', true );
+
+		// return our bool
+		return ! empty( $check ) ? false : true;
+	}
+
+	/**
+	 * check the user ID against the stored expiration
+	 * timestamp to verify they are active
+	 *
+	 * @param  integer $user_id   the epoch timestamp
+	 *
+	 * @return boolean            false if the use is expired (or none at all), true otherwise
+	 */
+	public static function check_user_expire( $user_id = 0 ) {
+
+		// if user ID is missing, fetch the current logged in
+		if ( empty( $user_id ) ) {
+			$user_id    = get_current_user_id();
+		}
+
+		// bail without an ID
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		// fetch the meta key
+		$expire = get_user_meta( $user_id, '_tempadmin_expire', true );
+
+		// return our bool
+		return ! empty( $expire ) && time() <= floatval( $expire ) ? true : false;
 	}
 
 /// end class

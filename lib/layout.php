@@ -84,10 +84,12 @@ class TempAdminUser_Layout {
 	}
 
 	/**
-	 * [user_action_button description]
-	 * @param  string $title [description]
-	 * @param  string $type  [description]
-	 * @return [type]        [description]
+	 * build out the various submit buttons for different parts of the admin page
+	 *
+	 * @param  string  $title     the button text to display
+	 * @param  string  $type      the action being taken, used in the button ID and a data attribute
+	 *
+	 * @return html               the HTML markup of the button
 	 */
 	public static function user_action_button( $title = '', $type = '' ) {
 
@@ -169,9 +171,9 @@ class TempAdminUser_Layout {
 	}
 
 	/**
-	 * load the table header and footer
+	 * load the user list table header and footer
 	 *
-	 * @return [type]        [description]
+	 * @return html               the HTML markup
 	 */
 	public static function user_head_foot_row() {
 
@@ -189,9 +191,11 @@ class TempAdminUser_Layout {
 	}
 
 	/**
-	 * load the row for empty user list
+	 * load a single row for when no user is present in
+	 * a group. also used in ajax calls when removing all
+	 * users from a group
 	 *
-	 * @return [type]        [description]
+	 * @return html               the HTML markup
 	 */
 	public static function empty_user_row() {
 
@@ -209,10 +213,12 @@ class TempAdminUser_Layout {
 	}
 
 	/**
-	 * [single_user_row description]
-	 * @param  [type] $user  [description]
-	 * @param  string $class [description]
-	 * @return [type]        [description]
+	 * construct the HTML for an existing user row
+	 *
+	 * @param  object  $user      the complete object for a single user
+	 * @param  string  $class     the HTML class to assign to a particular row
+	 *
+	 * @return html               the HTML of the new user form portion
 	 */
 	public static function single_user_row( $user = OBJECT, $class = 'standard' ) {
 
