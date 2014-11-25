@@ -368,8 +368,8 @@ class TempAdminUser_Process {
 		if ( $type == 'delete' ) {
 
 			// do the action itself
-	//		$action = self::delete_users( $users );
-$action === true;
+			$action = self::delete_users( $users );
+
 			// return error if deletion failed
 			if( $action === false ) {
 				$ret['success'] = false;

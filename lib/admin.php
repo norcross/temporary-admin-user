@@ -66,7 +66,8 @@ class TempAdminUser_Admin {
 			'makeNonce' => wp_create_nonce( 'tempadmin_make_js' ),
 			'deltNonce' => wp_create_nonce( 'tempadmin_delete_js' ),
 			'demtNonce' => wp_create_nonce( 'tempadmin_demote_js' ),
-			'noEmail'   => TempAdminUser_Utilities::get_admin_messages( 'noemail' )
+			'noEmail'   => TempAdminUser_Utilities::get_admin_messages( 'noemail' ),
+			'emptyRow'  => TempAdminUser_Layout::empty_user_row()
 		));
 	}
 
