@@ -1,20 +1,15 @@
-Temporary Admin User
-====================
 
-**Contributors:** norcross
+=== Temporary Admin User ===
+Contributors: norcross
+Donate link: https://andrewnorcross.com/donate
+Tags: user accounts, support
+Requires at least: 4.0
+Tested up to: 4.0.1
+Stable tag: 0.0.1
 
-**Donate link:** https://andrewnorcross.com/donate
+Create a temporary WordPress admin user to provide access on support issues, etc.
 
-**Tags:** user accounts, support
-
-**Requires at least:** 4.0
-
-**Tested up to:** 4.0.1
-
-**Stable tag:** 0.0.1
-
-
-### Description ###
+== Description ==
 
 Create a temporary WordPress admin user to provide access on support issues, etc. This is
 still very much in beta, so please use with care.
@@ -25,7 +20,7 @@ Features
 * users can be demoted or deleted directly from settings page
 * numerous filters to customize aspects
 
-### Installation ###
+== Installation ==
 
 This section describes how to install the plugin and get it working.
 
@@ -33,23 +28,23 @@ This section describes how to install the plugin and get it working.
 1. Activate the plugin through the 'Plugins' menu in WordPress.
 1. Create users as needed
 
-### Frequently Asked Questions ###
+== Frequently Asked Questions ==
 
-#### Why do I need this? ####
+= Why do I need this? =
 
 If you have to make user accounts for people to provide support, this will make it easier
 
 
-### Screenshots ###
+== Screenshots ==
 
 
-### Changelog ###
+== Changelog ==
 
-#### 0.0.1 ####
+= 0.0.1 =
 * Initial release
 
 
-### Upgrade Notice ###
+== Upgrade Notice ==
 
-#### 0.0.1 ####
+= 0.0.1 =
 Initial release

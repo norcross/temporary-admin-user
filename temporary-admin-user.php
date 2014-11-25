@@ -100,6 +100,5 @@ class TempAdminUser_Core
 /// end class
 }
 
-
 // Instantiate our class
 $TempAdminUser_Core = TempAdminUser_Core::getInstance();
