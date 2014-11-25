@@ -19,7 +19,7 @@ Temporary Admin User
 Create a temporary WordPress admin user to provide access on support issues, etc. This is
 still very much in beta, so please use with care.
 
-Features
+**Features**
 
 * user is automatically set to 'subscriber' after the pre-determined time limit
 * users can be demoted or deleted directly from settings page
@@ -45,11 +45,11 @@ If you have to make user accounts for people to provide support, this will make 
 
 ### Changelog ###
 
-#### 0.0.1 ####
+**0.0.1**
 * Initial release
 
 
 ### Upgrade Notice ###
 
-#### 0.0.1 ####
+**0.0.1**
 Initial release
