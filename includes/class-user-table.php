@@ -64,6 +64,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		return array(
 			'cb'        => '<input type="checkbox" />',
 			'email'     => __( 'Email Address', 'temporary-admin-user' ),
+			'status'    => __( 'Status', 'temporary-admin-user' ),
 			'created'   => __( 'Date Created', 'temporary-admin-user' ),
 			'expires'   => __( 'Expiration', 'temporary-admin-user' ),
 			'actions'   => __( 'Actions', 'temporary-admin-user' ),
@@ -80,6 +81,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		// Return our setup.
 		return array(
 			'email'     => array( 'email', false ),
+			'status'    => array( 'status', true ),
 			'created'   => array( 'created', true ),
 			'expires'   => array( 'expires', false ),
 		);
@@ -117,6 +119,25 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 	}
 
 	/**
+	 * The current status column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_status( $item ) {
+
+		// Set my stamp.
+		$stamp  = absint( $item['expires'] );
+
+		// Do the check and output accordingly.
+		$status = current_time( 'timestamp' ) < absint( $stamp ) ? __( 'Active', 'temporary-admin-user' ) : __( 'Restricted', 'temporary-admin-user' );
+
+		// Return my formatted date.
+		return apply_filters( 'tmp_admin_user_status_display', $status, $item );
+	}
+
+	/**
 	 * The "date created" column.
 	 *
 	 * @param  array  $item  The item from the data array.
@@ -135,7 +156,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		$date   = '<abbr title="' . date( 'Y/m/d g:i:s a', $stamp ) . '">' . $show . '</abbr>';
 
 		// Return my formatted date.
-		return apply_filters( 'tmp_admin_user_created_date', $date, $stamp );
+		return apply_filters( 'tmp_admin_user_created_date_display', $date, $item );
 	}
 
 	/**
@@ -150,6 +171,11 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		// Set my stamp.
 		$stamp  = absint( $item['expires'] );
 
+		// Output the "expires" text.
+		if ( current_time( 'timestamp' ) > absint( $stamp ) ) {
+			return '<em>' . __( 'This account has expired.', 'temporary-admin-user' ) . '</em>';
+		}
+
 		// Do my date logicals.
 		$now    = new DateTime();
 		$future = new DateTime( date( 'Y/m/d g:i:s a', $stamp ) );
@@ -159,7 +185,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		$date   = '<abbr title="' . date( 'Y/m/d g:i:s a', $stamp ) . '">' . $intrvl->format( '%a days, %h hours, %i minutes' ) . '</abbr>';
 
 		// Return my formatted date.
-		return apply_filters( 'tmp_admin_user_expires_date', $date, $stamp );
+		return apply_filters( 'tmp_admin_user_expires_date_display', $date, $item );
 	}
 
 	/**
@@ -176,6 +202,17 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 		// Create an array of actions.
 		$setup  = array(
+			'profile'   => array(
+				'label' => __( 'View / Edit Profile', 'temporary-admin-user' ),
+				'icon'  => 'id-alt',
+				'link'  => get_edit_user_link( $id ),
+				'blank' => true,
+			),
+			'email'     => array(
+				'label' => __( 'Email User', 'temporary-admin-user' ),
+				'icon'  => 'email',
+				'link'  => 'mailto:' . antispambot( $item['email'] ),
+			),
 			'promote'   => array(
 				'label' => __( 'Promote User', 'temporary-admin-user' ),
 				'icon'  => 'star-filled',
@@ -190,25 +227,63 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 			),
 		);
 
+		// Grab my status.
+		$status = TempAdminUser_Users::check_user_status( $id );
+
 		// Set my empty.
 		$build  = '';
 
 		// Now loop my setup.
 		foreach ( $setup as $action => $items ) {
 
-			// Create the link args.
-			$args   = array(
-				'tmp-single'  => 1,
-				'tmp-action'  => esc_attr( $action ),
-				'user-id'     => $id,
-				'nonce'       => wp_create_nonce( 'tmp_single_user_' . $id ),
-			);
+			// If we passed a link, use that.
+			if ( ! empty( $items['link'] ) ) {
 
-			// Set up the link.
-			$link   = add_query_arg( $args, TempAdminUser_Helper::get_menu_link() );
+				// Check for blanks.
+				$blank  = ! empty( $items['blank'] ) ? 'target="_blank"' : '';
 
-			// And create the markup.
-			$build .= '<a class="tmp-admin-user-action tmp-admin-user-action-' . esc_attr( $action ) . '" href="' . esc_url( $link ) . '" title="' . esc_attr( $items['label'] ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></a>';
+				// And output the link itself.
+				$build .= '<a class="tmp-admin-user-link tmp-admin-user-view tmp-admin-user-view-' . esc_attr( $action ) . '" href="' . esc_url( $items['link'] ) . '" title="' . esc_attr( $items['label'] ) . '" ' . esc_attr( $blank ) . '><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></a>';
+
+			} else {
+
+				// Create my class.
+				$class  = 'tmp-admin-user-link tmp-admin-user-action tmp-admin-user-action-' . esc_attr( $action );
+
+				// Hide links based on status.
+				if ( 'promote' === esc_attr( $action ) && 'active' === esc_attr( $status ) ) {
+
+					// Create my class.
+					$class .= ' tmp-admin-user-disabled';
+
+					// And output the markup.
+					$build .= '<span class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
+
+				} elseif ( 'restrict' === esc_attr( $action ) && 'restricted' === esc_attr( $status ) ) {
+
+					// Create my class.
+					$class .= ' tmp-admin-user-disabled';
+
+					// And output the markup.
+					$build .= '<span class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
+
+				} else {
+
+					// Create the link args.
+					$args   = array(
+						'tmp-single'  => 1,
+						'tmp-action'  => esc_attr( $action ),
+						'user-id'     => $id,
+						'nonce'       => wp_create_nonce( 'tmp_single_user_' . $id ),
+					);
+
+					// Set up the link.
+					$link   = add_query_arg( $args, TempAdminUser_Helper::get_menu_link() );
+
+					// And output the markup.
+					$build .= '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $link ) . '" title="' . esc_attr( $items['label'] ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></a>';
+				}
+			}
 		}
 
 		// Return my links.

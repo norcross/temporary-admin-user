@@ -14,6 +14,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class TempAdminUser_Admin {
 
 	/**
+	 * The slugs being used for the menus.
+	 */
+	public static $hook_slug = 'users_page_temporary-admin-user';
+
+	/**
 	 * Call our hooks.
 	 *
 	 * @return void
@@ -26,34 +31,58 @@ class TempAdminUser_Admin {
 		}
 
 		// Load our actions and filters.
-		add_action( 'admin_head',                           array( $this, 'add_settings_css'            )           );
+		add_action( 'admin_head',                           array( $this, 'user_table_style'            )           );
+		add_action( 'admin_enqueue_scripts',                array( $this, 'load_admin_assets'           ),  10      );
 		add_action( 'admin_notices',                        array( $this, 'user_process_results'        )           );
 		add_action( 'admin_menu',                           array( $this, 'load_settings_menu'          ),  99      );
 	}
 
 	/**
-	 * Display a small bit of CSS in the admin head.
+	 * Add a small bit of CSS on the user table.
+	 *
+	 * @return void
 	 */
-	public function add_settings_css() {
+	public function user_table_style() {
 
-		// Bail if we aren't on the page.
-		if ( false === $check = TempAdminUser_Helper::check_admin_page() ) {
+		// Call the global $pagenow variable.
+		global $pagenow;
+
+		// Bail if this isn't a user page at all.
+		if ( empty( $pagenow ) || 'users.php' !== esc_attr( $pagenow ) ) {
 			return;
 		}
 
 		// And output the CSS.
 		echo '<style>' . "\n";
-			echo 'form.tmp-admin-user-form tr th { width: 140px; padding-bottom: 5px; }' . "\n";
-			echo 'form.tmp-admin-user-form tr td { padding-bottom: 5px; }' . "\n";
-			echo 'form.tmp-admin-user-form .tmp-admin-user-input { display: inline-block; vertical-align: middle; margin-right: 5px; }' . "\n";
-			echo 'form.tmp-admin-user-form .tmp-admin-user-description { display: inline-block; vertical-align: middle; }' . "\n";
-			echo 'form.tmp-admin-user-form .tmp-admin-user-label { display: inline-block; vertical-align: middle; font-size: 13px; font-style: italic; }' . "\n";
-			echo '.tmp-admin-user-existing-table .column-actions { text-align: left; }' . "\n";
-			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action { display: inline-block; vertical-align: middle; width: 32px; }' . "\n";
-			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action-promote { color: #ffc719; }' . "\n";
-			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action-restrict { color: #565656; }' . "\n";
-			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action-delete { color: #cc0000; }' . "\n";
+			echo '.column-tmp-admin { width: 32px; text-align: center; }' . "\n";
 		echo '</style>' . "\n";
+	}
+
+	/**
+	 * Load our admin side JS and CSS.
+	 *
+	 * @todo add conditional loading for the assets.
+	 *
+	 * @return void
+	 */
+	public function load_admin_assets( $hook ) {
+
+		// Check my hook before moving forward.
+		if ( self::$hook_slug !== esc_attr( $hook ) ) {
+			return;
+		}
+
+		// Set a file suffix structure based on whether or not we want a minified version.
+		$file   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? 'temporary-admin-user' : 'temporary-admin-user.min';
+
+		// Set a version for whether or not we're debugging.
+		$vers   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? time() : TMP_ADMIN_USER_VER;
+
+		// Load our CSS file.
+		wp_enqueue_style( 'temporary-admin-user', TMP_ADMIN_USER_ASSETS_URL . '/css/' . $file . '.css', false, $vers, 'all' );
+
+		// And our JS.
+		// wp_enqueue_script( 'temporary-admin-user', TMP_ADMIN_USER_ASSETS_URL . '/js/' . $file . '.js', array( 'jquery' ), $vers, true );
 	}
 
 	/**
@@ -76,9 +105,12 @@ class TempAdminUser_Admin {
 		// Do the new user success.
 		if ( ! empty( $_GET['success'] ) ) {
 
+			// Get the action.
+			$action = ! empty( $_GET['action'] ) ? $_GET['action'] : '';
+
 			// And handle the notice.
 			echo '<div class="notice notice-success is-dismissible tmp-admin-user-message">';
-				echo '<p>' . TempAdminUser_Helper::get_admin_messages( 'created' ) . '</p>';
+				echo '<p>' . TempAdminUser_Helper::get_admin_messages( $action ) . '</p>';
 			echo '</div>';
 
 			// And bail.

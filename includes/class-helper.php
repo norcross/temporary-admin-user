@@ -121,12 +121,29 @@ class TempAdminUser_Helper {
 		// Handle my different error codes.
 		switch ( esc_attr( strtolower( $code ) ) ) {
 
+			case 'create' :
 			case 'created' :
 				return __( 'Success! A new user was created.', 'temporary-admin-user' );
 				break;
 
-			case 'demoted' :
-				return __( 'The selected accounts were demoted.', 'temporary-admin-user' );
+			case 'promote' :
+				return __( 'The selected account was promoted.', 'temporary-admin-user' );
+				break;
+
+			case 'promoted' :
+				return __( 'The selected accounts were promoted.', 'temporary-admin-user' );
+				break;
+
+			case 'restrict' :
+				return __( 'The selected account was restricted.', 'temporary-admin-user' );
+				break;
+
+			case 'restricted' :
+				return __( 'The selected accounts were restricted.', 'temporary-admin-user' );
+				break;
+
+			case 'delete' :
+				return __( 'The selected account was deleted.', 'temporary-admin-user' );
 				break;
 
 			case 'deleted' :
@@ -169,6 +186,10 @@ class TempAdminUser_Helper {
 				return __( 'No user ID was included in the request.', 'temporary-admin-user' );
 				break;
 
+			case 'nouser' :
+				return __( 'No user exists for the given ID.', 'temporary-admin-user' );
+				break;
+
 			case 'nousers' :
 				return __( 'No user accounts were selected.', 'temporary-admin-user' );
 				break;
@@ -179,6 +200,10 @@ class TempAdminUser_Helper {
 
 			case 'nodelete' :
 				return __( 'Some user accounts could not be deleted. Please try again.', 'temporary-admin-user' );
+				break;
+
+			case 'isatemp' :
+				return __( 'This user was created with the Temporary Admin User plugin.', 'temporary-admin-user' );
 				break;
 
 			case 'unknown' :
