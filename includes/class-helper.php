@@ -165,12 +165,16 @@ class TempAdminUser_Helper {
 				return __( 'No user account was created.', 'temporary-admin-user' );
 				break;
 
+			case 'noid' :
+				return __( 'No user ID was included in the request.', 'temporary-admin-user' );
+				break;
+
 			case 'nousers' :
 				return __( 'No user accounts were selected.', 'temporary-admin-user' );
 				break;
 
-			case 'nodemote' :
-				return __( 'Some user accounts could not be demoted. Please try again.', 'temporary-admin-user' );
+			case 'norestrict' :
+				return __( 'Some user accounts could not be restricted. Please try again.', 'temporary-admin-user' );
 				break;
 
 			case 'nodelete' :

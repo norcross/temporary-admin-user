@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
  * Call our class.
  */
 class TempAdminUser_Users {
+
 	/**
 	 * Call our hooks.
 	 *
@@ -19,6 +20,7 @@ class TempAdminUser_Users {
 	 */
 	public function init() {
 		add_action( 'admin_init',                           array( $this, 'generate_new_user'           )           );
+		add_action( 'admin_init',                           array( $this, 'modify_existing_user'        )           );
 	}
 
 	/**
@@ -40,27 +42,27 @@ class TempAdminUser_Users {
 
 		// Check nonce and bail if missing or not valid.
 		if ( empty( $_POST['tmp-admin-new-user-nonce'] ) || ! wp_verify_nonce( $_POST['tmp-admin-new-user-nonce'], 'tmp-admin-new-user-nonce' ) ) {
-			TempAdminUser_Admin::admin_page_redirect( array( 'success' => 0, 'errcode' => 'nonce' ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nonce' ) );
 		}
 
 		// Do the email check.
 		if ( empty( $_POST['tmp-admin-new-user-email'] ) ) {
-			TempAdminUser_Admin::admin_page_redirect( array( 'success' => 0, 'errcode' => 'noemail' ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'noemail' ) );
 		}
 
 		// Check if the email address exists.
 		if ( email_exists( $_POST['tmp-admin-new-user-email'] ) ) {
-			TempAdminUser_Admin::admin_page_redirect( array( 'success' => 0, 'errcode' => 'usedemail' ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'usedemail' ) );
 		}
 
 		// Do the duration exists check.
 		if ( empty( $_POST['tmp-admin-new-user-duration'] ) ) {
-			TempAdminUser_Admin::admin_page_redirect( array( 'success' => 0, 'errcode' => 'noduration' ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'noduration' ) );
 		}
 
 		// Do the duration valid check.
 		if ( ! in_array( sanitize_text_field( $_POST['tmp-admin-new-user-duration'] ), TempAdminUser_Helper::get_user_durations( 0, true ) ) ) {
-			TempAdminUser_Admin::admin_page_redirect( array( 'success' => 0, 'errcode' => 'badduration' ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'badduration' ) );
 		}
 
 		// Set our variables.
@@ -69,11 +71,187 @@ class TempAdminUser_Users {
 
 		// preprint( $_POST, true );
 		if ( false !== $user_id = self::create_new_user( $user_email, $duration ) ) {
-			TempAdminUser_Admin::admin_page_redirect( array( 'success' => 1, 'newuser' => 1 ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'newuser' => 1 ) );
 		}
 
 		// And unknown error.
-		TempAdminUser_Admin::admin_page_redirect( array( 'success' => 0, 'errcode' => 'unknown' ) );
+		tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'unknown' ) );
+	}
+
+	/**
+	 * Generate a new user when passed the info.
+	 *
+	 * @return void
+	 */
+	public function modify_existing_user() {
+
+		// Bail if we aren't on the page.
+		if ( false === $check = TempAdminUser_Helper::check_admin_page() ) {
+			return;
+		}
+
+		// Bail if we don't have a request.
+		if ( empty( $_GET['tmp-single'] ) ) {
+			return;
+		}
+
+		// Do the user ID check.
+		if ( empty( $_GET['user-id'] ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'noid' ) );
+		}
+
+		// Set my ID.
+		$id = absint( $_GET['user-id'] );
+
+		// Check nonce and bail if missing or not valid.
+		if ( empty( $_GET['nonce'] ) || ! wp_verify_nonce( $_GET['nonce'], 'tmp_single_user_' . $id ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nonce' ) );
+		}
+
+		// Do the action type check.
+		if ( empty( $_GET['tmp-action'] ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'notype' ) );
+		}
+
+		// Do the action type valid check.
+		if ( ! in_array( sanitize_text_field( $_GET['tmp-action'] ), array( 'promote', 'restrict', 'delete' ) ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'badtype' ) );
+		}
+
+		// Handle my different action types.
+		switch ( sanitize_text_field( $_GET['tmp-action'] ) ) {
+
+			case 'promote' :
+				self::promote_existing_user( $user_id );
+				break;
+
+			case 'restrict' :
+				self::restrict_existing_user( $user_id );
+				break;
+
+			case 'delete' :
+				self::delete_existing_user( $user_id );
+				break;
+
+			// End all case breaks.
+		}
+	}
+
+	/**
+	 * Add a pre-determined amount of time to the existing user.
+	 *
+	 * @param  integer $user_id  The user ID we are updating.
+	 *
+	 * @return void
+	 */
+	public static function promote_existing_user( $user_id = 0 ) {
+
+		// Allow other things to hook into this process.
+		do_action( 'tmp_admin_user_before_user_promote', $user_id );
+
+		// And my setup.
+		$setup  = array(
+			'ID'    => absint( $user_id ),
+			'role'  => 'administrator',
+		);
+
+		// Run one more filter on it.
+		$setup  = apply_filters( 'tmp_admin_user_promote_args', $setup, $user_id );
+
+		// Bail if we nix'd it in the filter.
+		if ( empty( $setup ) ) {
+			return false;
+		}
+
+		// Get the new ID.
+		$update = wp_insert_user( $setup );
+
+		// Bail if we failed the update.
+		if ( is_wp_error( $update ) ) {
+			return false;
+		}
+
+		// Handle the expires time.
+		update_user_meta( $user_id, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
+		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day' ) );
+
+		// Allow other things to hook into this process.
+		do_action( 'tmp_admin_user_after_user_promote', $user_id );
+
+		// And return true, so we know to report back.
+		return true;
+	}
+
+	/**
+	 * Add a pre-determined amount of time to the existing user.
+	 *
+	 * @param  integer $user_id  The user ID we are restricting.
+	 *
+	 * @return void
+	 */
+	public static function restrict_existing_user( $user_id = 0 ) {
+
+		// Allow other things to hook into this process.
+		do_action( 'tmp_admin_user_before_user_restrict', $user_id );
+
+		// And my setup.
+		$setup  = array(
+			'ID'    => absint( $user_id ),
+			'role'  => 'subscriber',
+		);
+
+		// Run one more filter on it.
+		$setup  = apply_filters( 'tmp_admin_user_restrict_args', $setup, $user_id );
+
+		// Bail if we nix'd it in the filter.
+		if ( empty( $setup ) ) {
+			return false;
+		}
+
+		// Get the new ID.
+		$update = wp_insert_user( $setup );
+
+		// Bail if we failed the update.
+		if ( is_wp_error( $update ) ) {
+			return false;
+		}
+
+		// Handle the expires time.
+		update_user_meta( $user_id, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
+		update_user_meta( $user_id, '_tmp_admin_user_expires', current_time( 'timestamp' ) );
+
+		// Allow other things to hook into this process.
+		do_action( 'tmp_admin_user_after_user_restrict', $user_id );
+
+		// And return true, so we know to report back.
+		return true;
+	}
+
+	/**
+	 * Take te existing user and delete them.
+	 *
+	 * @param  integer $user_id  The user ID we are deleting.
+	 *
+	 * @return void
+	 */
+	public static function delete_existing_user( $user_id = 0 ) {
+
+		// Allow other things to hook into this process.
+		do_action( 'tmp_admin_user_before_user_delete', $user_id );
+
+		// Get the new ID.
+		$delete = wp_delete_user( $user_id, get_current_user_id() );
+
+		// Bail if we failed the update.
+		if ( is_wp_error( $delete ) ) {
+			return false;
+		}
+
+		// Allow other things to hook into this process.
+		do_action( 'tmp_admin_user_after_user_delete', $user_id );
+
+		// And return true, so we know to report back.
+		return true;
 	}
 
 	/**
@@ -131,9 +309,9 @@ class TempAdminUser_Users {
 	public static function create_user_password() {
 
 		// set my variables
-		$charcount  = apply_filters( 'tempadmin_pass_charcount', 16 );
-		$speclchar  = apply_filters( 'tempadmin_pass_specchar', true );
-		$xspeclchar = apply_filters( 'tempadmin_pass_xspeclchar', false );
+		$charcount  = apply_filters( 'tmp_admin_user_pass_charcount', 16 );
+		$speclchar  = apply_filters( 'tmp_admin_user_pass_specchar', true );
+		$xspeclchar = apply_filters( 'tmp_admin_user_pass_xspeclchar', false );
 
 		// return the password generated
 		return wp_generate_password( absint( $charcount ), $speclchar, $xspeclchar );
@@ -142,8 +320,8 @@ class TempAdminUser_Users {
 	/**
 	 * Create the new temporary user.
 	 *
-	 * @param  string  $user_email  The user-submitted email.
-	 * @param  string  $user_email  The user-submitted expiration
+	 * @param  string  $user_email  The supplied email.
+	 * @param  string  $duration    The supplied expiration
 	 *
 	 * @return integer $user_id     The newly created user ID.
 	 */
@@ -175,13 +353,13 @@ class TempAdminUser_Users {
 
 		// Return an error message if the user was not created.
 		if ( empty( $user_id ) || is_wp_error( $user_id ) ) {
-			TempAdminUser_Admin::admin_page_redirect( array( 'success' => 0, 'errcode' => 'nocreate' ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nocreate' ) );
 		}
 
 		// Now add our custom meta keys.
 		update_user_meta( $user_id, '_tmp_admin_user_flag', true );
 		update_user_meta( $user_id, '_tmp_admin_user_created', current_time( 'timestamp' ) );
-		update_user_meta( $user_id, '_tmp_admin_user_expire', TempAdminUser_Helper::get_user_expire_time( $duration ) );
+		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( $duration ) );
 
 		// And update some basic WP related user meta.
 		update_user_meta( $user_id, 'show_welcome_panel', 0 );
@@ -189,6 +367,38 @@ class TempAdminUser_Users {
 
 		// Return the user ID.
 		return $user_id;
+	}
+
+	/**
+	 * Set up the WP_User_Query args.
+	 *
+	 * @return array  An array of data for use.
+	 */
+	public static function get_temp_users() {
+
+		// Set my args.
+		$args   = array(
+			'fields'       => 'all',
+			'role'         => 'administrator',
+			'meta_key'     => '_tmp_admin_user_expires',
+			'meta_query'   => array(
+				array(
+					'key'     => '_tmp_admin_user_flag',
+					'value'   => true
+				)
+			)
+		);
+
+		// Run the user query.
+		$users  = new WP_User_Query( $args );
+
+		// Bail if we errored out or don't have any users.
+		if ( is_wp_error( $users ) || empty( $users->results ) ) {
+			return false;
+		}
+
+		// Return the query results.
+		return $users->results;
 	}
 
 	// End our class.

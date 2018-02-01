@@ -48,6 +48,11 @@ class TempAdminUser_Admin {
 			echo 'form.tmp-admin-user-form .tmp-admin-user-input { display: inline-block; vertical-align: middle; margin-right: 5px; }' . "\n";
 			echo 'form.tmp-admin-user-form .tmp-admin-user-description { display: inline-block; vertical-align: middle; }' . "\n";
 			echo 'form.tmp-admin-user-form .tmp-admin-user-label { display: inline-block; vertical-align: middle; font-size: 13px; font-style: italic; }' . "\n";
+			echo '.tmp-admin-user-existing-table .column-actions { text-align: left; }' . "\n";
+			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action { display: inline-block; vertical-align: middle; width: 32px; }' . "\n";
+			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action-promote { color: #ffc719; }' . "\n";
+			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action-restrict { color: #565656; }' . "\n";
+			echo '.tmp-admin-user-existing-table a.tmp-admin-user-action-delete { color: #cc0000; }' . "\n";
 		echo '</style>' . "\n";
 	}
 
@@ -112,7 +117,7 @@ class TempAdminUser_Admin {
 		add_users_page(
 			__( 'Temporary Users', 'temporary-admin-user' ),
 			__( 'Temporary Users', 'temporary-admin-user' ),
-			apply_filters( 'tmp_admin_user_cap', 'manage_options' ),
+			apply_filters( 'tmp_admin_user_menu_cap', 'manage_options' ),
 			TMP_ADMIN_USER_MENU_BASE,
 			array( __class__, 'settings_page_view' )
 		);
@@ -142,6 +147,18 @@ class TempAdminUser_Admin {
 			// Load the new user form.
 			echo self::new_user_form( $action );
 
+			// Wrap it in a div.
+			echo '<div class="tmp-admin-user-existing-table">';
+
+				// Handle the existing users.
+				echo '<h3 class="tmp-admin-user-settings-subtitle">' . esc_html__( 'Existing Users', 'temporary-admin-user' ) . '</h3>';
+
+				// Load the existing user table.
+				self::existing_user_table( $action );
+
+			// Close the table thing.
+			echo '</div>';
+
 		// Close the entire thing.
 		echo '</div>';
 	}
@@ -149,9 +166,9 @@ class TempAdminUser_Admin {
 	/**
 	 * Construct the HTML for the new user portion of the admin page.
 	 *
-	 * @param  string $action  The form action link.
+	 * @param  $action  The form action.
 	 *
-	 * @return html            The HTML of the new user form portion
+	 * @return html     The HTML of the new user form portion
 	 */
 	public static function new_user_form( $action = '' ) {
 
@@ -222,28 +239,38 @@ class TempAdminUser_Admin {
 	}
 
 	/**
-	 * Set up and process a redirect.
+	 * Construct the HTML for existing users.
 	 *
-	 * @param  array  $args  The redirect args.
-	 *
-	 * @return void
+	 * @return html            The HTML of the new user form portion
 	 */
-	public static function admin_page_redirect( $args = array() ) {
+	public static function existing_user_table( $action = '' ) {
 
-		// Bail if we aren't on the page.
-		if ( false === $check = TempAdminUser_Helper::check_admin_page() ) {
+		// Bail if no users exist.
+		if ( false === $users = TempAdminUser_Users::get_temp_users() ) {
+
+			// Echo out the message.
+			echo '<p>' . esc_html__( 'No temporary users have been created.', 'temporary-admin-user' ) . '</p>';
+
+			// And be done.
 			return;
 		}
 
-		// Check my args.
-		$args   = ! empty( $args ) ? wp_parse_args( $args, array( 'tmp-admin-user-result' => 1 ) ) : array( 'tmp-admin-user-result' => 1 );
+		//preprint( $users, true );
 
-		// Create the args and add my link.
-		$setup  = add_query_arg( $args, TempAdminUser_Helper::get_menu_link() );
+		// Call our class.
+		$user_table = new TemporaryAdminUsers_Table();
 
-		// Do the redirect.
-		wp_safe_redirect( $setup );
-		exit();
+		// And output the table.
+		$user_table->prepare_items();
+
+		// And handle the display
+		echo '<form class="tmp-admin-user-form" id="tmp-admin-user-form-table" action="' . esc_url( $action ) . '" method="post">';
+
+		// The actual table itself.
+		$user_table->display();
+
+		// And close it up.
+		echo '</form>';
 	}
 
 	// End our class.

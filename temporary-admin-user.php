@@ -160,6 +160,7 @@ final class TempAdminUser_Core {
 		// And load our classes.
 		require_once TMP_ADMIN_USER_INCLS . '/class-helper.php';
 		require_once TMP_ADMIN_USER_INCLS . '/class-users.php';
+		require_once TMP_ADMIN_USER_INCLS . '/class-user-table.php';
 
 		// Load our admin-specific items.
 		if ( is_admin() ) {
@@ -170,6 +171,9 @@ final class TempAdminUser_Core {
 		require_once TMP_ADMIN_USER_INCLS . '/activate.php';
 		require_once TMP_ADMIN_USER_INCLS . '/deactivate.php';
 		require_once TMP_ADMIN_USER_INCLS . '/uninstall.php';
+
+		// Call our includes action.
+		do_action( 'tmp_admin_user_file_includes' );
 	}
 
 	/**
@@ -226,6 +230,37 @@ final class TempAdminUser_Core {
 		}
 	}
 
+	/**
+	 * Set up and process a redirect.
+	 *
+	 * @param  array    $args    The redirect args.
+	 * @param  boolean  $return  Whether to return the link instead of redirecting.
+	 *
+	 * @return void
+	 */
+	public function admin_page_redirect( $args = array(), $return = false ) {
+
+		// Bail if we aren't on the page.
+		if ( false === $check = TempAdminUser_Helper::check_admin_page() ) {
+			return;
+		}
+
+		// Check my args.
+		$args   = ! empty( $args ) ? wp_parse_args( $args, array( 'tmp-admin-user-result' => 1 ) ) : array( 'tmp-admin-user-result' => 1 );
+
+		// Create the args and add my link.
+		$setup  = add_query_arg( $args, TempAdminUser_Helper::get_menu_link() );
+
+		// Return the link if requested.
+		if ( ! empty( $return ) ) {
+			return $setup;
+		}
+
+		// Do the redirect.
+		wp_safe_redirect( $setup );
+		exit();
+	}
+
 	// End our class.
 }
 
@@ -241,7 +276,7 @@ final class TempAdminUser_Core {
  * @since 1.0
  * @return TempAdminUser_Core The one true TempAdminUser_Core Instance
  */
-function temp_admin_user() {
+function tmp_admin_user() {
 	return TempAdminUser_Core::instance();
 }
-temp_admin_user();
+tmp_admin_user();
