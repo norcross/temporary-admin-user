@@ -19,8 +19,127 @@ class TempAdminUser_Users {
 	 * @return void
 	 */
 	public function init() {
+		add_filter( 'manage_users_columns',                 array( $this, 'add_temp_user_badge'         )           );
+		add_action( 'manage_users_custom_column',           array( $this, 'show_temp_user_badge'        ),  10, 3   );
+		//add_action( 'admin_notices',                        array( $this, 'display_user_change_notice'  )           );
+		add_action( 'admin_notices',                        array( $this, 'display_temp_user_banner'    )           );
 		add_action( 'admin_init',                           array( $this, 'generate_new_user'           )           );
 		add_action( 'admin_init',                           array( $this, 'modify_existing_user'        )           );
+	}
+
+	/**
+	 * Add a column to indicate a temporary user.
+	 *
+	 * @param  array $columns  The existing array of columns.
+	 *
+	 * @return array $columns  The modified array of columns.
+	 */
+	public function add_temp_user_badge( $columns ) {
+
+		// Make our column with no label.
+		$columns['tmp-admin'] = '';
+
+		// Return my entire array.
+		return $columns;
+	}
+
+	/**
+	 * Show the small badge if they are a temp user.
+	 *
+	 * @param  string  $output       Custom column output. Default empty.
+	 * @param  string  $column_name  The actual column name.
+	 * @param  integer $user_id      The currently-listed user.
+	 *
+	 * @return mixed
+	 */
+	public function show_temp_user_badge( $output, $column_name, $user_id ) {
+
+		// Return whatever we have if it isn't our column.
+		if ( 'tmp-admin' !== $column_name ) {
+			return $output;
+		}
+
+		// Check for the flag.
+		$check  = get_user_meta( absint( $user_id ), '_tmp_admin_user_flag', true );
+
+		// Return the icon, or nothing.
+		return ! empty( $check ) ? '<span title="' . __( 'This user was created with the Temporary Admin User plugin', 'temporary-admin-user' ) . '" class="dashicons dashicons-admin-network"></span>' : $output;
+	}
+
+	/**
+	 * Display the after changing a user.
+	 *
+	 * @return HTML
+	 */
+	public function display_user_change_notice() {
+
+		// Bail if we aren't on the page.
+		if ( false === $check = TempAdminUser_Helper::check_admin_page() ) {
+			return;
+		}
+
+		// Check for the flag.
+		if ( empty( $_GET['tmp-single'] ) ) {
+			return;
+		}
+
+		// Check for the flag.
+		$check  = get_user_meta( absint( $_GET['user_id'] ), '_tmp_admin_user_flag', true );
+
+		// Do the notice banner if we have the flag.
+		if ( ! empty( $check ) ) {
+
+			// Get my created flag.
+			$create = get_user_meta( absint( $_GET['user_id'] ), '_tmp_admin_user_created', true );
+
+			// Set my message text.
+			$msgtxt = sprintf( __( 'This user was created with the Temporary Admin User plugin on %s', 'temporary-admin-user' ), date( 'F jS Y @ g:i a', $create ) );
+
+			// And handle the notice.
+			echo '<div class="notice notice-info is-dismissible tmp-admin-user-message">';
+				echo '<p>' . wp_kses_post( $msgtxt ) . '</p>';
+			echo '</div>';
+		}
+
+		// And be done.
+		return;
+	}
+
+	/**
+	 * Display the banner showing the user was made in the plugin.
+	 *
+	 * @return HTML
+	 */
+	public function display_temp_user_banner() {
+
+		// Call the global $pagenow variable.
+		global $pagenow;
+
+		// Bail if this isn't a user page at all.
+		if ( empty( $pagenow ) || 'user-edit.php' !== esc_attr( $pagenow ) || empty( $_GET['user_id'] ) ) {
+			return;
+		}
+
+		// Check for the flag.
+		$check  = get_user_meta( absint( $_GET['user_id'] ), '_tmp_admin_user_flag', true );
+
+		// Do the notice banner if we have the flag.
+		if ( ! empty( $check ) ) {
+
+			// Get my created flag.
+			$create = get_user_meta( absint( $_GET['user_id'] ), '_tmp_admin_user_created', true );
+
+			// Set my message text.
+			$msgtxt = sprintf( __( 'This user was created with the Temporary Admin User plugin on %s', 'temporary-admin-user' ), date( 'F jS Y @ g:i a', $create ) );
+
+			// And handle the notice.
+			echo '<div class="notice notice-info is-dismissible tmp-admin-user-message">';
+				echo '<p>' . wp_kses_post( $msgtxt ) . '</p>';
+			echo '</div>';
+		}
+
+		// And be done.
+		return;
 	}
 
 	/**
@@ -71,7 +190,7 @@ class TempAdminUser_Users {
 
 		// preprint( $_POST, true );
 		if ( false !== $user_id = self::create_new_user( $user_email, $duration ) ) {
-			tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'newuser' => 1 ) );
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'action' => 'create', 'newuser' => 1 ) );
 		}
 
 		// And unknown error.
@@ -118,65 +237,73 @@ class TempAdminUser_Users {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'badtype' ) );
 		}
 
+		// Bail if no userdata exists.
+		if ( false === $user = get_userdata( $id ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nouser' ) );
+		}
+
 		// Handle my different action types.
 		switch ( sanitize_text_field( $_GET['tmp-action'] ) ) {
 
 			case 'promote' :
-				self::promote_existing_user( $user_id );
+				self::promote_existing_user( $user );
 				break;
 
 			case 'restrict' :
-				self::restrict_existing_user( $user_id );
+				self::restrict_existing_user( $user );
 				break;
 
 			case 'delete' :
-				self::delete_existing_user( $user_id );
+				self::delete_existing_user( $user );
 				break;
 
 			// End all case breaks.
 		}
+
+		// And our success.
+		tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'action' => sanitize_text_field( $_GET['tmp-action'] ) ) );
 	}
 
 	/**
 	 * Add a pre-determined amount of time to the existing user.
 	 *
-	 * @param  integer $user_id  The user ID we are updating.
+	 * @param  object $user  The WP_User object we are updating.
 	 *
 	 * @return void
 	 */
-	public static function promote_existing_user( $user_id = 0 ) {
+	public static function promote_existing_user( $user ) {
 
-		// Allow other things to hook into this process.
-		do_action( 'tmp_admin_user_before_user_promote', $user_id );
-
-		// And my setup.
-		$setup  = array(
-			'ID'    => absint( $user_id ),
-			'role'  => 'administrator',
-		);
-
-		// Run one more filter on it.
-		$setup  = apply_filters( 'tmp_admin_user_promote_args', $setup, $user_id );
-
-		// Bail if we nix'd it in the filter.
-		if ( empty( $setup ) ) {
-			return false;
+		// Double check the user was passed.
+		if ( empty( $user ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nouser' ) );
 		}
 
-		// Get the new ID.
-		$update = wp_insert_user( $setup );
+		// Allow other things to hook into this process.
+		do_action( 'tmp_admin_user_before_user_promote', $user );
 
-		// Bail if we failed the update.
-		if ( is_wp_error( $update ) ) {
-			return false;
+		// If we are already an admin, don't bother updating the user.
+		if ( ! in_array( 'administrator', $user->roles ) ) {
+
+			// Grab the user args.
+			if ( false === $setup = self::get_user_update_args( $user, 'administrator', 'promote' ) ) {
+				return false; // @@todo needs some error checking
+			}
+
+			// Get the new ID.
+			$update = wp_insert_user( $setup );
+
+			// Bail if we failed the update.
+			if ( empty( $update ) || is_wp_error( $update ) ) {
+				return false; // @@todo needs some error checking
+			}
 		}
 
 		// Handle the expires time.
-		update_user_meta( $user_id, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
-		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day' ) );
 
 		// Allow other things to hook into this process.
-		do_action( 'tmp_admin_user_after_user_promote', $user_id );
+		do_action( 'tmp_admin_user_after_user_promote', $user );
 
 		// And return true, so we know to report back.
 		return true;
@@ -185,43 +312,46 @@ class TempAdminUser_Users {
 	/**
 	 * Add a pre-determined amount of time to the existing user.
 	 *
-	 * @param  integer $user_id  The user ID we are restricting.
+	 * @param  object $user  The WP_User object we are updating.
 	 *
 	 * @return void
 	 */
-	public static function restrict_existing_user( $user_id = 0 ) {
+	public static function restrict_existing_user( $user ) {
+
+		// Double check the user was passed.
+		if ( empty( $user ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nouser' ) );
+		}
 
 		// Allow other things to hook into this process.
-		do_action( 'tmp_admin_user_before_user_restrict', $user_id );
+		do_action( 'tmp_admin_user_before_user_restrict', $user );
 
-		// And my setup.
-		$setup  = array(
-			'ID'    => absint( $user_id ),
-			'role'  => 'subscriber',
-		);
+		// If we are already a subscriber, don't bother updating the user.
+		if ( ! in_array( 'subscriber', $user->roles ) ) {
 
-		// Run one more filter on it.
-		$setup  = apply_filters( 'tmp_admin_user_restrict_args', $setup, $user_id );
+			// Grab the user args.
+			if ( false === $setup = self::get_user_update_args( $user, 'subscriber', 'restrict' ) ) {
+				return false; // @@todo needs some error checking
+			}
 
-		// Bail if we nix'd it in the filter.
-		if ( empty( $setup ) ) {
-			return false;
+			// Get the new ID.
+			$update = wp_insert_user( $setup );
+
+			// Bail if we failed the update.
+			if ( empty( $update ) || is_wp_error( $update ) ) {
+				return false; // @@todo needs some error checking
+			}
 		}
 
-		// Get the new ID.
-		$update = wp_insert_user( $setup );
-
-		// Bail if we failed the update.
-		if ( is_wp_error( $update ) ) {
-			return false;
-		}
+		// Set my expire time one hour back.
+		$expire = current_time( 'timestamp' ) - HOUR_IN_SECONDS;
 
 		// Handle the expires time.
-		update_user_meta( $user_id, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
-		update_user_meta( $user_id, '_tmp_admin_user_expires', current_time( 'timestamp' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_expires', absint( $expire ) );
 
 		// Allow other things to hook into this process.
-		do_action( 'tmp_admin_user_after_user_restrict', $user_id );
+		do_action( 'tmp_admin_user_after_user_restrict', $user );
 
 		// And return true, so we know to report back.
 		return true;
@@ -230,17 +360,22 @@ class TempAdminUser_Users {
 	/**
 	 * Take te existing user and delete them.
 	 *
-	 * @param  integer $user_id  The user ID we are deleting.
+	 * @param  object $user  The WP_User object we are updating.
 	 *
 	 * @return void
 	 */
-	public static function delete_existing_user( $user_id = 0 ) {
+	public static function delete_existing_user( $user ) {
+
+		// Double check the user was passed.
+		if ( empty( $user ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nouser' ) );
+		}
 
 		// Allow other things to hook into this process.
-		do_action( 'tmp_admin_user_before_user_delete', $user_id );
+		do_action( 'tmp_admin_user_before_user_delete', $user );
 
 		// Get the new ID.
-		$delete = wp_delete_user( $user_id, get_current_user_id() );
+		$delete = wp_delete_user( $user->ID, get_current_user_id() );
 
 		// Bail if we failed the update.
 		if ( is_wp_error( $delete ) ) {
@@ -248,10 +383,33 @@ class TempAdminUser_Users {
 		}
 
 		// Allow other things to hook into this process.
-		do_action( 'tmp_admin_user_after_user_delete', $user_id );
+		do_action( 'tmp_admin_user_after_user_delete', $user );
 
 		// And return true, so we know to report back.
 		return true;
+	}
+
+	/**
+	 * Set the args for the user modification.
+	 *
+	 * @param  object $user    The whole WP_User object.
+	 * @param  string $role    What the role we are updating is.
+	 * @param  string $action  What action is being taken on the user.
+	 *
+	 * @return array
+	 */
+	public static function get_user_update_args( $user, $role = '', $action = '' ) {
+
+		// Create the user args for updating.
+		$setup  = array(
+			'user_login'  => $user->user_login,
+			'user_email'  => $user->user_email,
+			'ID'          => absint( $user->ID ),
+			'role'        => $role,
+		);
+
+		// Run one more filter on it.
+		return apply_filters( 'tmp_admin_user_modify_args', $setup, $user, $action );
 	}
 
 	/**
@@ -276,6 +434,27 @@ class TempAdminUser_Users {
 
 		// Return our bool.
 		return ! empty( $check ) ? false : true;
+	}
+
+	/**
+	 * Check the user ID to check their status.
+	 *
+	 * @param  integer $user_id  The user ID we wanna check.
+	 *
+	 * @return string           True if the user is expired.
+	 */
+	public static function check_user_status( $user_id = 0 ) {
+
+		// Bail without an ID.
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		// Fetch the meta key.
+		$stamp  = get_user_meta( $user_id, '_tmp_admin_user_expires', true );
+
+		// Return our string.
+		return current_time( 'timestamp' ) < absint( $stamp ) ? 'active' : 'restricted';
 	}
 
 	/**
@@ -358,6 +537,7 @@ class TempAdminUser_Users {
 
 		// Now add our custom meta keys.
 		update_user_meta( $user_id, '_tmp_admin_user_flag', true );
+		update_user_meta( $user_id, '_tmp_admin_user_admin_id', get_current_user_id() );
 		update_user_meta( $user_id, '_tmp_admin_user_created', current_time( 'timestamp' ) );
 		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( $duration ) );
 
@@ -379,8 +559,6 @@ class TempAdminUser_Users {
 		// Set my args.
 		$args   = array(
 			'fields'       => 'all',
-			'role'         => 'administrator',
-			'meta_key'     => '_tmp_admin_user_expires',
 			'meta_query'   => array(
 				array(
 					'key'     => '_tmp_admin_user_flag',

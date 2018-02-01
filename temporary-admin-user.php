@@ -139,6 +139,16 @@ final class TempAdminUser_Core {
 			define( 'TMP_ADMIN_USER_INCLS', __DIR__ . '/includes' );
 		}
 
+		// Set our assets directory constant.
+		if ( ! defined( 'TMP_ADMIN_USER_ASSETS' ) ) {
+			define( 'TMP_ADMIN_USER_ASSETS', __DIR__ . '/assets' );
+		}
+
+		// Set our assets directory constant.
+		if ( ! defined( 'TMP_ADMIN_USER_ASSETS_URL' ) ) {
+			define( 'TMP_ADMIN_USER_ASSETS_URL', TMP_ADMIN_USER_URL . 'assets' );
+		}
+
 		// Set our menu base slug constant.
 		if ( ! defined( 'TMP_ADMIN_USER_MENU_BASE' ) ) {
 			define( 'TMP_ADMIN_USER_MENU_BASE', 'temporary-admin-user' );
