@@ -19,6 +19,14 @@ form.tmp-admin-user-form .tmp-admin-user-label {
 .tmp-admin-user-existing-table .widefat td.check-column,
 .tmp-admin-user-existing-table .widefat th.check-column {
   width: 12px; }
+.tmp-admin-user-existing-table td.column-id,
+.tmp-admin-user-existing-table th.column-id {
+  width: 24px; }
+  .tmp-admin-user-existing-table td.column-id .toggle-row,
+  .tmp-admin-user-existing-table th.column-id .toggle-row {
+    display: none;
+    height: 0;
+    width: 0; }
 .tmp-admin-user-existing-table .tmp-admin-user-view-label {
   margin-right: 10px; }
 .tmp-admin-user-existing-table .column-actions {

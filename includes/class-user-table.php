@@ -63,6 +63,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		// Return our array of column setups.
 		return array(
 			'cb'        => '<input type="checkbox" />',
+			'id'        => __( 'ID', 'temporary-admin-user' ),
 			'email'     => __( 'Email Address', 'temporary-admin-user' ),
 			'status'    => __( 'Status', 'temporary-admin-user' ),
 			'created'   => __( 'Date Created', 'temporary-admin-user' ),
@@ -70,6 +71,19 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 			'actions'   => __( 'Actions', 'temporary-admin-user' ),
 		);
 	}
+
+	/**
+	 * Return null for our table, since no row actions exist.
+	 *
+	 * @param  object $item         The item being acted upon.
+	 * @param  string $column_name  Current column name.
+	 * @param  string $primary      Primary column name.
+	 *
+	 * @return null
+	 */
+	protected function handle_row_actions( $item, $column_name, $primary ) {
+		return '';
+ 	}
 
 	/**
 	 * Define the sortable columns.
@@ -224,9 +238,6 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 			),
 		);
 
-		// Grab my status.
-		// $status = TempAdminUser_Users::check_user_status( $id );
-
 		// Set my empty.
 		$build  = '';
 
@@ -255,15 +266,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 					// And output the markup.
 					$build .= '<span class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
-				/*
-				} elseif ( ! empty( $item['restrict'] ) && 'restrict' === esc_attr( $action ) ) {
 
-					// Create my class.
-					$class .= ' tmp-admin-user-disabled';
-
-					// And output the markup.
-					$build .= '<span class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
-				*/
 				} else {
 
 					// Create the link args.
@@ -337,13 +340,14 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		// Run our column switch.
 		switch ( $column_name ) {
 
+			case 'id' :
 			case 'email' :
 			case 'created' :
 			case 'expires' :
 				return $dataset[ $column_name ];
 
 			default :
-				return;
+				return print_r( $dataset, true );
 		}
 	}
 

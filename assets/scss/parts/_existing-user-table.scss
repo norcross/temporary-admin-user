@@ -6,6 +6,17 @@
 		width: 12px;
 	}
 
+	td.column-id,
+	th.column-id {
+		width: 24px;
+
+		.toggle-row {
+			display: none;
+			height: 0;
+			width: 0;
+		}
+	}
+
 	tr td.column-status {
 		//font-style: italic;
 	}
