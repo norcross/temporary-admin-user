@@ -273,6 +273,9 @@ class TempAdminUser_Users {
 	 */
 	public static function promote_existing_user( $user ) {
 
+		// Quick check to make sure we got the whole object and not just an ID.
+		$user   = ! is_object( $user ) ? get_userdata( $user ) : $user;
+
 		// Double check the user was passed.
 		if ( empty( $user ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nouser' ) );
@@ -302,6 +305,9 @@ class TempAdminUser_Users {
 		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
 		update_user_meta( $user->ID, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day' ) );
 
+		// Delete our restricted flag if it happens to exist.
+		delete_user_meta( $user->ID, '_tmp_admin_user_is_restricted' );
+
 		// Allow other things to hook into this process.
 		do_action( 'tmp_admin_user_after_user_promote', $user );
 
@@ -310,13 +316,16 @@ class TempAdminUser_Users {
 	}
 
 	/**
-	 * Add a pre-determined amount of time to the existing user.
+	 * Take the user and set them to the restricted status.
 	 *
 	 * @param  object $user  The WP_User object we are updating.
 	 *
 	 * @return void
 	 */
 	public static function restrict_existing_user( $user ) {
+
+		// Quick check to make sure we got the whole object and not just an ID.
+		$user   = ! is_object( $user ) ? get_userdata( $user ) : $user;
 
 		// Double check the user was passed.
 		if ( empty( $user ) ) {
@@ -349,6 +358,7 @@ class TempAdminUser_Users {
 		// Handle the expires time.
 		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
 		update_user_meta( $user->ID, '_tmp_admin_user_expires', absint( $expire ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_is_restricted', true );
 
 		// Allow other things to hook into this process.
 		do_action( 'tmp_admin_user_after_user_restrict', $user );
@@ -365,6 +375,9 @@ class TempAdminUser_Users {
 	 * @return void
 	 */
 	public static function delete_existing_user( $user ) {
+
+		// Quick check to make sure we got the whole object and not just an ID.
+		$user   = ! is_object( $user ) ? get_userdata( $user ) : $user;
 
 		// Double check the user was passed.
 		if ( empty( $user ) ) {
@@ -450,11 +463,17 @@ class TempAdminUser_Users {
 			return false;
 		}
 
-		// Fetch the meta key.
-		$stamp  = get_user_meta( $user_id, '_tmp_admin_user_expires', true );
+		// Fetch the meta keys.
+		$restricted = get_user_meta( $user_id, '_tmp_admin_user_is_restricted', true );
+		$timestamp  = get_user_meta( $user_id, '_tmp_admin_user_expires', true );
 
-		// Return our string.
-		return current_time( 'timestamp' ) < absint( $stamp ) ? 'active' : 'restricted';
+		// If we have the restricted flag, return that.
+		if ( ! empty( $restricted ) ) {
+			return 'restricted';
+		}
+
+		// Now do the timestamp comparison.
+		return current_time( 'timestamp' ) < absint( $timestamp ) ? 'active' : 'restricted';
 	}
 
 	/**
@@ -487,12 +506,12 @@ class TempAdminUser_Users {
 	 */
 	public static function create_user_password() {
 
-		// set my variables
+		// Set my variables.
 		$charcount  = apply_filters( 'tmp_admin_user_pass_charcount', 16 );
 		$speclchar  = apply_filters( 'tmp_admin_user_pass_specchar', true );
 		$xspeclchar = apply_filters( 'tmp_admin_user_pass_xspeclchar', false );
 
-		// return the password generated
+		// Return the password generated.
 		return wp_generate_password( absint( $charcount ), $speclchar, $xspeclchar );
 	}
 
