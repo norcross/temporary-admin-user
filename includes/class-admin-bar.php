@@ -18,6 +18,11 @@ add_action( 'admin_bar_menu', 'tmp_admin_user_admin_bar', 9999 );
  */
 function tmp_admin_user_admin_bar( WP_Admin_Bar $wp_admin_bar ) {
 
+	// Bail if current user doesnt have cap.
+	if ( ! current_user_can( apply_filters( 'tmp_admin_user_menu_cap', 'manage_options' ) ) ) {
+		return;
+	}
+
 	// Add the link to the menu page.
 	$wp_admin_bar->add_node(
 		array(
