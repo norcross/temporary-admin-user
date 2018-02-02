@@ -26,7 +26,11 @@ form.tmp-admin-user-form .tmp-admin-user-label {
 .tmp-admin-user-existing-table .tmp-admin-user-link {
   display: inline-block;
   vertical-align: middle;
-  width: 32px; }
+  width: 32px;
+  text-align: center;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none; }
   .tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-promote {
     color: #ffc719; }
   .tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-restrict {
@@ -37,7 +41,10 @@ form.tmp-admin-user-form .tmp-admin-user-label {
     color: #6d1530; }
   .tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-view-email {
     color: #153e6d; }
+  .tmp-admin-user-existing-table .tmp-admin-user-link:visited, .tmp-admin-user-existing-table .tmp-admin-user-link:hover, .tmp-admin-user-existing-table .tmp-admin-user-link:active {
+    border: 0 none;
+    outline: 0 none; }
   .tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-disabled {
-    opacity: 0.65; }
+    opacity: 0.45; }
 
 /*# sourceMappingURL=temporary-admin-user.css.map */

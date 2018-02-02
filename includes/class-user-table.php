@@ -127,11 +127,8 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 	 */
 	protected function column_status( $item ) {
 
-		// Set my stamp.
-		$stamp  = absint( $item['expires'] );
-
 		// Do the check and output accordingly.
-		$status = current_time( 'timestamp' ) < absint( $stamp ) ? __( 'Active', 'temporary-admin-user' ) : __( 'Restricted', 'temporary-admin-user' );
+		$status = ! empty( $item['restrict'] ) ? __( 'Restricted', 'temporary-admin-user' ) : __( 'Active', 'temporary-admin-user' );
 
 		// Return my formatted date.
 		return apply_filters( 'tmp_admin_user_status_display', $status, $item );
@@ -168,13 +165,13 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 	 */
 	protected function column_expires( $item ) {
 
-		// Set my stamp.
-		$stamp  = absint( $item['expires'] );
-
 		// Output the "expires" text.
-		if ( current_time( 'timestamp' ) > absint( $stamp ) ) {
+		if ( ! empty( $item['restrict'] ) ) {
 			return '<em>' . __( 'This account has expired.', 'temporary-admin-user' ) . '</em>';
 		}
+
+		// Set my stamp.
+		$stamp  = absint( $item['expires'] );
 
 		// Do my date logicals.
 		$now    = new DateTime();
@@ -228,7 +225,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		);
 
 		// Grab my status.
-		$status = TempAdminUser_Users::check_user_status( $id );
+		// $status = TempAdminUser_Users::check_user_status( $id );
 
 		// Set my empty.
 		$build  = '';
@@ -251,22 +248,22 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 				$class  = 'tmp-admin-user-link tmp-admin-user-action tmp-admin-user-action-' . esc_attr( $action );
 
 				// Hide links based on status.
-				if ( 'promote' === esc_attr( $action ) && 'active' === esc_attr( $status ) ) {
+				if ( empty( $item['restrict'] ) && 'promote' === esc_attr( $action ) || ! empty( $item['restrict'] ) && 'restrict' === esc_attr( $action ) ) {
 
 					// Create my class.
 					$class .= ' tmp-admin-user-disabled';
 
 					// And output the markup.
 					$build .= '<span class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
-
-				} elseif ( 'restrict' === esc_attr( $action ) && 'restricted' === esc_attr( $status ) ) {
+				/*
+				} elseif ( ! empty( $item['restrict'] ) && 'restrict' === esc_attr( $action ) ) {
 
 					// Create my class.
 					$class .= ' tmp-admin-user-disabled';
 
 					// And output the markup.
 					$build .= '<span class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
-
+				*/
 				} else {
 
 					// Create the link args.
@@ -311,6 +308,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 			// Get our created and expired times.
 			$created    = get_user_meta( $user->ID, '_tmp_admin_user_created', true );
 			$expires    = get_user_meta( $user->ID, '_tmp_admin_user_expires', true );
+			$restrict   = get_user_meta( $user->ID, '_tmp_admin_user_is_restricted', true );
 
 			// Set the array of the data we want.
 			$data[] = array(
@@ -318,6 +316,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 				'email'     => $user->user_email,
 				'created'   => $created,
 				'expires'   => $expires,
+				'restrict'  => $restrict,
 			);
 		}
 

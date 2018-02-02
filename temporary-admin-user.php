@@ -171,6 +171,7 @@ final class TempAdminUser_Core {
 		require_once TMP_ADMIN_USER_INCLS . '/class-helper.php';
 		require_once TMP_ADMIN_USER_INCLS . '/class-users.php';
 		require_once TMP_ADMIN_USER_INCLS . '/class-user-table.php';
+		require_once TMP_ADMIN_USER_INCLS . '/class-cron.php';
 		require_once TMP_ADMIN_USER_INCLS . '/class-admin-bar.php';
 
 		// Load our admin-specific items.
@@ -251,8 +252,8 @@ final class TempAdminUser_Core {
 	 */
 	public function admin_page_redirect( $args = array(), $return = false ) {
 
-		// Bail if we aren't on the page.
-		if ( false === $check = TempAdminUser_Helper::check_admin_page() ) {
+		// Bail if we aren't on the page or a cron.
+		if ( wp_doing_cron() || false === $check = TempAdminUser_Helper::check_admin_page() ) {
 			return;
 		}
 

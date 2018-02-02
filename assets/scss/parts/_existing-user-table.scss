@@ -22,6 +22,10 @@
 		display: inline-block;
 		vertical-align: middle;
 		width: 32px;
+		text-align: center;
+		-webkit-box-shadow: none;
+		-moz-box-shadow: none;
+		box-shadow: none;
 
 		&.tmp-admin-user-action-promote { color: #ffc719; }
 		&.tmp-admin-user-action-restrict { color: #565656; }
@@ -29,7 +33,14 @@
 		&.tmp-admin-user-view-profile { color: #6d1530; }
 		&.tmp-admin-user-view-email { color: #153e6d; }
 
-		&.tmp-admin-user-disabled { opacity: 0.65; }
+		&:visited,
+		&:hover,
+		&:active {
+			border: 0 none;
+			outline: 0 none;
+		}
+
+		&.tmp-admin-user-disabled { opacity: 0.45; }
 
 	}
 
