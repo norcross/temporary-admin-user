@@ -176,8 +176,14 @@ class TempAdminUser_Admin {
 			// Handle the title.
 			echo '<h1 class="tmp-admin-user-settings-title">' . get_admin_page_title() . '</h1>';
 
-			// Load the new user form.
-			echo self::new_user_form( $action );
+			// Wrap it in a div.
+			echo '<div class="tmp-admin-user-form-entry">';
+
+				// Load the new user form.
+				echo self::new_user_form( $action );
+
+			// Close the form div thing.
+			echo '</div>';
 
 			// Wrap it in a div.
 			echo '<div class="tmp-admin-user-existing-table">';

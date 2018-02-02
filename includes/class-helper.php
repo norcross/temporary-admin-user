@@ -130,7 +130,7 @@ class TempAdminUser_Helper {
 				return __( 'The selected account was promoted.', 'temporary-admin-user' );
 				break;
 
-			case 'promoted' :
+			case 'bulk_promote' :
 				return __( 'The selected accounts were promoted.', 'temporary-admin-user' );
 				break;
 
@@ -138,7 +138,7 @@ class TempAdminUser_Helper {
 				return __( 'The selected account was restricted.', 'temporary-admin-user' );
 				break;
 
-			case 'restricted' :
+			case 'bulk_restrict' :
 				return __( 'The selected accounts were restricted.', 'temporary-admin-user' );
 				break;
 
@@ -146,7 +146,7 @@ class TempAdminUser_Helper {
 				return __( 'The selected account was deleted.', 'temporary-admin-user' );
 				break;
 
-			case 'deleted' :
+			case 'bulk_delete' :
 				return __( 'The selected accounts were deleted.', 'temporary-admin-user' );
 				break;
 
