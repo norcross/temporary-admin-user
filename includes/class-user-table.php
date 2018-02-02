@@ -96,9 +96,9 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 		// Return the setup.
 		return array(
-			'promote_users'  => __( 'Promote Users', 'temporary-admin-user' ),
-			'restrict_users' => __( 'Restrict Users', 'temporary-admin-user' ),
-			'delete_users'   => __( 'Delete Users', 'temporary-admin-user' ),
+			'tmp_users_bulk_promote'  => __( 'Promote Users', 'temporary-admin-user' ),
+			'tmp_users_bulk_restrict' => __( 'Restrict Users', 'temporary-admin-user' ),
+			'tmp_users_bulk_delete'   => __( 'Delete Users', 'temporary-admin-user' ),
 		);
 	}
 
