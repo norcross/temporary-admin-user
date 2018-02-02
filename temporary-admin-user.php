@@ -171,6 +171,7 @@ final class TempAdminUser_Core {
 		require_once TMP_ADMIN_USER_INCLS . '/class-helper.php';
 		require_once TMP_ADMIN_USER_INCLS . '/class-users.php';
 		require_once TMP_ADMIN_USER_INCLS . '/class-user-table.php';
+		require_once TMP_ADMIN_USER_INCLS . '/class-admin-bar.php';
 
 		// Load our admin-specific items.
 		if ( is_admin() ) {
