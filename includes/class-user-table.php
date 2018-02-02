@@ -20,6 +20,22 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class TemporaryAdminUsers_Table extends WP_List_Table {
 
 	/**
+	 * TemporaryAdminUsers_Table constructor.
+	 *
+	 * REQUIRED. Set up a constructor that references the parent constructor. We
+	 * use the parent reference to set some default configs.
+	 */
+	public function __construct() {
+
+		// Set parent defaults.
+		parent::__construct( array(
+			'singular' => __( 'Temporary Admin User', 'temporary-admin-user' ),
+			'plural'   => __( 'Temporary Admin Users', 'temporary-admin-user' ),
+			'ajax'     => false,
+		) );
+	}
+
+	/**
 	 * Prepare the items for the table to process
 	 *
 	 * @return Void
@@ -28,6 +44,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 		// Roll out each part.
 		$columns    = $this->get_columns();
+		$hidden     = array();
 		$sortable   = $this->get_sortable_columns();
 		$dataset    = $this->table_data();
 
@@ -47,7 +64,10 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		$dataset    = array_slice( $dataset, ( ( $current - 1 ) * $paginate ), $paginate );
 
 		// Do the column headers
-		$this->_column_headers = array( $columns, array(), $sortable );
+		$this->_column_headers = array( $columns, $hidden, $sortable );
+
+		// Make sure we have the bulk action running.
+		$this->process_bulk_action();
 
 		// And the result.
 		$this->items = $dataset;
@@ -95,9 +115,9 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 		// Return our setup.
 		return array(
 			'email'     => array( 'email', false ),
-			'status'    => array( 'status', true ),
+			'status'    => array( 'status', false ),
 			'created'   => array( 'created', true ),
-			'expires'   => array( 'expires', false ),
+			'expires'   => array( 'expires', true ),
 		);
 	}
 
@@ -110,10 +130,85 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 		// Return the setup.
 		return array(
-			'tmp_users_bulk_promote'  => __( 'Promote Users', 'temporary-admin-user' ),
-			'tmp_users_bulk_restrict' => __( 'Restrict Users', 'temporary-admin-user' ),
-			'tmp_users_bulk_delete'   => __( 'Delete Users', 'temporary-admin-user' ),
+			'bulk_promote'  => __( 'Promote Users', 'temporary-admin-user' ),
+			'bulk_restrict' => __( 'Restrict Users', 'temporary-admin-user' ),
+			'bulk_delete'   => __( 'Delete Users', 'temporary-admin-user' ),
 		);
+	}
+
+	/**
+	 * Handle bulk actions.
+	 *
+	 * @see $this->prepare_items()
+	 */
+	protected function process_bulk_action() {
+
+		// Bail if we aren't on the page.
+		if ( empty( $this->current_action() ) || false === $check = TempAdminUser_Helper::check_admin_page() ) {
+			return;
+		}
+
+		// Bail if a nonce was never passed.
+		if ( empty( $_REQUEST['_wpnonce'] ) ) {
+			return;
+		}
+
+		// Grab an array of our items.
+		$items  = array( 'bulk_promote', 'bulk_restrict', 'bulk_delete' );
+
+		// Now check each variable against the array.
+		if ( ! in_array( $this->current_action(), $items ) ) {
+			return;
+		}
+
+		// Fail on a bad nonce.
+		if ( ! wp_verify_nonce( $_POST['_wpnonce'], 'bulk-temporaryadminusers' ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nononce' ) );
+		}
+
+		// Check for the array of users being passed.
+		if ( empty( $_POST['tmp_admin_users'] ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nousers' ) );
+		}
+
+		// Check our user IDs.
+		$user_ids   = array_filter( $_POST['tmp_admin_users'], 'absint' );
+
+		// Check for the array of users being passed.
+		if ( empty( $user_ids ) ) {
+			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nousers' ) );
+		}
+
+		// Set my action.
+		$action = sanitize_text_field( $this->current_action() );
+
+		// Loop my users and run the action on each one.
+		foreach ( $user_ids as $user_id ) {
+
+			// Grab my userdata.
+			$user   = get_userdata( $user_id );
+
+			// Handle my different action types.
+			switch ( $action ) {
+
+				case 'bulk_promote' :
+					TempAdminUser_Users::promote_existing_user( $user );
+					break;
+
+				case 'bulk_restrict' :
+					TempAdminUser_Users::restrict_existing_user( $user );
+					break;
+
+				case 'bulk_delete' :
+					TempAdminUser_Users::delete_existing_user( $user );
+					break;
+
+				// End all case breaks.
+			}
+		}
+
+		// And our success.
+		tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'action' => $action ) );
 	}
 
 	/**
@@ -347,7 +442,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 				return $dataset[ $column_name ];
 
 			default :
-				return print_r( $dataset, true );
+				return;
 		}
 	}
 
@@ -360,7 +455,7 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 		// Set defaults and check for query strings.
 		$ordby  = ! empty( $_GET['orderby'] ) ? $_GET['orderby'] : 'expires';
-		$order  = ! empty( $_GET['order'] ) ? $_GET['order'] : 'asc';
+		$order  = ! empty( $_GET['order'] ) ? $_GET['order'] : 'desc';
 
 		// Set my result up.
 		$result = strcmp( $a[ $ordby ], $b[ $ordby ] );

@@ -23,7 +23,6 @@ class TempAdminUser_Users {
 		add_action( 'manage_users_custom_column',           array( $this, 'show_temp_user_badge'        ),  10, 3   );
 		add_action( 'admin_notices',                        array( $this, 'display_temp_user_banner'    )           );
 		add_action( 'admin_init',                           array( $this, 'generate_new_user'           )           );
-		add_action( 'admin_init',                           array( $this, 'modify_bulk_action_users'    )           );
 		add_action( 'admin_init',                           array( $this, 'modify_existing_user'        )           );
 	}
 
@@ -156,84 +155,6 @@ class TempAdminUser_Users {
 
 		// And unknown error.
 		tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'unknown' ) );
-	}
-
-	/**
-	 * Look for the bulk action on temporary users.
-	 *
-	 * @return void
-	 */
-	public function modify_bulk_action_users() {
-
-		// Bail if we aren't on the page.
-		if ( false === $check = TempAdminUser_Helper::check_admin_page() ) {
-			return;
-		}
-
-		// Check against our two bulk action types.
-		if ( empty( $_POST['action'] ) && empty( $_POST['action2'] ) ) {
-			return;
-		}
-
-		// Grab an array of our items.
-		$items  = array( 'tmp_users_bulk_promote', 'tmp_users_bulk_restrict', 'tmp_users_bulk_delete' );
-
-		// Now check each variable against the array.
-		if ( ! in_array( $_POST['action'], $items ) && ! in_array( $_POST['action2'], $items ) ) {
-			return;
-		}
-
-		// Check nonce and bail if missing or not valid.
-		if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'bulk-users_page_temporary-admin-user' ) ) {
-			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nonce' ) );
-		}
-
-		// Check for the array of users being passed.
-		if ( empty( $_POST['tmp_admin_users'] ) ) {
-			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nousers' ) );
-		}
-
-		// Check our user IDs.
-		$user_ids   = array_filter( $_POST['tmp_admin_users'], 'absint' );
-
-		// Check for the array of users being passed.
-		if ( empty( $user_ids ) ) {
-			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'nousers' ) );
-		}
-
-		// Figure out which action is active.
-		$active = absint( $_POST['action'] ) === 1 ? $_POST['action2'] : $_POST['action'];
-
-		// Set my action.
-		$action = mb_substr( sanitize_text_field( $active ), 10 );
-
-		// Loop my users and run the action on each one.
-		foreach ( $user_ids as $user_id ) {
-
-			// Grab my userdata.
-			$user   = get_userdata( $user_id );
-
-			// Handle my different action types.
-			switch ( $action ) {
-
-				case 'bulk_promote' :
-					self::promote_existing_user( $user );
-					break;
-
-				case 'bulk_restrict' :
-					self::restrict_existing_user( $user );
-					break;
-
-				case 'bulk_delete' :
-					self::delete_existing_user( $user );
-					break;
-
-				// End all case breaks.
-			}
-		}
-
-		// And our success.
-		tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'action' => $action ) );
 	}
 
 	/**
