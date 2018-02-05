@@ -499,10 +499,17 @@ class TempAdminUser_Users {
 
 		// Create the user args for updating.
 		$setup  = array(
-			'user_login'  => $user->user_login,
-			'user_email'  => $user->user_email,
-			'ID'          => absint( $user->ID ),
-			'role'        => $role,
+			'ID'             => absint( $user->ID ),
+			'role'           => $role,
+			'user_login'     => $user->user_login,
+			'user_email'     => $user->user_email,
+			'user_nicename'  => $user->user_nicename,
+			'user_url'       => $user->user_url,
+			'first_name'     => $user->first_name,
+			'last_name'      => $user->last_name,
+			'display_name'   => $user->display_name,
+			'nickname'       => $user->nickname,
+
 		);
 
 		// Run one more filter on it.
