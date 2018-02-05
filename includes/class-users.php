@@ -148,7 +148,6 @@ class TempAdminUser_Users {
 		$user_email = sanitize_text_field( $_POST['tmp-admin-new-user-email'] );
 		$duration   = sanitize_text_field( $_POST['tmp-admin-new-user-duration'] );
 
-		// preprint( $_POST, true );
 		if ( false !== $user_id = self::create_new_user( $user_email, $duration ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'action' => 'create', 'newuser' => 1 ) );
 		}
@@ -272,7 +271,7 @@ class TempAdminUser_Users {
 		update_user_meta( $user_id, '_tmp_admin_user_flag', true );
 		update_user_meta( $user_id, '_tmp_admin_user_admin_id', get_current_user_id() );
 		update_user_meta( $user_id, '_tmp_admin_user_created', current_time( 'timestamp' ) );
-		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( $duration, 'create' ) );
+		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( $duration, $user_id, 'create' ) );
 
 		// And update some basic WP related user meta.
 		update_user_meta( $user_id, 'show_welcome_panel', 0 );
@@ -327,7 +326,7 @@ class TempAdminUser_Users {
 
 		// Handle the expires time.
 		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
-		update_user_meta( $user->ID, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day', 'promote' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day', 'promote', $user->ID ) );
 
 		// Delete our restricted flag if it happens to exist.
 		delete_user_meta( $user->ID, '_tmp_admin_user_is_restricted' );

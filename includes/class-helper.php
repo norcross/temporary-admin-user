@@ -47,19 +47,23 @@ class TempAdminUser_Helper {
 
 		// Set my ranges.
 		$ranges = array(
-			'hour'  => array(
+			'halfhour'  => array(
+				'value' => MINUTE_IN_SECONDS * 30,
+				'label' => __( 'Thirty Minutes', 'temporary-admin-user' )
+			),
+			'hour'      => array(
 				'value' => HOUR_IN_SECONDS,
 				'label' => __( 'One Hour', 'temporary-admin-user' )
 			),
-			'day'   => array(
+			'day'       => array(
 				'value' => DAY_IN_SECONDS,
 				'label' => __( 'One Day', 'temporary-admin-user' )
 			),
-			'week'  => array(
+			'week'      => array(
 				'value' => WEEK_IN_SECONDS,
 				'label' => __( 'One Week', 'temporary-admin-user' )
 			),
-			'month' => array(
+			'month'     => array(
 				'value' => DAY_IN_SECONDS * 30,
 				'label' => __( 'One Month', 'temporary-admin-user' )
 			),
@@ -92,13 +96,14 @@ class TempAdminUser_Helper {
 	 *
 	 * @param  string  $length    The length of time we are requesting.
 	 * @param  string  $action    What action we are taking on the user.
+	 * @param  integer $user_id   The user ID we wanna check.
 	 *
 	 * @return integer $duration  The expiration date in unix time.
 	 */
-	public static function get_user_expire_time( $length = '', $action = 'create' ) {
+	public static function get_user_expire_time( $length = '', $action = 'create', $user_id = 0 ) {
 
 		// Allow my time length to be filtered based on action.
-		$length = apply_filters( 'tmp_admin_user_promote_duration', $length, $action );
+		$length = apply_filters( 'tmp_admin_user_promote_duration', $length, $action, $user_id );
 
 		// Get my data for the particular period provided.
 		$data	= self::get_user_durations( $length );

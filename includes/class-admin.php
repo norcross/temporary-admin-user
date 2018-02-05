@@ -244,18 +244,19 @@ class TempAdminUser_Admin {
 					$build .= '<th scope="row">' . esc_html__( 'Account Expiration', 'temporary-admin-user' ) . '</th>';
 					$build .= '<td>';
 
-					// Output the select field.
-					$build .= '<select name="tmp-admin-new-user-duration" id="tmp-admin-new-user-duration" class="tmp-admin-user-input">';
+						// Output the select field.
+						$build .= '<select name="tmp-admin-new-user-duration" id="tmp-admin-new-user-duration" class="tmp-admin-user-input">';
 
-					'<option value="">' . esc_html__( '(Select)', 'temporary-admin-user' ) . '</option>';
+						// Add the "empty" one.
+						$build .= '<option value="0">' . esc_html__( '(Select)', 'temporary-admin-user' ) . '</option>';
 
-					// Loop my frequencies to make the select field.
-					foreach ( $ranges as $range => $args ) {
-						$build .= '<option value="' . esc_attr( $range ) . '">' . esc_html( $args['label'] ) . '</option>';
-					}
+						// Loop my frequencies to make the select field.
+						foreach ( $ranges as $range => $args ) {
+							$build .= '<option value="' . esc_attr( $range ) . '">' . esc_html( $args['label'] ) . '</option>';
+						}
 
-					// Close the select.
-					$build .= '</select>';
+						// Close the select.
+						$build .= '</select>';
 
 					// Close the row.
 					$build .= '</td>';
@@ -292,8 +293,6 @@ class TempAdminUser_Admin {
 			// And be done.
 			return;
 		}
-
-		//preprint( $users, true );
 
 		// Call our class.
 		$user_table = new TemporaryAdminUsers_Table();
