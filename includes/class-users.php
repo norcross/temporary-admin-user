@@ -576,6 +576,9 @@ class TempAdminUser_Users {
 		// Get the name portion, stripping out periods.
 		$uname  = preg_replace( '/[^a-zA-Z0-9\s]/', '', $split[0] );
 
+		// Run our check to make sure something was left over.
+		$uname  = ! empty( $uname ) ? $uname : wp_generate_password( 10, false, false );
+
 		// Check if it exists.
 		$uname  = ! username_exists( $uname ) ? $uname : $uname . substr( uniqid( '', true ), -5 );
 
