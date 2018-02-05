@@ -140,7 +140,7 @@ class TempAdminUser_Users {
 		}
 
 		// Do the duration valid check.
-		if ( ! in_array( sanitize_text_field( $_POST['tmp-admin-new-user-duration'] ), TempAdminUser_Helper::get_user_durations( 0, true ) ) ) {
+		if ( ! in_array( sanitize_text_field( $_POST['tmp-admin-new-user-duration'] ), self::get_user_durations( 0, true ) ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'badduration' ) );
 		}
 
@@ -182,7 +182,7 @@ class TempAdminUser_Users {
 		$id = absint( $_GET['user-id'] );
 
 		// Check the user ID itself.
-		if ( false === $check = TempAdminUser_Helper::user_id_exists( $id ) ) {
+		if ( false === $check = self::user_id_exists( $id ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'baduser' ) );
 		}
 
@@ -271,7 +271,7 @@ class TempAdminUser_Users {
 		update_user_meta( $user_id, '_tmp_admin_user_flag', true );
 		update_user_meta( $user_id, '_tmp_admin_user_admin_id', get_current_user_id() );
 		update_user_meta( $user_id, '_tmp_admin_user_created', current_time( 'timestamp' ) );
-		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( $duration, $user_id, 'create' ) );
+		update_user_meta( $user_id, '_tmp_admin_user_expires', self::get_user_expire_time( $duration, $user_id, 'create' ) );
 
 		// And update some basic WP related user meta.
 		update_user_meta( $user_id, 'show_welcome_panel', 0 );
@@ -300,7 +300,7 @@ class TempAdminUser_Users {
 		}
 
 		// Check the user ID itself.
-		if ( false === $check = TempAdminUser_Helper::user_id_exists( $user->ID ) ) {
+		if ( false === $check = self::user_id_exists( $user->ID ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'baduser' ), $redirect );
 		}
 
@@ -326,7 +326,7 @@ class TempAdminUser_Users {
 
 		// Handle the expires time.
 		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
-		update_user_meta( $user->ID, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day', 'promote', $user->ID ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_expires', self::get_user_expire_time( 'day', 'promote', $user->ID ) );
 
 		// Delete our restricted flag if it happens to exist.
 		delete_user_meta( $user->ID, '_tmp_admin_user_is_restricted' );
@@ -357,7 +357,7 @@ class TempAdminUser_Users {
 		}
 
 		// Check the user ID itself.
-		if ( false === $check = TempAdminUser_Helper::user_id_exists( $user->ID ) ) {
+		if ( false === $check = self::user_id_exists( $user->ID ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'baduser' ), $redirect );
 		}
 
@@ -415,7 +415,7 @@ class TempAdminUser_Users {
 		}
 
 		// Check the user ID itself.
-		if ( false === $check = TempAdminUser_Helper::user_id_exists( $user->ID ) ) {
+		if ( false === $check = self::user_id_exists( $user->ID ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 0, 'errcode' => 'baduser' ), $redirect );
 		}
 
@@ -458,7 +458,7 @@ class TempAdminUser_Users {
 		foreach ( $users as $user ) {
 
 			// Check the user ID itself.
-			if ( false === $check = TempAdminUser_Helper::user_id_exists( $user->ID ) ) {
+			if ( false === $check = self::user_id_exists( $user->ID ) ) {
 				continue; // @@todo needs some error checking
 			}
 
@@ -516,6 +516,30 @@ class TempAdminUser_Users {
 	}
 
 	/**
+	 * Calculate the Epoch time expiration.
+	 *
+	 * @param  string  $length    The length of time we are requesting.
+	 * @param  string  $action    What action we are taking on the user.
+	 * @param  integer $user_id   The user ID we wanna check.
+	 *
+	 * @return integer $duration  The expiration date in unix time.
+	 */
+	public static function get_user_expire_time( $length = '', $action = 'create', $user_id = 0 ) {
+
+		// Allow my time length to be filtered based on action.
+		$length = apply_filters( 'tmp_admin_user_promote_duration', $length, $action, $user_id );
+
+		// Get my data for the particular period provided.
+		$data	= self::get_user_durations( $length );
+
+		// Set my range accordingly.
+		$range  = ! empty( $data['value'] ) ? $data['value'] : DAY_IN_SECONDS;
+
+		// Send it back, added to the current stamp.
+		return time() + floatval( $range );
+	}
+
+	/**
 	 * Check the user ID against the allowed permissions to prevent temp admins from adding / deleting users and other actions on site.
 	 *
 	 * @param  integer $user_id  The user ID we wanna check.
@@ -537,6 +561,99 @@ class TempAdminUser_Users {
 
 		// Return our bool.
 		return ! empty( $check ) ? false : true;
+	}
+
+	/**
+	 * Get the available expiration time ranges that a user can be set to.
+	 *
+	 * @param  string  $single  Optional to fetch one item from the array.
+	 * @param  boolean $keys    Whether to return just the keys.
+	 *
+	 * @return array            An array of the time data.
+	 */
+	public static function get_user_durations( $single = '', $keys = false ) {
+
+		// Set my ranges.
+		$ranges = array(
+			'halfhour'  => array(
+				'value' => MINUTE_IN_SECONDS * 30,
+				'label' => __( 'Thirty Minutes', 'temporary-admin-user' )
+			),
+			'hour'      => array(
+				'value' => HOUR_IN_SECONDS,
+				'label' => __( 'One Hour', 'temporary-admin-user' )
+			),
+			'day'       => array(
+				'value' => DAY_IN_SECONDS,
+				'label' => __( 'One Day', 'temporary-admin-user' )
+			),
+			'week'      => array(
+				'value' => WEEK_IN_SECONDS,
+				'label' => __( 'One Week', 'temporary-admin-user' )
+			),
+			'month'     => array(
+				'value' => DAY_IN_SECONDS * 30,
+				'label' => __( 'One Month', 'temporary-admin-user' )
+			),
+		);
+
+		// Return it filtered.
+		$ranges = apply_filters( 'tmp_admin_user_expire_ranges', $ranges );
+
+		// Bail if no data exists.
+		if ( empty( $ranges ) ) {
+			return false;
+		}
+
+		// Return just the array keys.
+		if ( ! empty( $keys ) ) {
+			return array_keys( $ranges );
+		}
+
+		// Return the entire array if no key requested.
+		if ( empty( $single ) ) {
+			return $ranges;
+		}
+
+		// Return the single key item.
+		return ! empty( $single ) && isset( $ranges[ $single ] ) ? $ranges[ $single ] : false;
+	}
+
+	/**
+	 * Check the provided user ID against the database.
+	 *
+	 * @param  integer $user_id  The user ID we wanna check.
+	 *
+	 * @return boolean
+	 */
+	public static function user_id_exists( $user_id ) {
+
+		// Bail if no ID was provided.
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		// Call our global DB.
+		global $wpdb;
+
+		// Check cache first.
+		if ( wp_cache_get( $user_id, 'users' ) ) {
+			return true;
+		}
+
+		// Now check the database.
+		$query  = $wpdb->prepare("
+			SELECT ID
+			FROM $wpdb->users
+			WHERE ID = %d
+			LIMIT 1
+			", $user_id );
+
+		// Run the query.
+		$check  = $wpdb->get_var( $query );
+
+		// And return the results.
+		return ! empty( $check ) ? true : false;
 	}
 
 	/**

@@ -208,7 +208,7 @@ class TempAdminUser_Admin {
 	public static function new_user_form( $action = '' ) {
 
 		// Fetch my time ranges.
-		$ranges = TempAdminUser_Helper::get_user_durations();
+		$ranges = TempAdminUser_Users::get_user_durations();
 
 		// Create an empty.
 		$build  = '';
