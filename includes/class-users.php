@@ -272,7 +272,7 @@ class TempAdminUser_Users {
 		update_user_meta( $user_id, '_tmp_admin_user_flag', true );
 		update_user_meta( $user_id, '_tmp_admin_user_admin_id', get_current_user_id() );
 		update_user_meta( $user_id, '_tmp_admin_user_created', current_time( 'timestamp' ) );
-		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( $duration ) );
+		update_user_meta( $user_id, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( $duration, 'create' ) );
 
 		// And update some basic WP related user meta.
 		update_user_meta( $user_id, 'show_welcome_panel', 0 );
@@ -327,7 +327,7 @@ class TempAdminUser_Users {
 
 		// Handle the expires time.
 		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
-		update_user_meta( $user->ID, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_expires', TempAdminUser_Helper::get_user_expire_time( 'day', 'promote' ) );
 
 		// Delete our restricted flag if it happens to exist.
 		delete_user_meta( $user->ID, '_tmp_admin_user_is_restricted' );

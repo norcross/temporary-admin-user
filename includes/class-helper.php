@@ -88,6 +88,29 @@ class TempAdminUser_Helper {
 	}
 
 	/**
+	 * Calculate the Epoch time expiration.
+	 *
+	 * @param  string  $length    The length of time we are requesting.
+	 * @param  string  $action    What action we are taking on the user.
+	 *
+	 * @return integer $duration  The expiration date in unix time.
+	 */
+	public static function get_user_expire_time( $length = '', $action = 'create' ) {
+
+		// Allow my time length to be filtered based on action.
+		$length = apply_filters( 'tmp_admin_user_promote_duration', $length, $action );
+
+		// Get my data for the particular period provided.
+		$data	= self::get_user_durations( $length );
+
+		// Set my range accordingly.
+		$range  = ! empty( $data['value'] ) ? $data['value'] : DAY_IN_SECONDS;
+
+		// Send it back, added to the current stamp.
+		return time() + floatval( $range );
+	}
+
+	/**
 	 * Check the provided user ID against the database.
 	 *
 	 * @param  integer $user_id  The user ID we wanna check.
@@ -106,7 +129,6 @@ class TempAdminUser_Helper {
 
 		// Check cache first.
 		if ( wp_cache_get( $user_id, 'users' ) ) {
-			die( 'cached' );
 			return true;
 		}
 
@@ -123,23 +145,6 @@ class TempAdminUser_Helper {
 
 		// And return the results.
 		return ! empty( $check ) ? true : false;
-	}
-
-	/**
-	 * Calculate the Epoch time expiration.
-	 *
-	 * @return integer $time  The timestamp number.
-	 */
-	public static function get_user_expire_time( $time = '' ) {
-
-		// Get my data for the particular period provided.
-		$data	= self::get_user_durations( $time );
-
-		// Set my range accordingly.
-		$range  = ! empty( $data['value'] ) ? $data['value'] : DAY_IN_SECONDS;
-
-		// Send it back, added to the current stamp.
-		return time() + floatval( $range );
 	}
 
 	/**
