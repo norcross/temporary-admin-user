@@ -80,9 +80,6 @@ class TempAdminUser_Admin {
 
 		// Load our CSS file.
 		wp_enqueue_style( 'temporary-admin-user', TMP_ADMIN_USER_ASSETS_URL . '/css/' . $file . '.css', false, $vers, 'all' );
-
-		// And our JS.
-		// wp_enqueue_script( 'temporary-admin-user', TMP_ADMIN_USER_ASSETS_URL . '/js/' . $file . '.js', array( 'jquery' ), $vers, true );
 	}
 
 	/**
