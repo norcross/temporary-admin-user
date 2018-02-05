@@ -356,11 +356,14 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 				// Hide links based on status.
 				if ( empty( $item['restrict'] ) && 'promote' === esc_attr( $action ) || ! empty( $item['restrict'] ) && 'restrict' === esc_attr( $action ) ) {
 
+					// Set a title.
+					$title  = sprintf( __( 'The %s action has been disabled for this user.', 'temporary-admin-user' ), esc_attr( $action ) );
+
 					// Create my class.
 					$class .= ' tmp-admin-user-disabled';
 
 					// And output the markup.
-					$build .= '<span class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
+					$build .= '<span title="' . esc_attr( $title ) . '" class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $items['icon'] ) . '"></i></span>';
 
 				} else {
 

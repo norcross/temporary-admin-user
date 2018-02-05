@@ -88,6 +88,44 @@ class TempAdminUser_Helper {
 	}
 
 	/**
+	 * Check the provided user ID against the database.
+	 *
+	 * @param  integer $user_id  The user ID we wanna check.
+	 *
+	 * @return boolean
+	 */
+	public static function user_id_exists( $user_id ) {
+
+		// Bail if no ID was provided.
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		// Call our global DB.
+		global $wpdb;
+
+		// Check cache first.
+		if ( wp_cache_get( $user_id, 'users' ) ) {
+			die( 'cached' );
+			return true;
+		}
+
+		// Now check the database.
+		$query  = $wpdb->prepare("
+			SELECT ID
+			FROM $wpdb->users
+			WHERE ID = %d
+			LIMIT 1
+			", $user_id );
+
+		// Run the query.
+		$check  = $wpdb->get_var( $query );
+
+		// And return the results.
+		return ! empty( $check ) ? true : false;
+	}
+
+	/**
 	 * Calculate the Epoch time expiration.
 	 *
 	 * @return integer $time  The timestamp number.
@@ -188,6 +226,10 @@ class TempAdminUser_Helper {
 
 			case 'nouser' :
 				return __( 'No user exists for the given ID.', 'temporary-admin-user' );
+				break;
+
+			case 'baduser' :
+				return __( 'The provided ID is not a valid user ID.', 'temporary-admin-user' );
 				break;
 
 			case 'nousers' :
