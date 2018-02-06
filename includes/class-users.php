@@ -148,6 +148,7 @@ class TempAdminUser_Users {
 		$user_email = sanitize_text_field( $_POST['tmp-admin-new-user-email'] );
 		$duration   = sanitize_text_field( $_POST['tmp-admin-new-user-duration'] );
 
+		// Now create the user.
 		if ( false !== $user_id = self::create_new_user( $user_email, $duration ) ) {
 			tmp_admin_user()->admin_page_redirect( array( 'success' => 1, 'action' => 'create', 'newuser' => 1 ) );
 		}
@@ -270,8 +271,8 @@ class TempAdminUser_Users {
 		// Now add our custom meta keys.
 		update_user_meta( $user_id, '_tmp_admin_user_flag', true );
 		update_user_meta( $user_id, '_tmp_admin_user_admin_id', get_current_user_id() );
-		update_user_meta( $user_id, '_tmp_admin_user_created', current_time( 'timestamp' ) );
-		update_user_meta( $user_id, '_tmp_admin_user_expires', self::get_user_expire_time( $duration, $user_id, 'create' ) );
+		update_user_meta( $user_id, '_tmp_admin_user_created', current_time( 'timestamp', 1 ) );
+		update_user_meta( $user_id, '_tmp_admin_user_expires', self::get_user_expire_time( $duration, 'create', $user_id ) );
 
 		// And update some basic WP related user meta.
 		update_user_meta( $user_id, 'show_welcome_panel', 0 );
@@ -325,7 +326,7 @@ class TempAdminUser_Users {
 		}
 
 		// Handle the expires time.
-		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp', 1 ) );
 		update_user_meta( $user->ID, '_tmp_admin_user_expires', self::get_user_expire_time( 'day', 'promote', $user->ID ) );
 
 		// Delete our restricted flag if it happens to exist.
@@ -385,7 +386,7 @@ class TempAdminUser_Users {
 		$expire = current_time( 'timestamp' ) - HOUR_IN_SECONDS;
 
 		// Handle the expires time.
-		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp' ) );
+		update_user_meta( $user->ID, '_tmp_admin_user_updated', current_time( 'timestamp', 1 ) );
 		update_user_meta( $user->ID, '_tmp_admin_user_expires', absint( $expire ) );
 		update_user_meta( $user->ID, '_tmp_admin_user_is_restricted', true );
 
@@ -516,54 +517,6 @@ class TempAdminUser_Users {
 	}
 
 	/**
-	 * Calculate the Epoch time expiration.
-	 *
-	 * @param  string  $length    The length of time we are requesting.
-	 * @param  string  $action    What action we are taking on the user.
-	 * @param  integer $user_id   The user ID we wanna check.
-	 *
-	 * @return integer $duration  The expiration date in unix time.
-	 */
-	public static function get_user_expire_time( $length = '', $action = 'create', $user_id = 0 ) {
-
-		// Allow my time length to be filtered based on action.
-		$length = apply_filters( 'tmp_admin_user_promote_duration', $length, $action, $user_id );
-
-		// Get my data for the particular period provided.
-		$data	= self::get_user_durations( $length );
-
-		// Set my range accordingly.
-		$range  = ! empty( $data['value'] ) ? $data['value'] : DAY_IN_SECONDS;
-
-		// Send it back, added to the current stamp.
-		return time() + floatval( $range );
-	}
-
-	/**
-	 * Check the user ID against the allowed permissions to prevent temp admins from adding / deleting users and other actions on site.
-	 *
-	 * @param  integer $user_id  The user ID we wanna check.
-	 *
-	 * @return boolean           False if the use is a temp (or none at all), true otherwise.
-	 */
-	public static function check_user_perm( $user_id = 0 ) {
-
-		// If user ID is missing, fetch the current logged in.
-		$user_id    = ! empty( $user_id ) ? $user_id : get_current_user_id();
-
-		// Bail without an ID.
-		if ( empty( $user_id ) ) {
-			return false;
-		}
-
-		// Fetch the meta key.
-		$check  = get_user_meta( $user_id, '_tmp_admin_user_flag', true );
-
-		// Return our bool.
-		return ! empty( $check ) ? false : true;
-	}
-
-	/**
 	 * Get the available expiration time ranges that a user can be set to.
 	 *
 	 * @param  string  $single  Optional to fetch one item from the array.
@@ -573,10 +526,14 @@ class TempAdminUser_Users {
 	 */
 	public static function get_user_durations( $single = '', $keys = false ) {
 
-		// Set my ranges.
+		// Set my ranges. All values are in seconds.
 		$ranges = array(
+			'fifteen'   => array(
+				'value' => 900,
+				'label' => __( 'Fifteen Minutes', 'temporary-admin-user' )
+			),
 			'halfhour'  => array(
-				'value' => MINUTE_IN_SECONDS * 30,
+				'value' => 1800,
 				'label' => __( 'Thirty Minutes', 'temporary-admin-user' )
 			),
 			'hour'      => array(
@@ -592,7 +549,7 @@ class TempAdminUser_Users {
 				'label' => __( 'One Week', 'temporary-admin-user' )
 			),
 			'month'     => array(
-				'value' => DAY_IN_SECONDS * 30,
+				'value' => 2592000,
 				'label' => __( 'One Month', 'temporary-admin-user' )
 			),
 		);
@@ -617,6 +574,57 @@ class TempAdminUser_Users {
 
 		// Return the single key item.
 		return ! empty( $single ) && isset( $ranges[ $single ] ) ? $ranges[ $single ] : false;
+	}
+
+	/**
+	 * Calculate the Epoch time expiration.
+	 *
+	 * @param  string  $length    The length of time we are requesting.
+	 * @param  string  $action    What action we are taking on the user.
+	 * @param  integer $user_id   The user ID we wanna check.
+	 *
+	 * @return integer $duration  The expiration date in unix time.
+	 */
+	public static function get_user_expire_time( $length = '', $action = 'create', $user_id = 0 ) {
+
+		// Allow my time length to be filtered based on action.
+		$length = apply_filters( 'tmp_admin_user_promote_duration', $length, $action, $user_id );
+
+		// Get my data for the particular period provided.
+		$data	= self::get_user_durations( $length );
+
+		// Set my range accordingly.
+		$range  = absint( $data['value'] ) > 0 ? $data['value'] : DAY_IN_SECONDS;
+
+		// Create the expiration.
+		$expire = current_time( 'timestamp', 1 ) + absint( $range );
+
+		// Send it back, added to the current stamp.
+		return absint( $expire );
+	}
+
+	/**
+	 * Check the user ID against the allowed permissions to prevent temp admins from adding / deleting users and other actions on site.
+	 *
+	 * @param  integer $user_id  The user ID we wanna check.
+	 *
+	 * @return boolean           False if the use is a temp (or none at all), true otherwise.
+	 */
+	public static function check_user_perm( $user_id = 0 ) {
+
+		// If user ID is missing, fetch the current logged in.
+		$user_id    = ! empty( $user_id ) ? $user_id : get_current_user_id();
+
+		// Bail without an ID.
+		if ( empty( $user_id ) ) {
+			return false;
+		}
+
+		// Fetch the meta key.
+		$check  = get_user_meta( $user_id, '_tmp_admin_user_flag', true );
+
+		// Return our bool.
+		return ! empty( $check ) ? false : true;
 	}
 
 	/**
@@ -680,7 +688,25 @@ class TempAdminUser_Users {
 		}
 
 		// Now do the timestamp comparison.
-		return current_time( 'timestamp' ) < absint( $timestamp ) ? 'active' : 'restricted';
+		return current_time( 'timestamp', 1 ) < absint( $timestamp ) ? 'active' : 'restricted';
+	}
+
+	/**
+	 * Do the comparison to possibly restrict a user.
+	 *
+	 * @param  object $user  The user we wanna check.
+	 *
+	 * @return void
+	 */
+	public static function maybe_restrict_user( $user ) {
+
+		// Check our status, skip the active ones.
+		if ( 'active' === $status = self::check_user_status( $user->ID ) ) {
+			return;
+		}
+
+		// Run the restriction.
+		self::restrict_existing_user( $user, false );
 	}
 
 	/**

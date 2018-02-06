@@ -43,7 +43,7 @@ class TempAdminUser_Cron {
 			}
 
 			// Run the restrict.
-			$restrict  = TempAdminUser_Users::restrict_existing_user( $user );
+			TempAdminUser_Users::restrict_existing_user( $user );
 
 			// @@todo add some error checking or flag if it fails?
 		}

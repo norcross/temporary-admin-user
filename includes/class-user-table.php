@@ -254,12 +254,13 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 		// Set my stamp.
 		$stamp  = absint( $item['created'] );
+		$local  = TempAdminUser_Helper::gmt_to_local( absint( $item['created'] ), 'Y/m/d g:i:s a' );
 
 		// Set my date with the formatting.
-		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, current_time( 'timestamp' ) ) );
+		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, current_time( 'timestamp', 1 ) ) );
 
 		// Wrap it in an accessible tag.
-		$date   = '<abbr title="' . date( 'Y/m/d g:i:s a', $stamp ) . '">' . $show . '</abbr>';
+		$date   = '<abbr title="' . esc_attr( $local ) . '">' . esc_attr( $show ) . '</abbr>';
 
 		// Return my formatted date.
 		return apply_filters( 'tmp_admin_user_created_date_display', $date, $item );
@@ -279,16 +280,18 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 			return '<em>' . __( 'This account has expired.', 'temporary-admin-user' ) . '</em>';
 		}
 
-		// Set my stamp.
+		// Set my stamps, both local and GMT.
 		$stamp  = absint( $item['expires'] );
+		$local  = TempAdminUser_Helper::gmt_to_local( absint( $item['expires'] ), 'Y/m/d g:i:s a' );
 
 		// Do my date logicals.
-		$now    = new DateTime();
+		$now    = new DateTime( 'now' );
 		$future = new DateTime( date( 'Y/m/d g:i:s a', $stamp ) );
 		$intrvl = $future->diff( $now );
+		$format = $intrvl->format( '%a days, %h hours, %i minutes' );
 
 		// Wrap it in an accessible tag.
-		$date   = '<abbr title="' . date( 'Y/m/d g:i:s a', $stamp ) . '">' . $intrvl->format( '%a days, %h hours, %i minutes' ) . '</abbr>';
+		$date   = '<abbr title="' . esc_attr( $local ) . '">' . esc_attr( $format ) . '</abbr>';
 
 		// Return my formatted date.
 		return apply_filters( 'tmp_admin_user_expires_date_display', $date, $item );
@@ -405,6 +408,9 @@ class TemporaryAdminUsers_Table extends WP_List_Table {
 
 		// Loop my userdata.
 		foreach ( $users as $user ) {
+
+			// Run our check.
+			TempAdminUser_Users::maybe_restrict_user( $user );
 
 			// Get our created and expired times.
 			$created    = get_user_meta( $user->ID, '_tmp_admin_user_created', true );

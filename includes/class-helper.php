@@ -36,6 +36,34 @@ class TempAdminUser_Helper {
 	}
 
 	/**
+	 * Take a GMT timestamp and convert it to the local.
+	 *
+	 * @param  integer $timestamp  The timestamp in GMT.
+	 * @param  string  $format     What date format we want to return. False for the timestamp.
+	 *
+	 * @return integer $timestamp  The timestamp in GMT.
+	 */
+	public static function gmt_to_local( $timestamp = 0, $format = 'Y/m/d g:i:s' ) {
+
+		// Bail if we don't have a timestamp to check.
+		if ( empty( $timestamp ) ) {
+			return;
+		}
+
+		// Fetch our timezone.
+		$savedzone  = get_option( 'timezone_string', 'America/New_York' );
+
+		// Pull my stored time with the UTC code on it.
+		$date_gmt   = new DateTime( date( 'Y-m-d H:i:s', $timestamp ), new DateTimeZone( 'GMT' ) );
+
+		// Now set the timezone to return the date.
+		$date_gmt->setTimezone( new DateTimeZone( $savedzone ) );
+
+		// Return it formatted, or the timestamp.
+		return ! empty( $format ) ? $date_gmt->format( $format ) : $date_gmt->format( 'U' );
+	}
+
+	/**
 	 * Get and return a specific error message.
 	 *
 	 * @param  string $code  The error key being requested.
