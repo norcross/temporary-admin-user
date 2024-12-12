@@ -24,7 +24,7 @@ add_action( 'admin_menu', __NAMESPACE__ . '\load_author_table_menu', 10 );
 function load_author_table_menu() {
 
 	// Handle loading the initial menu.
-	add_users_page(
+	$setup_page = add_users_page(
 		__( 'Temporary Users', 'temporary-admin-user' ),
 		__( 'Temporary Users', 'temporary-admin-user' ),
 		'promote_users',
@@ -33,7 +33,28 @@ function load_author_table_menu() {
 		7
 	);
 
+	// Now handle some screen options.
+	add_action( "load-$setup_page", __NAMESPACE__ . '\add_screen_options' );
+
 	// Nothing left inside this.
+}
+
+/**
+ * Add our per_page option for the table.
+ *
+ * @return void
+ */
+function add_screen_options() {
+
+	// Define the args we want.
+	$setup_args = [
+		'label'   => __( 'Per Page', 'temporary-admin-user' ),
+		'default' => 20,
+		'option'  => 'tmp_table_per_page'
+	];
+
+	// And add it to the setup.
+	add_screen_option( 'per_page', $setup_args );
 }
 
 /**

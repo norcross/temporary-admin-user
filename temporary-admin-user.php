@@ -40,9 +40,10 @@ define( __NAMESPACE__ . '\INCLUDES_PATH', __DIR__ . '/includes' );
 
 // Set the various prefixes for our actions and filters.
 define( __NAMESPACE__ . '\HOOK_PREFIX', 'temporary_admin_user_' );
+define( __NAMESPACE__ . '\META_PREFIX', '_tmp_admin_user_' );
 define( __NAMESPACE__ . '\NONCE_PREFIX', 'tempaa_nonce_' );
-define( __NAMESPACE__ . '\TRANSIENT_PREFIX', 'tempaa_tr_' );
 define( __NAMESPACE__ . '\OPTION_PREFIX', 'tempaa_setting_' );
+define( __NAMESPACE__ . '\TRANSIENT_PREFIX', 'tempaa_tr_' );
 
 // Set our menu root.
 define( __NAMESPACE__ . '\MENU_ROOT', 'temporary-admin-user' );
@@ -59,14 +60,17 @@ function temporary_admin_user_file_load() {
 
 	// Load the multi-use files first.
 	require_once __DIR__ . '/includes/helpers.php';
+	require_once __DIR__ . '/includes/queries.php';
 
 	// Handle our admin items.
 	require_once __DIR__ . '/includes/admin/admin-bar.php';
 	require_once __DIR__ . '/includes/admin/setup.php';
+	require_once __DIR__ . '/includes/admin/markup.php';
 	require_once __DIR__ . '/includes/admin/menu-items.php';
+
 	/*
 
-	require_once __DIR__ . '/includes/admin/markup.php';
+
 
 	require_once __DIR__ . '/includes/admin/notices.php';
 	require_once __DIR__ . '/includes/admin/process.php';
