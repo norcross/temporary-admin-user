@@ -129,12 +129,13 @@ function restrict_existing_user( $user_id = 0 ) {
 	// Replace the current role with 'subscriber' role.
 	$get_user_obj->set_role( 'subscriber' );
 
-	// Set a stamp for now.
+	// Define a few timestamps
 	$now_stamp  = current_datetime()->format('U');
+	$exp_stamp  = absint( $now_stamp ) - MINUTE_IN_SECONDS;
 
 	// Handle the expires time.
 	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
-	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $now_stamp );
+	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $exp_stamp );
 	update_user_meta( $user_id, Core\META_PREFIX . 'status', 'inactive' );
 
 	// Allow other things to hook into this process.

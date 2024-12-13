@@ -66,7 +66,7 @@ function render_new_user_form( $echo = true ) {
 
 					// Loop my frequencies to make the select field.
 					foreach ( $ranges as $range => $args ) {
-						$build .= '<option value="' . esc_attr( $range ) . '" ' . selected( $range, 'day', false ) . '>' . esc_html( $args['label'] ) . '</option>';
+						$build .= '<option value="' . esc_attr( $range ) . '">' . esc_html( $args['label'] ) . '</option>';
 					}
 
 					// Close the select.
