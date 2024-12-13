@@ -16,6 +16,7 @@ use Norcross\TempAdminUser as Core;
  */
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_admin_core_assets', 10 );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_user_table_css' );
+add_filter( 'removable_query_args', __NAMESPACE__ . '\add_removable_args' );
 
 /**
  * Load our admin side CSS.
@@ -60,4 +61,25 @@ function load_user_table_css() {
 
 	// And add the CSS.
 	wp_add_inline_style( 'common', $admin_bar_css );
+}
+
+/**
+ * Add our custom strings to the vars.
+ *
+ * @param  array $args  The existing array of args.
+ *
+ * @return array $args  The modified array of args.
+ */
+function add_removable_args( $args ) {
+
+	// Set the array of new args.
+	$setup_custom_args  = [
+		'tmp-admin-users-success',
+		'tmp-admin-users-action-complete',
+		'tmp-admin-users-action-result',
+		'tmp-admin-users-error-code',
+	];
+
+	// Include my new args and return.
+	return wp_parse_args( $setup_custom_args, $args );
 }

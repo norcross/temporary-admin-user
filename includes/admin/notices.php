@@ -32,11 +32,6 @@ function display_admin_notices() {
 	if ( empty( $confirm_admin ) || Core\MENU_ROOT !== $confirm_admin ) {
 		return;
 	}
-	/*
-	tmp-admin-users-success=1
-	tmp-admin-users-action-complete=yes
-	tmp-admin-users-action-result=new-user
-	 */
 
 	// Check for our complete flag.
 	$confirm_action = filter_input( INPUT_GET, 'tmp-admin-users-action-complete', FILTER_SANITIZE_SPECIAL_CHARS );
@@ -66,24 +61,101 @@ function display_admin_notices() {
 		$error_code = ! empty( $maybe_code ) ? $maybe_code : 'unknown';
 
 		// Handle my error text retrieval.
-		$error_text = Helpers\get_admin_notice_text( $error_code );
+		$error_text = get_admin_notice_text( $error_code );
 
 		// Make sure the error type is correct, since one is more informational.
 		$error_type = 'email-exists' === $error_code ? 'info' : 'error';
 
 		// And handle the display.
-		AdminMarkup\display_admin_notice_markup( $error_text, $error_type );
+		AdminMarkup\render_admin_notice_markup( $error_text, $error_type );
 
 		// And be done.
 		return;
 	}
 
 	// Handle my success message based on the clear flag.
-	$alert_text = Helpers\get_admin_notice_text( $confirm_result );
+	$alert_text = get_admin_notice_text( $confirm_result );
 
 	// And handle the display.
-	AdminMarkup\display_admin_notice_markup( $alert_text, 'success' );
+	AdminMarkup\render_admin_notice_markup( $alert_text, 'success' );
 
 	// And be done.
 	return;
+}
+
+/**
+ * Check an code and (usually an error) return the appropriate text.
+ *
+ * @param  string $return_code  The code provided.
+ *
+ * @return string
+ */
+function get_admin_notice_text( $return_code = '' ) {
+
+	// Handle my different error codes.
+	switch ( esc_attr( $return_code ) ) {
+
+		case 'no-email' :
+			return __( 'The required user email was not provided.', 'temporary-admin-user' );
+			break;
+
+		case 'no-user-id' :
+			return __( 'The required user ID was not provided.', 'temporary-admin-user' );
+			break;
+
+		case 'email-exists' :
+			return __( 'The provided email address is already in use.', 'temporary-admin-user' );
+			break;
+
+		case 'no-duration' :
+			return __( 'Please select a duration to allow the user access.', 'temporary-admin-user' );
+			break;
+
+		case 'invalid-user-action' :
+			return __( 'The requested user action was not valid.', 'temporary-admin-user' );
+			break;
+
+		case 'failed-new-user' :
+			return __( 'The new user could not be created. Please check your error logs.', 'temporary-admin-user' );
+			break;
+
+		case 'user-promote-error' :
+			return __( 'The existing user could not be promoted. Please check your error logs.', 'temporary-admin-user' );
+			break;
+
+		case 'user-restrict-error' :
+			return __( 'The existing user could not be restricted. Please check your error logs.', 'temporary-admin-user' );
+			break;
+
+		case 'user-delete-error' :
+			return __( 'The existing user could not be deleted. Please check your error logs.', 'temporary-admin-user' );
+			break;
+
+		case 'new-user-created' :
+			return __( 'Success! A new temporary admin user has been created.', 'temporary-admin-user' );
+			break;
+
+		case 'user-promote-success' :
+			return __( 'Success! The requested user account was promoted.', 'temporary-admin-user' );
+			break;
+
+		case 'user-restrict-success' :
+			return __( 'Success! The requested user account was restricted.', 'temporary-admin-user' );
+			break;
+
+		case 'user-delete-success' :
+			return __( 'Success! The requested user account was deleted.', 'temporary-admin-user' );
+			break;
+
+		case 'unknown' :
+		case 'unknown-error' :
+			return __( 'There was an unknown error with your request.', 'temporary-admin-user' );
+			break;
+
+		default :
+			return __( 'There was an error with your request.', 'temporary-admin-user' );
+			break;
+
+		// End all case breaks.
+	}
 }

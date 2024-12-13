@@ -87,7 +87,7 @@ function redirect_admin_action_result( $error = '', $result = 'failed', $success
 function create_expire_time( $length = 'day', $action = 'create', $current_time = 0 ) {
 
 	// Allow my time length to be filtered based on action.
-	$length = apply_filters( Core\HOOK_PREFIX . 'promote_duration', $length, $action );
+	$length = apply_filters( Core\HOOK_PREFIX . 'active_duration', $length, $action );
 
 	// Get my data for the particular period provided.
 	$data	= Queries\get_user_durations( $length );
@@ -130,50 +130,53 @@ function create_username( $user_email = '' ) {
 	$uname  = ! empty( $uname ) ? $uname : 'random-' . mt_rand( 1000000000, 9999999999 );
 
 	// Return it sanitized.
-	return sanitize_user( $uname, true );
+	return apply_filters( Core\HOOK_PREFIX . 'create_username', sanitize_user( $uname, true ), $user_email );
 }
 
 /**
- * Check an code and (usually an error) return the appropriate text.
+ * Set up the various actions for a user on the table.
  *
- * @param  string $return_code  The code provided.
+ * @param  integer $user_id     The user ID.
+ * @param  string  $user_email  The email of the user.
  *
- * @return string
+ * @return array
  */
-function get_admin_notice_text( $return_code = '' ) {
+function create_user_action_args( $user_id = 0, $user_email = '' ) {
 
-	// Handle my different error codes.
-	switch ( esc_attr( $return_code ) ) {
+	// Create an array of actions.
+	$setup_args = [
+		'profile' => [
+			'label' => __( 'View / Edit Profile', 'temporary-admin-user' ),
+			'icon'  => 'id-alt',
+			'link'  => get_edit_user_link( $user_id ),
+			'blank' => true,
+		],
+		'email' => [
+			'label' => __( 'Email User', 'temporary-admin-user' ),
+			'icon'  => 'email',
+			'link'  => 'mailto:' . antispambot( $user_email ),
+			'blank' => false,
+		],
+		'promote' => [
+			'label' => __( 'Promote User', 'temporary-admin-user' ),
+			'icon'  => 'star-filled',
+			'link'  => '',
+			'blank' => false,
+		],
+		'restrict' => [
+			'label' => __( 'Restrict User', 'temporary-admin-user' ),
+			'icon'  => 'lock',
+			'link'  => '',
+			'blank' => false,
+		],
+		'delete' => [
+			'label' => __( 'Delete User', 'temporary-admin-user' ),
+			'icon'  => 'trash',
+			'link'  => '',
+			'blank' => false,
+		],
+	];
 
-		case 'no-email' :
-			return __( 'No parameters were defined. Please review the options below and try again.', 'temporary-admin-user' );
-			break;
-
-		case 'email-exists' :
-			return __( 'No user roles were selected. Please select one or more and try again.', 'temporary-admin-user' );
-			break;
-
-		case 'no-duration' :
-			return __( 'Please enter both a numeric value and the range to set a date.', 'temporary-admin-user' );
-			break;
-
-		case 'new-error' :
-			return __( 'No inactive users were found based on the selected options.', 'temporary-admin-user' );
-			break;
-
-		case 'new-user' :
-			return __( 'Success! A new temporary admin user has been created.', 'temporary-admin-user' );
-			break;
-
-		case 'unknown' :
-		case 'unknown-error' :
-			return __( 'There was an unknown error with your request.', 'temporary-admin-user' );
-			break;
-
-		default :
-			return __( 'There was an error with your request.', 'temporary-admin-user' );
-			break;
-
-		// End all case breaks.
-	}
+	// Return them filtered.
+	return apply_filters( Core\HOOK_PREFIX . 'user_action_args', $setup_args, $user_id, $user_email );
 }

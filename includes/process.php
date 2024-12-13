@@ -13,67 +13,6 @@ use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
 
 /**
- * Start our engines.
- */
-add_action( 'admin_init', __NAMESPACE__ . '\add_new_user_via_form' );
-
-/**
- * Add a new user when requested on the form.
- *
- * @return void
- */
-function add_new_user_via_form() {
-
-	// Confirm we requested this action.
-	$confirm_action = filter_input( INPUT_POST, 'tmp-admin-new-user-submit', FILTER_SANITIZE_SPECIAL_CHARS ); // phpcs:ignore -- the nonce check is happening after this.
-
-	// Make sure it is what we want.
-	if ( empty( $confirm_action ) || 'go' !== $confirm_action ) {
-		return;
-	}
-
-	// Make sure we have a nonce.
-	$confirm_nonce  = filter_input( INPUT_POST, 'tmp-admin-new-user-nonce', FILTER_SANITIZE_SPECIAL_CHARS ); // phpcs:ignore -- the nonce check is happening after this.
-
-	// Handle the nonce check.
-	if ( empty( $confirm_nonce ) || ! wp_verify_nonce( $confirm_nonce, Core\NONCE_PREFIX . 'new_user' ) ) {
-
-		// Let them know they had a failure.
-		wp_die( esc_html__( 'There was an error validating the nonce.', 'temporary-admin-user' ), esc_html__( 'Temporary Admin Users', 'temporary-admin-user' ), [ 'back_link' => true ] );
-	}
-
-	// Now get the two items we needed to be passed.
-	$confirm_email  = filter_input( INPUT_POST, 'tmp-admin-new-user-email', FILTER_SANITIZE_EMAIL );
-	$confirm_durtn  = filter_input( INPUT_POST, 'tmp-admin-new-user-duration', FILTER_SANITIZE_SPECIAL_CHARS );
-
-	// Bail without email.
-	if ( empty( $confirm_email ) ) {
-		Helpers\redirect_admin_action_result( 'no-email' );
-	}
-
-	// Check if the email address exists.
-	if ( email_exists( $confirm_email ) ) {
-		Helpers\redirect_admin_action_result( 'email-exists' );
-	}
-
-	// Bail without a duration.
-	if ( empty( $confirm_durtn ) ) {
-		Helpers\redirect_admin_action_result( 'no-duration' );
-	}
-
-	// OK, we got this far, now make a new user.
-	$maybe_new_user = create_new_user( $confirm_email, $confirm_durtn );
-
-	// Handle a failed user creation.
-	if ( empty( $maybe_new_user ) ) {
-		Helpers\redirect_admin_action_result( 'new-error' );
-	}
-
-	// We are good, so redirect with the affermative.
-	Helpers\redirect_admin_action_result( '', 'new-user', true );
-}
-
-/**
  * Create the new temporary user.
  *
  * @param  string  $user_email  The supplied email.
@@ -111,14 +50,6 @@ function create_new_user( $user_email = '', $duration = '' ) {
  		],
 	];
 
-	// Filter the args.
-	$setup_user = apply_filters( Core\HOOK_PREFIX . 'new_user_args', $setup_user );
-
-	// Bail if we have no user args.
-	if ( empty( $setup_user ) ) {
-		return false;
-	}
-
 	// Create the user.
 	$create_id  = wp_insert_user( $setup_user ) ;
 
@@ -132,4 +63,115 @@ function create_new_user( $user_email = '', $duration = '' ) {
 
 	// Return the user ID.
 	return $create_id;
+}
+
+/**
+ * Add a pre-determined amount of time to the existing user.
+ *
+ * @param  integer $user_id  The user ID we want to restrict.
+ *
+ * @return void
+ */
+function promote_existing_user( $user_id = 0 ) {
+
+	// Bail without a user ID.
+	if ( empty( $user_id ) ) {
+		return false;
+	}
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'before_user_promote', $user_id );
+
+	// Fetch the WP_User object of our user.
+	$get_user_obj   = new \WP_User( absint( $user_id ) );
+
+	// Replace the current role with 'administrator' role.
+	$get_user_obj->set_role( 'administrator' );
+
+	// Set a stamp for now.
+	$now_stamp  = current_datetime()->format('U');
+
+	// Get the exipration.
+	$get_expire = Helpers\create_expire_time( 'day', 'update', $now_stamp );
+
+	// Handle the expires time.
+	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
+	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $get_expire );
+	update_user_meta( $user_id, Core\META_PREFIX . 'status', 'active' );
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'after_user_promote', $user_id );
+
+	// And return true, so we know to report back.
+	return true;
+}
+
+/**
+ * Take te existing user and restrict them.
+ *
+ * @param  integer $user_id  The user ID we want to restrict.
+ *
+ * @return boolean
+ */
+function restrict_existing_user( $user_id = 0 ) {
+
+	// Bail without a user ID.
+	if ( empty( $user_id ) ) {
+		return false;
+	}
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'before_user_restrict', $user_id );
+
+	// Fetch the WP_User object of our user.
+	$get_user_obj   = new \WP_User( absint( $user_id ) );
+
+	// Replace the current role with 'subscriber' role.
+	$get_user_obj->set_role( 'subscriber' );
+
+	// Set a stamp for now.
+	$now_stamp  = current_datetime()->format('U');
+
+	// Handle the expires time.
+	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
+	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $now_stamp );
+	update_user_meta( $user_id, Core\META_PREFIX . 'status', 'inactive' );
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'after_user_restrict', $user_id );
+
+	// And return true, so we know to report back.
+	return true;
+}
+
+/**
+ * Take te existing user and delete them.
+ *
+ * @param  integer $user_id  The user ID we want to delete.
+ *
+ * @return boolean
+ */
+function delete_existing_user( $user_id = 0 ) {
+
+	// Bail without a user ID.
+	if ( empty( $user_id ) ) {
+		return false;
+	}
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'before_user_delete', $user_id );
+
+	// Attempt to delete the user.
+	$maybe_delete_user  = wp_delete_user( $user_id, get_current_user_id() );
+
+	// Bail if we failed the update.
+	if ( empty( $maybe_delete_user ) || is_wp_error( $maybe_delete_user ) ) {
+		return false; // @@todo needs some error checking
+	}
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'after_user_delete', $user_id );
+
+	// And return true, so we know to report back.
+	return true;
 }

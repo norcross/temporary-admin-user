@@ -69,6 +69,7 @@ function temporary_admin_user_file_load() {
 	require_once __DIR__ . '/includes/admin/markup.php';
 	require_once __DIR__ . '/includes/admin/menu-items.php';
 	require_once __DIR__ . '/includes/admin/notices.php';
+	require_once __DIR__ . '/includes/admin/triggers.php';
 	require_once __DIR__ . '/includes/admin/user-table.php';
 
 	/*

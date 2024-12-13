@@ -132,7 +132,7 @@ function get_user_durations( $single = '', $keys = false ) {
 		],
 	];
 
-	// Return it filtered.
+	// Allow it filtered.
 	$ranges = apply_filters( Core\HOOK_PREFIX . 'expire_ranges', $ranges );
 
 	// Bail if no data exists.

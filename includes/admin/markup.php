@@ -99,6 +99,78 @@ function render_new_user_form( $echo = true ) {
 }
 
 /**
+ * Handle building the HTML for each user action.
+ *
+ * @param  array  $table_item    The various actions we have.
+ * @param  array  $user_actions  The various actions we have.
+ *
+ * @return HTML                  Nice icon based list.
+ */
+function render_user_actions_list( $table_item = [], $user_actions = [] ) {
+
+	// Return an empty string if no actions or data exist.
+	if ( empty( $user_actions ) || empty( $table_item ) ) {
+		return '';
+	}
+
+	// Set my empty.
+	$build  = '';
+
+	// Now loop my setup.
+	foreach ( $user_actions as $user_action => $action_args ) {
+
+		// If this is a link based action, show that.
+		if ( ! empty( $action_args['link'] ) ) {
+
+			// Check for blanks.
+			$blank  = ! empty( $action_args['blank'] ) ? 'target="_blank"' : '';
+
+			// And output the link itself.
+			$build .= '<a class="tmp-admin-user-link tmp-admin-user-view tmp-admin-user-view-' . esc_attr( $user_action ) . '" href="' . esc_url( $action_args['link'] ) . '" title="' . esc_attr( $action_args['label'] ) . '" ' . esc_attr( $blank ) . '><i class="dashicons dashicons-' . esc_attr( $action_args['icon'] ) . '"></i></a>';
+
+			// And done.
+			continue;
+		}
+
+		// Create my class.
+		$class  = 'tmp-admin-user-link tmp-admin-user-action tmp-admin-user-action-' . esc_attr( $user_action );
+
+		// Hide links based on status.
+		if ( 'active' === $table_item['status'] && 'promote' === $user_action || 'inactive' === $table_item['status'] && 'restrict' === $user_action ) {
+
+			// Set a title.
+			$title  = sprintf( __( 'The %s action has been disabled for this user.', 'temporary-admin-user' ), esc_attr( $user_action ) );
+
+			// Create my class.
+			$class .= ' tmp-admin-user-disabled';
+
+			// And output the markup.
+			$build .= '<span title="' . esc_attr( $title ) . '" class="' . esc_attr( $class ) . '"><i class="dashicons dashicons-' . esc_attr( $action_args['icon'] ) . '"></i></span>';
+
+			// And done.
+			continue;
+		}
+
+		// Create the link args.
+		$setup_args = [
+			'tmp-admin-single-user-modify'  => 'yes',
+			'tmp-admin-single-user-request' => $user_action,
+			'tmp-admin-single-user-id'      => $table_item['id'],
+			'tmp-admin-single-user-nonce'   => wp_create_nonce( Core\NONCE_PREFIX . 'user_action_' . $table_item['id'] ),
+		];
+
+		// Set up the link.
+		$setup_link = add_query_arg( $setup_args, Helpers\get_admin_menu_link() );
+
+		// And output the markup.
+		$build .= '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $setup_link ) . '" title="' . esc_attr( $action_args['label'] ) . '"><i class="dashicons dashicons-' . esc_attr( $action_args['icon'] ) . '"></i></a>';
+	}
+
+	// Return my links.
+	return $build;
+}
+
+/**
  * Build the markup for an admin notice.
  *
  * @param  string  $notice       The actual message to display.
@@ -109,7 +181,7 @@ function render_new_user_form( $echo = true ) {
  *
  * @return HTML
  */
-function display_admin_notice_markup( $notice = '', $result = 'error', $dismiss = true, $show_button = false, $echo = true ) {
+function render_admin_notice_markup( $notice = '', $result = 'error', $dismiss = true, $show_button = false, $echo = true ) {
 
 	// Bail without the required message text.
 	if ( empty( $notice ) ) {

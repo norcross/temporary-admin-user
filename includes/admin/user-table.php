@@ -313,7 +313,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	protected function column_expires( $item ) {
 
 		// Handle determining if the timestamp expired.
-		if ( absint( $item['stamps']['current'] ) > absint( $item['stamps']['expires'] ) ) {
+		if ( absint( $item['stamps']['current'] ) >= absint( $item['stamps']['expires'] ) ) {
 
 			// Return my formatted text.
 			return apply_filters( Core\HOOK_PREFIX . 'expires_date_display', '<em>' . __( 'This account has expired.', 'temporary-admin-user' ) . '</em>', $item );
@@ -347,7 +347,12 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 * @return string
 	 */
 	protected function column_actions( $item ) {
-		return '';
+
+		// First get my user actions.
+		$setup_actions  = Helpers\create_user_action_args( $item['id'], $item['email'] );
+
+		// Pass it over to the larger HTML builder.
+		return AdminMarkup\render_user_actions_list( $item, $setup_actions );
 	}
 
 	/**
