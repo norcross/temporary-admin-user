@@ -23,7 +23,54 @@ add_action( 'admin_init', __NAMESPACE__ . '\add_new_user_via_form' );
  * @return void
  */
 function add_new_user_via_form() {
-	// preprint( $_POST, true );
+
+	// Confirm we requested this action.
+	$confirm_action = filter_input( INPUT_POST, 'tmp-admin-new-user-submit', FILTER_SANITIZE_SPECIAL_CHARS ); // phpcs:ignore -- the nonce check is happening after this.
+
+	// Make sure it is what we want.
+	if ( empty( $confirm_action ) || 'go' !== $confirm_action ) {
+		return;
+	}
+
+	// Make sure we have a nonce.
+	$confirm_nonce  = filter_input( INPUT_POST, 'tmp-admin-new-user-nonce', FILTER_SANITIZE_SPECIAL_CHARS ); // phpcs:ignore -- the nonce check is happening after this.
+
+	// Handle the nonce check.
+	if ( empty( $confirm_nonce ) || ! wp_verify_nonce( $confirm_nonce, Core\NONCE_PREFIX . 'new_user' ) ) {
+
+		// Let them know they had a failure.
+		wp_die( esc_html__( 'There was an error validating the nonce.', 'temporary-admin-user' ), esc_html__( 'Temporary Admin Users', 'temporary-admin-user' ), [ 'back_link' => true ] );
+	}
+
+	// Now get the two items we needed to be passed.
+	$confirm_email  = filter_input( INPUT_POST, 'tmp-admin-new-user-email', FILTER_SANITIZE_EMAIL );
+	$confirm_durtn  = filter_input( INPUT_POST, 'tmp-admin-new-user-duration', FILTER_SANITIZE_SPECIAL_CHARS );
+
+	// Bail without email.
+	if ( empty( $confirm_email ) ) {
+		Helpers\redirect_admin_action_result( 'no-email' );
+	}
+
+	// Check if the email address exists.
+	if ( email_exists( $confirm_email ) ) {
+		Helpers\redirect_admin_action_result( 'email-exists' );
+	}
+
+	// Bail without a duration.
+	if ( empty( $confirm_durtn ) ) {
+		Helpers\redirect_admin_action_result( 'no-duration' );
+	}
+
+	// OK, we got this far, now make a new user.
+	$maybe_new_user = create_new_user( $confirm_email, $confirm_durtn );
+
+	// Handle a failed user creation.
+	if ( empty( $maybe_new_user ) ) {
+		Helpers\redirect_admin_action_result( 'new-error' );
+	}
+
+	// We are good, so redirect with the affermative.
+	Helpers\redirect_admin_action_result( '', 'new-user', true );
 }
 
 /**

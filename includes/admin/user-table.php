@@ -281,17 +281,6 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	}
 
 	/**
-	 * The current status column.
-	 *
-	 * @param  array  $item  The item from the data array.
-	 *
-	 * @return string
-	 */
-	protected function column_status( $item ) {
-		return '';
-	}
-
-	/**
 	 * The "date created" column.
 	 *
 	 * @param  array  $item  The item from the data array.
@@ -299,7 +288,19 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 * @return string
 	 */
 	protected function column_created( $item ) {
-		return '';
+
+		// Set my stamp.
+		$stamp  = absint( $item['stamps']['created'] );
+		$local  = gmdate( 'Y/m/d g:i:s a', $stamp );
+
+		// Set my date with the formatting.
+		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, $item['stamps']['current'] ) );
+
+		// Wrap it in an accessible tag.
+		$build  = '<abbr title="' . esc_attr( $local ) . '">' . esc_html( $show ) . '</abbr>';
+
+		// Return my formatted date.
+		return apply_filters( Core\HOOK_PREFIX . 'created_date_display', $build, $item );
 	}
 
 	/**
@@ -310,7 +311,32 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 * @return string
 	 */
 	protected function column_expires( $item ) {
-		return '';
+
+		// Handle determining if the timestamp expired.
+		if ( absint( $item['stamps']['current'] ) > absint( $item['stamps']['expires'] ) ) {
+
+			// Return my formatted text.
+			return apply_filters( Core\HOOK_PREFIX . 'expires_date_display', '<em>' . __( 'This account has expired.', 'temporary-admin-user' ) . '</em>', $item );
+		}
+
+		// Set my stamps, both local and GMT.
+		$stamp  = absint( $item['stamps']['expires'] );
+		$local  = gmdate( 'Y/m/d g:i:s a', $stamp );
+
+		// Do my date logicals.
+		$now    = new DateTime( 'now' );
+		$future = new DateTime( $local );
+		$intrvl = $future->diff( $now );
+		$format = $intrvl->format( '%a days, %h hours, %i minutes' );
+
+		// Remove the possible "0 days" because it's ugly.
+		$show   = str_replace( '0 days,', '', $format );
+
+		// Wrap it in an accessible tag.
+		$build  = '<abbr title="' . esc_attr( $local ) . '">' . esc_html( $show ) . '</abbr>';
+
+		// Return my formatted date.
+		return apply_filters( Core\HOOK_PREFIX . 'expires_date_display', $build, $item );
 	}
 
 	/**
@@ -359,6 +385,9 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			return false;
 		}
 
+		// Include the "now" time so we can calc it later.
+		$right_now  = current_datetime()->format('U');
+
 		// Set my empty.
 		$list_data  = [];
 
@@ -372,7 +401,8 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 				'status' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'status', true ),
 				'stamps' => [
 					'created' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'created', true ),
-					'expired' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'expires', true ),
+					'expires' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'expires', true ),
+					'current' => $right_now,
 				]
 			];
 
@@ -398,9 +428,14 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 
 			case 'id' :
 			case 'email' :
+				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
+
 			case 'created' :
 			case 'expires' :
-				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
+				return ! empty( $dataset['stamps'][ $column_name ] ) ? $dataset['stamps'][ $column_name ] : '';
+
+			case 'status' :
+				return ! empty( $dataset[ $column_name ] ) ? ucfirst( $dataset[ $column_name ] ) : '';
 
 			default :
 				return apply_filters( Core\HOOK_PREFIX . 'table_column_default', '', $dataset, $column_name );

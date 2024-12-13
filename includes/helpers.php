@@ -44,6 +44,38 @@ function get_admin_menu_link() {
 }
 
 /**
+ * Redirect based on an edit action result.
+ *
+ * @param  string  $error    Optional error code.
+ * @param  string  $result   What the result of the action was.
+ * @param  boolean $success  Whether it was successful.
+ *
+ * @return void
+ */
+function redirect_admin_action_result( $error = '', $result = 'failed', $success = false ) {
+
+	// Set our base redirect link.
+	$base_redirect  = get_admin_menu_link();
+
+	// Set up my redirect args.
+	$redirect_args  = [
+		'tmp-admin-users-success'         => $success,
+		'tmp-admin-users-action-complete' => 'yes',
+		'tmp-admin-users-action-result'   => esc_attr( $result ),
+	];
+
+	// Add the error code if we have one.
+	$redirect_args  = ! empty( $error ) ? wp_parse_args( $redirect_args, [ 'tmp-admin-users-error-code' => esc_attr( $error ) ] ) : $redirect_args;
+
+	// Now set my redirect link.
+	$redirect_link  = add_query_arg( $redirect_args, $base_redirect );
+
+	// Do the redirect.
+	wp_safe_redirect( $redirect_link );
+	exit;
+}
+
+/**
  * Calculate the Epoch time expiration.
  *
  * @param  string  $length        The length of time we are requesting.
@@ -52,7 +84,7 @@ function get_admin_menu_link() {
  *
  * @return integer $duration      The expiration date in unix time.
  */
-function create_expire_time( $length = '', $action = 'create', $current_time = 0 ) {
+function create_expire_time( $length = 'day', $action = 'create', $current_time = 0 ) {
 
 	// Allow my time length to be filtered based on action.
 	$length = apply_filters( Core\HOOK_PREFIX . 'promote_duration', $length, $action );
@@ -99,4 +131,49 @@ function create_username( $user_email = '' ) {
 
 	// Return it sanitized.
 	return sanitize_user( $uname, true );
+}
+
+/**
+ * Check an code and (usually an error) return the appropriate text.
+ *
+ * @param  string $return_code  The code provided.
+ *
+ * @return string
+ */
+function get_admin_notice_text( $return_code = '' ) {
+
+	// Handle my different error codes.
+	switch ( esc_attr( $return_code ) ) {
+
+		case 'no-email' :
+			return __( 'No parameters were defined. Please review the options below and try again.', 'temporary-admin-user' );
+			break;
+
+		case 'email-exists' :
+			return __( 'No user roles were selected. Please select one or more and try again.', 'temporary-admin-user' );
+			break;
+
+		case 'no-duration' :
+			return __( 'Please enter both a numeric value and the range to set a date.', 'temporary-admin-user' );
+			break;
+
+		case 'new-error' :
+			return __( 'No inactive users were found based on the selected options.', 'temporary-admin-user' );
+			break;
+
+		case 'new-user' :
+			return __( 'Success! A new temporary admin user has been created.', 'temporary-admin-user' );
+			break;
+
+		case 'unknown' :
+		case 'unknown-error' :
+			return __( 'There was an unknown error with your request.', 'temporary-admin-user' );
+			break;
+
+		default :
+			return __( 'There was an error with your request.', 'temporary-admin-user' );
+			break;
+
+		// End all case breaks.
+	}
 }
