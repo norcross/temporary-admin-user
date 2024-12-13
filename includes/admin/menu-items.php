@@ -25,8 +25,8 @@ function load_author_table_menu() {
 
 	// Handle loading the initial menu.
 	$setup_page = add_users_page(
-		__( 'Temporary Users', 'temporary-admin-user' ),
-		__( 'Temporary Users', 'temporary-admin-user' ),
+		__( 'Temporary Admin Users', 'temporary-admin-user' ),
+		__( 'Temporary Admins', 'temporary-admin-user' ),
 		'promote_users',
 		Core\MENU_ROOT,
 		__NAMESPACE__ . '\settings_page_view',
@@ -69,5 +69,12 @@ function settings_page_view() {
 		wp_die( esc_html__( 'You are not permitted to view this page.', 'temporary-admin-user' ) );
 	}
 
-	echo 'Gonna have a table here soon.';
+	// Call our table class.
+	$table  = new \Temporary_Admin_Users_List();
+
+	// And output the table.
+	$table->prepare_items();
+
+	// The actual table itself.
+	$table->display();
 }

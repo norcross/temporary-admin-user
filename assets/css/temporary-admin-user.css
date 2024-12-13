@@ -1,3 +1,24 @@
+
+.tmp-admin-user-title-wrap {
+	margin-bottom: 10px;
+}
+
+.tmp-admin-user-new-user-form-wrap {
+	padding: 1em;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background-color: #fff;
+}
+
+h3.tmp-admin-user-new-user-form-title {
+	margin-top: 0;
+	margin-bottom: 0.5em;
+}
+
+p.tmp-admin-new-user-submit-wrap {
+	padding-bottom: 0;
+}
+
 form.tmp-admin-user-form tr th {
 	width: 140px;
 	padding-bottom: 5px;
@@ -23,11 +44,6 @@ form.tmp-admin-user-form .tmp-admin-user-label {
 	vertical-align: middle;
 	font-size: 13px;
 	font-style: italic;
-}
-
-.tmp-admin-user-existing-table .widefat td.check-column,
-.tmp-admin-user-existing-table .widefat th.check-column {
-	width: 12px;
 }
 
 .tmp-admin-user-existing-table td.column-id,

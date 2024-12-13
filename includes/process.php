@@ -15,7 +15,16 @@ use Norcross\TempAdminUser\Helpers as Helpers;
 /**
  * Start our engines.
  */
-// add_action( 'admin_init', __NAMESPACE__ . '\run_criteria_lookup' );
+add_action( 'admin_init', __NAMESPACE__ . '\add_new_user_via_form' );
+
+/**
+ * Add a new user when requested on the form.
+ *
+ * @return void
+ */
+function add_new_user_via_form() {
+	// preprint( $_POST, true );
+}
 
 /**
  * Create the new temporary user.
@@ -35,11 +44,16 @@ function create_new_user( $user_email = '', $duration = '' ) {
 
 	// Set my user args.
 	$setup_user = [
-		'user_login'  => Helpers\create_username( $user_email ),
-		'user_pass'   => Helpers\create_user_password(),
-		'user_email'  => sanitize_email( $user_email, true ),
-		'role'        => 'administrator'
-		'meta_input'  => [
+		'user_login'   => Helpers\create_username( $user_email ),
+		'user_pass'    => apply_filters( Core\HOOK_PREFIX . 'random_password', wp_generate_password( 16, true, false ) ),
+		'user_email'   => sanitize_email( $user_email, true ),
+		'user_url'     => home_url(),
+		'role'         => 'administrator',
+		'description'  => sprintf( __( 'Generated from the Temporary Admin User plugin on %s and will expire %s', 'temporary-admin-user' ), gmdate( 'F jS, Y', $now_stamp ), gmdate( 'F jS, Y', $get_expire ) ),
+		'first_name'   => __( 'Temporary', 'temporary-admin-user' ),
+		'last_name'    => __( 'Admin', 'temporary-admin-user' ),
+		'display_name' => __( 'Temporary Admin', 'temporary-admin-user' ),
+		'meta_input'   => [
 			Core\META_PREFIX . 'flag'     => true,
 			Core\META_PREFIX . 'admin_id' => get_current_user_id(),
 			Core\META_PREFIX . 'created'  => $now_stamp,

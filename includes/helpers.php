@@ -95,22 +95,8 @@ function create_username( $user_email = '' ) {
 	$uname  = preg_replace( '/[^a-zA-Z0-9\s]/', '', $split[0] );
 
 	// Run our check to make sure something was left over.
-	$uname  = ! empty( $uname ) ? $uname : wp_generate_password( 10, false, false );
-
-	// Check if it exists.
-	$uname  = ! username_exists( $uname ) ? $uname : $uname . substr( uniqid( '', true ), -5 );
+	$uname  = ! empty( $uname ) ? $uname : 'random-' . mt_rand( 1000000000, 9999999999 );
 
 	// Return it sanitized.
 	return sanitize_user( $uname, true );
-}
-
-/**
- * Create a random password.
- *
- * @return string  The password generated from wp_generate_password.
- */
-function create_user_password() {
-
-	// Return the password generated.
-	return apply_filters( Core\HOOK_PREFIX . 'random_password', wp_generate_password( 16, true, false ) );
 }

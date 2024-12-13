@@ -9,6 +9,7 @@
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
 use Norcross\TempAdminUser\Queries as Queries;
+use Norcross\TempAdminUser\Admin\Markup as AdminMarkup;
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -54,13 +55,11 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		// Load up the pagination settings.
 		$paginate   = $this->get_items_per_page( 'tmp_table_per_page', 20 );
 
-
-
-		$item_count = $this->table_count();
-		$current    = $this->get_pagenum();
-
 		// Now grab the dataset.
 		$dataset    = $this->table_data( $paginate );
+
+		// Get the total count from the query.
+		$item_count = $dataset['total'];
 
 		// Set my pagination args.
 		$this->set_pagination_args( [
@@ -73,7 +72,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		$this->_column_headers = [ $columns, [], $sortable ];
 
 		// And the result.
-		$this->items = $dataset;
+		$this->items = $this->format_table_data( $dataset['users'] );
 	}
 
 	/**
@@ -130,9 +129,11 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			// Include our page display.
 			$this->table_page_title_display();
 
-			/*
+			// Handle the new user form.
+			$this->table_new_user_form_display();
+
 			// Throw a wrap around the table.
-			echo '<div class="ac-table-admin-section-wrap ac-table-admin-table-wrap">';
+			echo '<div class="tmp-admin-user-section-wrap tmp-admin-user-table-data-wrap">';
 
 				// Wrap the display in a form.
 				echo '<form action="" class="ac-admin-form" id="ac-admin-table-form" method="get">';
@@ -145,7 +146,6 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 
 			// And close the table div.
 			echo '</div>';
-			*/
 
 		// And close the final div.
 		echo '</div>';
@@ -191,7 +191,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			'striped',
 			'table-view-list',
 			'posts',
-			'temporary-admin-user',
+			'tmp-admin-user-existing-table',
 		];
 
 		// Return it, filtered.
@@ -227,10 +227,30 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		echo '<div class="tmp-admin-user-section-wrap tmp-admin-user-title-wrap">';
 
 			// Handle the title.
-			echo '<h1 class="wp-heading-inline tmp-admin-user-settings-title">' . esc_html( get_admin_page_title() ) . '</h1>';
+			echo '<h1 class="wp-heading-inline">' . esc_html( get_admin_page_title() ) . '</h1>';
 
 			// Cut off the header.
 			echo '<hr class="wp-header-end">';
+
+		// Close the div.
+		echo '</div>';
+	}
+
+	/**
+	 * Handle our new user form which goes before the table.
+	 *
+	 * @return HTML
+	 */
+	public function table_new_user_form_display() {
+		//
+		// Wrap a div on it.
+		echo '<div class="tmp-admin-user-section-wrap tmp-admin-user-new-user-form-wrap">';
+
+			// Handle the title.
+			echo '<h3 class="tmp-admin-user-new-user-form-title">' . esc_html__( 'Create New Temporary User', 'temporary-admin-user' ) . '</h3>';
+
+			// And my actual form.
+			AdminMarkup\render_new_user_form();
 
 		// Close the div.
 		echo '</div>';
@@ -257,7 +277,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	protected function column_cb( $item ) {
 
 		// Return my checkbox.
-		return '<input type="checkbox" name="tmp_admin_users[]" id="cb-' . absint( $item['id'] ) . '" value="' . absint( $item['id'] ) . '" /><label for="cb-' . $id . '" class="screen-reader-text">' . __( 'Select user', 'temporary-admin-user' ) . '</label>';
+		return '<input type="checkbox" name="tmp_admin_users[]" id="cb-' . absint( $item['id'] ) . '" value="' . absint( $item['id'] ) . '" /><label for="cb-' . absint( $item['id'] ) . '" class="screen-reader-text">' . __( 'Select user', 'temporary-admin-user' ) . '</label>';
 	}
 
 	/**
@@ -342,32 +362,25 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		// Set my empty.
 		$list_data  = [];
 
-		// Now loop each customer info.
-		foreach ( $table_data as $index => $item ) {
+		// Now loop each bit of user info.
+		foreach ( $table_data as $user_obj ) {
 
-			// Make sure this is an array.
-			$set_object = is_array( $item ) ? get_post( $item['ID'] ) : $item;
-			$set_data   = is_array( $item ) ? $item : (array) $item;
-
-			// Confirm a title.
-			$set_title  = ! empty( $set_data['post_title'] ) ? $set_data['post_title'] : '(' . __( 'no title', 'temporary-admin-user' ) . ')';
-
-			// Set up the basic return array.
+			// Adding to the array of arrays.
 			$list_data[] = [
-				'id'             => $set_data['ID'],
-				'title'          => $set_title,
-				'categories'     => AuthorQueries\query_single_item_term_data( $set_data['ID'], 'category' ),
-				'post_tags'      => AuthorQueries\query_single_item_term_data( $set_data['ID'], 'post_tag' ),
-				'post_type'      => $set_data['post_type'],
-				'date'           => $set_data['post_date'],
-				'stamp'          => strtotime( $set_data['post_date'] ),
-				'status'         => $set_data['post_status'],
-				'post_object'    => $set_object,
+				'id'     => $user_obj->ID,
+				'email'  => $user_obj->user_email,
+				'status' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'status', true ),
+				'stamps' => [
+					'created' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'created', true ),
+					'expired' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'expires', true ),
+				]
 			];
+
+			// preprint( $user_obj, true );
 		}
 
 		// Return our data.
-		return apply_filters( Core\HOOK_PREFIX . 'table_data', $list_data, $table_data );
+		return apply_filters( Core\HOOK_PREFIX . 'table_display_data', $list_data, $table_data );
 	}
 
 	/**

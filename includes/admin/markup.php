@@ -16,9 +16,11 @@ use Norcross\TempAdminUser\Queries as Queries;
 /**
  * Construct the HTML for the new user portion of the admin page.
  *
- * @return HTML The HTML of the new user form portion
+ * @param  boolean $echo  Whether to echo or return it.
+ *
+ * @return HTML           The HTML of the new user form portion.
  */
-function new_user_form() {
+function render_new_user_form( $echo = true ) {
 
 	// Fetch my time ranges.
 	$ranges = Queries\get_user_durations();
@@ -65,7 +67,7 @@ function new_user_form() {
 
 					// Loop my frequencies to make the select field.
 					foreach ( $ranges as $range => $args ) {
-						$build .= '<option value="' . esc_attr( $range ) . '">' . esc_html( $args['label'] ) . '</option>';
+						$build .= '<option value="' . esc_attr( $range ) . '" ' . selected( $range, 'day', false ) . '>' . esc_html( $args['label'] ) . '</option>';
 					}
 
 					// Close the select.
@@ -81,11 +83,18 @@ function new_user_form() {
 		$build .= '</table>';
 
 		// Handle our submit button.
-		$build .= get_submit_button( __( 'Create New User', 'temporary-admin-user' ), 'primary', 'tmp-admin-new-user-submit', true, array( 'id' => 'tmp-admin-new-user-submit' ) );
+		$build .= '<p class="submit tmp-admin-new-user-submit-wrap">';
+			$build .= '<button class="button button-primary" id="tmp-admin-new-user-submit" name="tmp-admin-new-user-submit" type="submit" value="yes">' . esc_html__( 'Create New User', 'temporary-admin-user' ) . '</button>';
+		$build .= '</p>';
 
 	// Close the  markup for the wrapper on the field box.
 	$build .= '</form>';
 
 	// Return the markup.
-	return $build;
+	if ( false === $echo ) {
+		return $build;
+	}
+
+	// Show it.
+	echo $build;
 }

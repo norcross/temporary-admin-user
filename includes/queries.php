@@ -14,12 +14,6 @@ use Norcross\TempAdminUser as Core;
 /**
  * Query all of the temporary users we've created.
  *
- * @return array  An array of data for use.
- */
-
-/**
- * Query all of the temporary users we've created.
- *
  * @param  array $query_args  The args to pass into the query.
  *
  * @return array              Our users, or an empty array.
@@ -65,29 +59,28 @@ function query_current_temporary_users( $query_args = [] ) {
 		$setup_args['orderby'] = 'user_email';
 	}
 
-	// Handle status sorting, which is a string.
-	if ( 'status' === $do_orderby ) {
+	// Handle the other 3 sorting methods.
+	if ( in_array( $do_orderby, ['status', 'created', 'expires'], true ) ) {
+
+		// Confirm the orderby meta key.
+		$order_meta = 'status' === $do_orderby ? 'meta_value' : 'meta_value_num';
 
 		// Update the orderby.
-		$setup_args['orderby'] = 'meta_value';
+		$setup_args['orderby'] = $order_meta;
 
 		// And add the meta key parts.
-		$setup_args['meta_key'] = Core\META_PREFIX . 'status';
+		$setup_args['meta_key'] = Core\META_PREFIX . $do_orderby;
 	}
-
-	/*
-	'email'
-	'status'
-	'created'
-	'expires'
-	 */
 
 	// Run the user query.
 	$get_users  = new \WP_User_Query( $setup_args );
 
 	// Bail if we errored out or don't have any users.
 	if ( is_wp_error( $get_users ) || empty( $get_users->results ) ) {
-		return [];
+		return [
+			'total' => 0,
+			'users' => [],
+		];
 	}
 
 	// Return the query results.

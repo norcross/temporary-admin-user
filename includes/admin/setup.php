@@ -20,9 +20,11 @@ add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_user_table_css' );
 /**
  * Load our admin side CSS.
  *
+ * @param  string $admin_hook  The page hook we're on.
+ *
  * @return void
  */
-function load_admin_core_assets( $hook ) {
+function load_admin_core_assets( $admin_hook ) {
 
 	// Only run this on our page.
 	if ( empty( $admin_hook ) || 'users_page_' . Core\MENU_ROOT !== $admin_hook ) {
