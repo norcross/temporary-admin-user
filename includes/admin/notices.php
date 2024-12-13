@@ -136,15 +136,15 @@ function get_admin_notice_text( $return_code = '' ) {
 			break;
 
 		case 'user-promote-success' :
-			return __( 'Success! The requested user account was promoted.', 'temporary-admin-user' );
+			return __( 'Success! The requested temporary user account was promoted.', 'temporary-admin-user' );
 			break;
 
 		case 'user-restrict-success' :
-			return __( 'Success! The requested user account was restricted.', 'temporary-admin-user' );
+			return __( 'Success! The requested temporary user account was restricted.', 'temporary-admin-user' );
 			break;
 
 		case 'user-delete-success' :
-			return __( 'Success! The requested user account was deleted.', 'temporary-admin-user' );
+			return __( 'Success! The requested temporary user account was deleted.', 'temporary-admin-user' );
 			break;
 
 		case 'unknown' :
