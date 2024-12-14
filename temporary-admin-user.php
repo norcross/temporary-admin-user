@@ -48,6 +48,9 @@ define( __NAMESPACE__ . '\TRANSIENT_PREFIX', 'tempaa_tr_' );
 // Set our menu root.
 define( __NAMESPACE__ . '\MENU_ROOT', 'temporary-admin-user' );
 
+// Set our cron function name constants.
+define( __NAMESPACE__ . '\EXPIRED_CRON', 'tmp_admin_user_expire_check' );
+
 // Now we handle all the various file loading.
 temporary_admin_user_file_load();
 
@@ -59,6 +62,7 @@ temporary_admin_user_file_load();
 function temporary_admin_user_file_load() {
 
 	// Load the multi-use files first.
+	require_once __DIR__ . '/includes/cron.php';
 	require_once __DIR__ . '/includes/helpers.php';
 	require_once __DIR__ . '/includes/queries.php';
 	require_once __DIR__ . '/includes/process.php';
@@ -72,15 +76,7 @@ function temporary_admin_user_file_load() {
 	require_once __DIR__ . '/includes/admin/triggers.php';
 	require_once __DIR__ . '/includes/admin/user-table.php';
 
-	/*
-
-
-
-	require_once __DIR__ . '/includes/admin/notices.php';
-	require_once __DIR__ . '/includes/admin/process.php';
-
 	// Load the triggered file loads.
+	require_once __DIR__ . '/includes/activate.php';
 	require_once __DIR__ . '/includes/deactivate.php';
-	require_once __DIR__ . '/includes/uninstall.php';
-	*/
 }

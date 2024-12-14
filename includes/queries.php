@@ -90,6 +90,44 @@ function query_current_temporary_users( $query_args = [] ) {
 	];
 }
 
+
+/**
+ * Query all of the currently active users we've created.
+ *
+ * @param  array $query_args  The args to pass into the query.
+ *
+ * @return array              Our users, or an empty array.
+ */
+function query_active_temporary_users( $query_args = [] ) {
+
+	// Set my args.
+	$setup_args = [
+		'fields'     => 'ID',
+		'number'     => 99999,
+		'meta_query' => [
+			[
+				'key'   => Core\META_PREFIX . 'flag',
+				'value' => true,
+			],
+			[
+				'key'   => Core\META_PREFIX . 'status',
+				'value' => 'active',
+			]
+		]
+	];
+
+	// Run the user query.
+	$get_users  = new \WP_User_Query( $setup_args );
+
+	// Bail if we errored out or don't have any users.
+	if ( is_wp_error( $get_users ) || empty( $get_users->results ) ) {
+		return [];
+	}
+
+	// Return the resulting user IDs if we have them.
+	return $get_users->results;
+}
+
 /**
  * Get the available expiration time ranges that a user can be set to.
  *

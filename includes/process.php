@@ -58,6 +58,9 @@ function create_new_user( $user_email = '', $duration = '' ) {
 		return false;
 	}
 
+	// Send the new user email.
+	wp_send_new_user_notifications( $create_id, 'user' );
+
 	// Allow others to help.
 	do_action( Core\HOOK_PREFIX . 'after_user_created', $create_id, $setup_user );
 
