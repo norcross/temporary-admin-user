@@ -35,7 +35,7 @@ function create_new_user( $user_email = '', $duration = '' ) {
 		'user_email'   => sanitize_email( $user_email, true ),
 		'user_url'     => home_url(),
 		'role'         => 'administrator',
-		'description'  => sprintf( __( 'Generated from the Temporary Admin User plugin on %s and will expire %s', 'temporary-admin-user' ), gmdate( 'F jS, Y', $now_stamp ), gmdate( 'F jS, Y', $get_expire ) ),
+		'description'  => sprintf( __( 'Generated from the Temporary Admin User plugin on %s and will expire %s', 'temporary-admin-user' ), gmdate( 'F jS, Y', $now_stamp ), gmdate( get_option( 'date_format' ), $get_expire ) ),
 		'first_name'   => __( 'Temporary', 'temporary-admin-user' ),
 		'last_name'    => __( 'Admin', 'temporary-admin-user' ),
 		'display_name' => __( 'Temporary Admin', 'temporary-admin-user' ),

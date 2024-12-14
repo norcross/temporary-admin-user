@@ -9,6 +9,7 @@
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
 use Norcross\TempAdminUser\Queries as Queries;
+use Norcross\TempAdminUser\Process as Process;
 use Norcross\TempAdminUser\Admin\Markup as AdminMarkup;
 
 // Exit if accessed directly.
@@ -315,8 +316,13 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		// Handle determining if the timestamp expired.
 		if ( absint( $item['stamps']['current'] ) >= absint( $item['stamps']['expires'] ) ) {
 
+			// If this hasn't been handled by the cron job, restrict the account now.
+			if ( ! empty( $item['status'] ) && 'active' === $item['status'] ) {
+				Process\restrict_existing_user( $item['id'] );
+			}
+
 			// Return my formatted text.
-			return apply_filters( Core\HOOK_PREFIX . 'expires_date_display', '<em>' . __( 'This account has expired.', 'temporary-admin-user' ) . '</em>', $item );
+			return apply_filters( Core\HOOK_PREFIX . 'expires_date_display', '<em>' . __( 'This account has expired.', 'temporary-admin-user' ) . '</em>', $item, true );
 		}
 
 		// Set my stamps, both local and GMT.
@@ -336,7 +342,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		$build  = '<abbr title="' . esc_attr( $local ) . '">' . esc_html( $show ) . '</abbr>';
 
 		// Return my formatted date.
-		return apply_filters( Core\HOOK_PREFIX . 'expires_date_display', $build, $item );
+		return apply_filters( Core\HOOK_PREFIX . 'expires_date_display', $build, $item, false );
 	}
 
 	/**
