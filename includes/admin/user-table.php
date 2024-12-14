@@ -414,8 +414,6 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 					'current' => $right_now,
 				]
 			];
-
-			// preprint( $user_obj, true );
 		}
 
 		// Return our data.

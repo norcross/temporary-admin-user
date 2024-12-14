@@ -31,7 +31,7 @@ function query_current_temporary_users( $query_args = [] ) {
 
 	// Define the order and orderby, with defaults.
 	$do_orderby = ! empty( $query_args['orderby'] ) ? $query_args['orderby'] : 'expires';
-	$do_order   = ! empty( $query_args['order'] ) ? strtoupper( $query_args['order'] ) : 'DESC';
+	$do_order   = ! empty( $query_args['order'] ) ? strtoupper( $query_args['order'] ) : 'ASC';
 
 	// Set my args.
 	$setup_args = [

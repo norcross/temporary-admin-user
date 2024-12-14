@@ -86,7 +86,6 @@ function new_user_form_request() {
  * @return void
  */
 function modify_user_action_request() {
-	// preprint( $_GET, true );
 
 	// Confirm we are on the proper page..
 	$confirm_admin  = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_SPECIAL_CHARS ); // phpcs:ignore -- the nonce check is happening soon.
@@ -153,8 +152,6 @@ function modify_user_action_request() {
 			Helpers\redirect_admin_action_result( '', 'user-promote-success', true );
 
 			// Nothing else to do here.
-			break;
-
 			break;
 
 		// Restrict an existing user.
