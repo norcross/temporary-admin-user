@@ -10,7 +10,7 @@ namespace Norcross\TempAdminUser\Cron;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
-use Norcross\TempAdminUser\Helpers as Helpers;
+use Norcross\TempAdminUser\Process as Process;
 use Norcross\TempAdminUser\Queries as Queries;
 
 /**
