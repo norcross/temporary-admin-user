@@ -26,7 +26,7 @@ function query_current_temporary_users( $query_args = [] ) {
 
 	// Calculate the offset.
 	if ( ! empty( $query_args['paged'] ) && absint( $query_args['paged'] ) > 1 ) {
-		$set_offset = ( absint( $query_args['paged'] ) - 1 ) * absint( $ppage );
+		$set_offset = ( absint( $query_args['paged'] ) - 1 ) * absint( $per_page );
 	}
 
 	// Define the order and orderby, with defaults.
