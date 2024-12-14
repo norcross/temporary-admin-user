@@ -49,6 +49,9 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 */
 	public function prepare_items() {
 
+		// Check for any bulk actions running.
+		$this->process_bulk_actions();
+
 		// Roll out each part.
 		$columns    = $this->get_columns();
 		$sortable   = $this->get_sortable_columns();
@@ -137,7 +140,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			echo '<div class="tmp-admin-user-section-wrap tmp-admin-user-table-data-wrap">';
 
 				// Wrap the display in a form.
-				echo '<form action="" class="ac-admin-form" id="ac-admin-table-form" method="get">';
+				echo '<form action="" class="tmp-admin-user-table-form" id="tmp-admin-user-list-table-form" method="get">';
 
 					// And the parent display (which is most of it).
 					parent::display();
@@ -164,8 +167,12 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		// Open the table nav.
 		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
 
-			// Include the blank div where the bulk action dropdown would be.
-			echo '<div class="alignleft actions bulkactions"></div>';
+			// Include the bulk action dropdown.
+			if ( $this->has_items() ) {
+				echo '<div class="alignleft actions bulkactions">';
+				$this->bulk_actions( $which );
+				echo '</div>';
+			}
 
 			// Now show the other parts.
 			$this->extra_tablenav( $which );
@@ -205,16 +212,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 * @return array
 	 */
 	protected function get_bulk_actions() {
-
-		// Set our array.
-		$setup_data = [
-			'bulk-promote'  => __( 'Promote Users', 'temporary-admin-user' ),
-			'bulk-restrict' => __( 'Restrict Users', 'temporary-admin-user' ),
-			'bulk-delete'   => __( 'Delete Users', 'temporary-admin-user' ),
-		];
-
-		// Return it, filtered.
-		return apply_filters( Core\HOOK_PREFIX . 'bulk_actions', $setup_data );
+		return apply_filters( Core\HOOK_PREFIX . 'bulk_actions', [] );
 	}
 
 	/**
@@ -473,6 +471,17 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 */
 	public function no_items() {
 		esc_html_e( 'No users available.', 'temporary-admin-user' );
+	}
+
+	/**
+	 * Handle bulk actions.
+	 *
+	 * @see $this->prepare_items()
+	 */
+	protected function process_bulk_actions() {
+
+		// Allow this hooked since it needs to run at a specific time in the table generation.
+		do_action( Core\HOOK_PREFIX . 'bulk_action_process' );
 	}
 
 	// Add any additional functions here.
