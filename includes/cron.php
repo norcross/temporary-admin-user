@@ -54,7 +54,7 @@ function modify_refresh_cron( $clear = true, $frequency = '' ) {
 function check_expired_users() {
 
 	// Get all the active temporary users we have.
-	$get_active_users   = Queries\query_active_temporary_users();
+	$get_active_users   = Queries\query_all_active_temporary_users();
 
 	// Bail if we have no users.
 	if ( empty( $get_active_users ) ) {

@@ -11,6 +11,7 @@ namespace Norcross\TempAdminUser\Process;
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
+use Norcross\TempAdminUser\Queries as Queries;
 
 /**
  * Create the new temporary user.
@@ -110,7 +111,7 @@ function promote_existing_user( $user_id = 0 ) {
 }
 
 /**
- * Take te existing user and restrict them.
+ * Take the existing user and restrict them.
  *
  * @param  integer $user_id  The user ID we want to restrict.
  *
@@ -149,7 +150,36 @@ function restrict_existing_user( $user_id = 0 ) {
 }
 
 /**
- * Take te existing user and delete them.
+ * Take all existing users and restrict them.
+ *
+ * @return boolean
+ */
+function restrict_all_users() {
+
+	// Get all the users we have.
+	$get_all_users  = Queries\query_all_temporary_users();
+
+	// Loop the user IDs.
+	foreach ( $get_all_users as $user_id ) {
+
+		// Attempt to restrict it.
+		$maybe_restrict = restrict_existing_user( $user_id );
+
+		// True means it was OK.
+		if ( false !== $maybe_restrict ) {
+			continue;
+		}
+
+		// Bail if something went wrong.
+		return false;
+	}
+
+	// And return true, so we know to report back.
+	return true;
+}
+
+/**
+ * Take the existing user and delete them.
  *
  * @param  integer $user_id  The user ID we want to delete.
  *
@@ -175,6 +205,35 @@ function delete_existing_user( $user_id = 0 ) {
 
 	// Allow other things to hook into this process.
 	do_action( Core\HOOK_PREFIX . 'after_user_delete', $user_id );
+
+	// And return true, so we know to report back.
+	return true;
+}
+
+/**
+ * Take all existing users and delete them.
+ *
+ * @return boolean
+ */
+function delete_all_users() {
+
+	// Get all the users we have.
+	$get_all_users  = Queries\query_all_temporary_users();
+
+	// Loop the user IDs.
+	foreach ( $get_all_users as $user_id ) {
+
+		// Attempt to delete it.
+		$maybe_delete   = delete_existing_user( $user_id );
+
+		// True means it was OK.
+		if ( false !== $maybe_delete ) {
+			continue;
+		}
+
+		// Bail if something went wrong.
+		return false;
+	}
 
 	// And return true, so we know to report back.
 	return true;
