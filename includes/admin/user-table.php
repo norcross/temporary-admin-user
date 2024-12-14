@@ -243,7 +243,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 * @return HTML
 	 */
 	public function table_new_user_form_display() {
-		//
+
 		// Wrap a div on it.
 		echo '<div class="tmp-admin-user-section-wrap tmp-admin-user-new-user-form-wrap">';
 
@@ -358,7 +358,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		$setup_actions  = Helpers\create_user_action_args( $item['id'], $item['email'] );
 
 		// Pass it over to the larger HTML builder.
-		return AdminMarkup\render_user_actions_list( $item, $setup_actions );
+		return AdminMarkup\render_user_actions_list( $item, $setup_actions, false );
 	}
 
 	/**

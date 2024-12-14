@@ -34,57 +34,67 @@ function render_new_user_form( $echo = true ) {
 	// Begin the form markup for the wrapper on the field box.
 	$build .= '<form class="tmp-admin-user-form" id="tmp-admin-user-form-new" action="' . esc_url( $action ) . '" method="post">';
 
-		// Output the nonce field.
-		$build .= wp_nonce_field( Core\NONCE_PREFIX . 'new_user', 'tmp-admin-new-user-nonce', false, false );
+		// Add a div around the whole thing.
+		$build .= '<div class="tmp-admin-new-user-form-columns">';
 
-		// Output the table options.
-		$build .= '<table class="form-table">';
-		$build .= '<tbody>';
+			// Handle the email field.
+			$build .= '<div class="tmp-admin-new-user-form-single-column tmp-admin-new-user-form-email-column">';
 
-		// Handle the email field.
-		$build .= '<tr>';
-			$build .= '<th scope="row">' . esc_html__( 'Email Address', 'temporary-admin-user' ) . '</th>';
-			$build .= '<td>';
+				// Show the label.
+				$build .= '<label for="tmp-admin-new-user-email">' . esc_html__( 'Email Address', 'temporary-admin-user' ) . '</label>';
+
+				// Show the actual field.
 				$build .= '<input autocomplete="off" name="tmp-admin-new-user-email" id="tmp-admin-new-user-email" value="" class="tmp-admin-user-input regular-text" type="email" data-1p-ignore>';
-			$build .= '</td>';
-		$build .= '</tr>';
 
-		// If we have ranges, show them. otherwise just a hidden field.
-		if ( empty( $ranges ) ) {
-			$build .= '<input name="tmp-admin-new-user-duration" id="tmp-admin-new-user-duration" value="day" type="hidden">';
-		} else {
+			// Close the email wrapper.
+			$build .= '</div>';
 
-			$build .= '<tr>';
-				$build .= '<th scope="row">' . esc_html__( 'Account Expiration', 'temporary-admin-user' ) . '</th>';
-				$build .= '<td>';
+		// Show a column section if we have ranged.
+		if ( ! empty( $ranges ) ) {
 
-					// Output the select field.
-					$build .= '<select name="tmp-admin-new-user-duration" id="tmp-admin-new-user-duration" class="tmp-admin-user-input">';
+			// Handle the range field.
+			$build .= '<div class="tmp-admin-new-user-form-single-column tmp-admin-new-user-form-range-column">';
 
-					// Add the "empty" one.
-					$build .= '<option value="0">' . esc_html__( '(Select)', 'temporary-admin-user' ) . '</option>';
+				// Show the label for the field.
+				$build .= '<label for="tmp-admin-new-user-duration">' . esc_html__( 'Expiration Length', 'temporary-admin-user' ) . '</label>';
 
-					// Loop my frequencies to make the select field.
-					foreach ( $ranges as $range => $args ) {
-						$build .= '<option value="' . esc_attr( $range ) . '">' . esc_html( $args['label'] ) . '</option>';
-					}
+				// Output the select field.
+				$build .= '<select name="tmp-admin-new-user-duration" id="tmp-admin-new-user-duration" class="tmp-admin-user-select">';
 
-					// Close the select.
-					$build .= '</select>';
+				// Add the "empty" one.
+				$build .= '<option value="0">' . esc_html__( '(Select)', 'temporary-admin-user' ) . '</option>';
 
-				// Close the row.
-				$build .= '</td>';
-			$build .= '</tr>';
+				// Loop my frequencies to make the select field.
+				foreach ( $ranges as $range => $args ) {
+					$build .= '<option value="' . esc_attr( $range ) . '">' . esc_html( $args['label'] ) . '</option>';
+				}
+
+				// Close the select.
+				$build .= '</select>';
+
+			// Close the range wrapper.
+			$build .= '</div>';
 		}
 
-		// Close up the table.
-		$build .= '</tbody>';
-		$build .= '</table>';
+			// Handle the submit field.
+			$build .= '<div class="tmp-admin-new-user-form-single-column tmp-admin-new-user-form-submit-column">';
 
-		// Handle our submit button.
-		$build .= '<p class="submit tmp-admin-new-user-submit-wrap">';
-			$build .= '<button class="button button-primary" id="tmp-admin-new-user-submit" name="tmp-admin-new-user-submit" type="submit" value="go">' . esc_html__( 'Create New User', 'temporary-admin-user' ) . '</button>';
-		$build .= '</p>';
+				// Show the submit button on it's own.
+				$build .= '<button class="button button-primary" id="tmp-admin-new-user-submit" name="tmp-admin-new-user-submit" type="submit" value="go">' . esc_html__( 'Create New User', 'temporary-admin-user' ) . '</button>';
+
+				// Include a hidden range if none were present.
+				if ( empty( $ranges ) ) {
+					$build .= '<input name="tmp-admin-new-user-duration" id="tmp-admin-new-user-duration" value="day" type="hidden">';
+				}
+
+				// Output the nonce field.
+				$build .= wp_nonce_field( Core\NONCE_PREFIX . 'new_user', 'tmp-admin-new-user-nonce', false, false );
+
+			// Close the submit wrapper.
+			$build .= '</div>';
+
+		// Close the div wrapper.
+		$build .= '</div>';
 
 	// Close the  markup for the wrapper on the field box.
 	$build .= '</form>';
@@ -101,12 +111,13 @@ function render_new_user_form( $echo = true ) {
 /**
  * Handle building the HTML for each user action.
  *
- * @param  array  $table_item    The various actions we have.
- * @param  array  $user_actions  The various actions we have.
+ * @param  array   $table_item    The various actions we have.
+ * @param  array   $user_actions  The various actions we have.
+ * @param  boolean $echo          Whether to echo out the markup or return it.
  *
- * @return HTML                  Nice icon based list.
+ * @return HTML                   Nice icon based list.
  */
-function render_user_actions_list( $table_item = [], $user_actions = [] ) {
+function render_user_actions_list( $table_item = [], $user_actions = [], $echo = true ) {
 
 	// Return an empty string if no actions or data exist.
 	if ( empty( $user_actions ) || empty( $table_item ) ) {
@@ -166,8 +177,13 @@ function render_user_actions_list( $table_item = [], $user_actions = [] ) {
 		$build .= '<a class="' . esc_attr( $class ) . '" href="' . esc_url( $setup_link ) . '" title="' . esc_attr( $action_args['label'] ) . '"><i class="dashicons dashicons-' . esc_attr( $action_args['icon'] ) . '"></i></a>';
 	}
 
-	// Return my links.
-	return $build;
+	// Return the markup.
+	if ( false === $echo ) {
+		return $build;
+	}
+
+	// Show it.
+	echo $build;
 }
 
 /**

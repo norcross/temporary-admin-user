@@ -104,31 +104,31 @@ function get_user_durations( $single = '', $keys = false ) {
 	$ranges = [
 		'fifteen' => [
 			'value' => 900,
-			'label' => __( 'Fifteen Minutes', 'temporary-admin-user' )
+			'label' => __( 'Fifteen Minutes', 'temporary-admin-user' ),
 		],
 		'halfhour' => [
 			'value' => 1800,
-			'label' => __( 'Thirty Minutes', 'temporary-admin-user' )
+			'label' => __( 'Thirty Minutes', 'temporary-admin-user' ),
 		],
 		'hour' => [
 			'value' => HOUR_IN_SECONDS,
-			'label' => __( 'One Hour', 'temporary-admin-user' )
+			'label' => __( 'One Hour', 'temporary-admin-user' ),
 		],
 		'day' => [
 			'value' => DAY_IN_SECONDS,
-			'label' => __( 'One Day', 'temporary-admin-user' )
+			'label' => __( 'One Day', 'temporary-admin-user' ),
 		],
 		'week' => [
 			'value' => WEEK_IN_SECONDS,
-			'label' => __( 'One Week', 'temporary-admin-user' )
+			'label' => __( 'One Week', 'temporary-admin-user' ),
 		],
 		'month' => [
 			'value' => MONTH_IN_SECONDS,
-			'label' => __( 'One Month', 'temporary-admin-user' )
+			'label' => __( 'One Month', 'temporary-admin-user' ),
 		],
 		'year' => [
 			'value' => YEAR_IN_SECONDS,
-			'label' => __( 'One Month', 'temporary-admin-user' )
+			'label' => __( 'One Year', 'temporary-admin-user' ),
 		],
 	];
 

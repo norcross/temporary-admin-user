@@ -12,38 +12,29 @@
 
 h3.tmp-admin-user-new-user-form-title {
 	margin-top: 0;
-	margin-bottom: 0.5em;
+	margin-bottom: 0.75em;
 }
 
-p.tmp-admin-new-user-submit-wrap {
-	padding-bottom: 0;
+.tmp-admin-new-user-form-columns {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;
+	align-items: flex-end;
+	gap: 20px;
 }
 
-form.tmp-admin-user-form tr th {
-	width: 140px;
-	padding-bottom: 5px;
+.tmp-admin-new-user-form-single-column {
+
 }
 
-form.tmp-admin-user-form tr td {
-	padding-bottom: 5px;
+.tmp-admin-new-user-form-single-column label {
+	display: block;
+	padding: 0 0 2px 4px;
+	font-weight: 600;
 }
 
-form.tmp-admin-user-form .tmp-admin-user-input {
-	display: inline-block;
-	vertical-align: middle;
-	margin-right: 5px;
-}
-
-form.tmp-admin-user-form .tmp-admin-user-description {
-	display: inline-block;
-	vertical-align: middle;
-}
-
-form.tmp-admin-user-form .tmp-admin-user-label {
-	display: inline-block;
-	vertical-align: middle;
-	font-size: 13px;
-	font-style: italic;
+.tmp-admin-new-user-form-single-column select.tmp-admin-user-select {
+	min-width: 150px;
 }
 
 .tmp-admin-user-existing-table td.column-id,
