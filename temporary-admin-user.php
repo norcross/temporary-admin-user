@@ -17,6 +17,9 @@
 // Declare our namespace.
 namespace Norcross\TempAdminUser;
 
+// Call our CLI namespace.
+use WP_CLI;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
 
@@ -51,33 +54,32 @@ define( __NAMESPACE__ . '\MENU_ROOT', 'temporary-admin-user' );
 // Set our cron function name constants.
 define( __NAMESPACE__ . '\EXPIRED_CRON', 'tmp_admin_user_expire_check' );
 
-// Now we handle all the various file loading.
-temporary_admin_user_file_load();
+// Load the multi-use files first.
+require_once __DIR__ . '/includes/cron.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/queries.php';
+require_once __DIR__ . '/includes/process.php';
 
-/**
- * Actually load our files.
- *
- * @return void
- */
-function temporary_admin_user_file_load() {
+// Handle our admin items.
+require_once __DIR__ . '/includes/admin/admin-bar.php';
+require_once __DIR__ . '/includes/admin/setup.php';
+require_once __DIR__ . '/includes/admin/markup.php';
+require_once __DIR__ . '/includes/admin/menu-items.php';
+require_once __DIR__ . '/includes/admin/notices.php';
+require_once __DIR__ . '/includes/admin/triggers.php';
+require_once __DIR__ . '/includes/admin/user-table.php';
 
-	// Load the multi-use files first.
-	require_once __DIR__ . '/includes/cron.php';
-	require_once __DIR__ . '/includes/helpers.php';
-	require_once __DIR__ . '/includes/queries.php';
-	require_once __DIR__ . '/includes/process.php';
+// Check that we have the CLI constant available.
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
 
-	// Handle our admin items.
-	require_once __DIR__ . '/includes/admin/admin-bar.php';
-	require_once __DIR__ . '/includes/admin/setup.php';
-	require_once __DIR__ . '/includes/admin/markup.php';
-	require_once __DIR__ . '/includes/admin/menu-items.php';
-	require_once __DIR__ . '/includes/admin/notices.php';
-	require_once __DIR__ . '/includes/admin/triggers.php';
-	require_once __DIR__ . '/includes/admin/user-table.php';
+	// Load our commands file.
+	require_once dirname( __FILE__ ) . '/includes/cli-commands.php';
 
-	// Load the triggered file loads.
-	require_once __DIR__ . '/includes/activate.php';
-	require_once __DIR__ . '/includes/deactivate.php';
-	require_once __DIR__ . '/includes/uninstall.php';
+	// And add our command.
+	WP_CLI::add_command( 'tmp-admin-user', TempAdminUserCommands::class );
 }
+
+// Load the triggered file loads.
+require_once __DIR__ . '/includes/activate.php';
+require_once __DIR__ . '/includes/deactivate.php';
+require_once __DIR__ . '/includes/uninstall.php';

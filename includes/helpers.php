@@ -13,6 +13,70 @@ use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Queries as Queries;
 
 /**
+ * Get the available expiration time ranges that a user can be set to.
+ *
+ * @param  string  $single  Optional to fetch one item from the array.
+ * @param  boolean $keys    Whether to return just the keys.
+ *
+ * @return array            An array of the time data.
+ */
+function get_user_durations( $single = '', $keys = false ) {
+
+	// Set my ranges. All values are in seconds.
+	$ranges = [
+		'fifteen' => [
+			'value' => 900,
+			'label' => __( 'Fifteen Minutes', 'temporary-admin-user' ),
+		],
+		'halfhour' => [
+			'value' => 1800,
+			'label' => __( 'Thirty Minutes', 'temporary-admin-user' ),
+		],
+		'hour' => [
+			'value' => HOUR_IN_SECONDS,
+			'label' => __( 'One Hour', 'temporary-admin-user' ),
+		],
+		'day' => [
+			'value' => DAY_IN_SECONDS,
+			'label' => __( 'One Day', 'temporary-admin-user' ),
+		],
+		'week' => [
+			'value' => WEEK_IN_SECONDS,
+			'label' => __( 'One Week', 'temporary-admin-user' ),
+		],
+		'month' => [
+			'value' => MONTH_IN_SECONDS,
+			'label' => __( 'One Month', 'temporary-admin-user' ),
+		],
+		'year' => [
+			'value' => YEAR_IN_SECONDS,
+			'label' => __( 'One Year', 'temporary-admin-user' ),
+		],
+	];
+
+	// Allow it filtered.
+	$ranges = apply_filters( Core\HOOK_PREFIX . 'expire_ranges', $ranges );
+
+	// Bail if no data exists.
+	if ( empty( $ranges ) ) {
+		return false;
+	}
+
+	// Return just the array keys.
+	if ( ! empty( $keys ) ) {
+		return array_keys( $ranges );
+	}
+
+	// Return the entire array if no key requested.
+	if ( empty( $single ) ) {
+		return $ranges;
+	}
+
+	// Return the single key item.
+	return isset( $ranges[ $single ] ) ? $ranges[ $single ] : false;
+}
+
+/**
  * Fetch the admin menu link on the users menu.
  *
  * @return string
@@ -90,7 +154,7 @@ function create_expire_time( $length = 'day', $action = 'create', $current_time 
 	$length = apply_filters( Core\HOOK_PREFIX . 'active_duration', $length, $action );
 
 	// Get my data for the particular period provided.
-	$data	= Queries\get_user_durations( $length );
+	$data	= get_user_durations( $length );
 
 	// Set my range accordingly.
 	$range  = absint( $data['value'] ) > 0 ? $data['value'] : DAY_IN_SECONDS;

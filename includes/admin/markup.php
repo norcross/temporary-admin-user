@@ -11,7 +11,6 @@ namespace Norcross\TempAdminUser\Admin\Markup;
 // Set our alias items.
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
-use Norcross\TempAdminUser\Queries as Queries;
 
 /**
  * Construct the HTML for the new user portion of the admin page.
@@ -23,7 +22,7 @@ use Norcross\TempAdminUser\Queries as Queries;
 function render_new_user_form( $echo = true ) {
 
 	// Fetch my time ranges.
-	$ranges = Queries\get_user_durations();
+	$ranges = Helpers\get_user_durations();
 
 	// Get my form action link.
 	$action = Helpers\get_admin_menu_link();
