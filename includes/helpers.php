@@ -244,3 +244,19 @@ function create_user_action_args( $user_id = 0, $user_email = '' ) {
 	// Return them filtered.
 	return apply_filters( Core\HOOK_PREFIX . 'user_action_args', $setup_args, $user_id, $user_email );
 }
+
+/**
+ * Make sure the user is one of ours.
+ *
+ * @param  integer $user_id  The ID of the user.
+ *
+ * @return boolean
+ */
+function confirm_user_via_plugin( $user_id = 0 ) {
+
+	// Check for the flag.
+	$check_flag = get_user_meta( absint( $user_id ), Core\META_PREFIX . 'flag', true );
+
+	// Return a boolean based on the flag existing.
+	return ! empty( $check_flag ) ? true : false;
+}

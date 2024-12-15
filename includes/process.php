@@ -72,11 +72,12 @@ function create_new_user( $user_email = '', $duration = '' ) {
 /**
  * Add a pre-determined amount of time to the existing user.
  *
- * @param  integer $user_id  The user ID we want to restrict.
+ * @param  integer $user_id   The user ID we want to restrict.
+ * @param  string  $duration  The requested duration length.
  *
  * @return void
  */
-function promote_existing_user( $user_id = 0 ) {
+function promote_existing_user( $user_id = 0, $duration = 'day' ) {
 
 	// Bail without a user ID.
 	if ( empty( $user_id ) ) {
@@ -96,7 +97,7 @@ function promote_existing_user( $user_id = 0 ) {
 	$now_stamp  = current_datetime()->format('U');
 
 	// Get the exipration.
-	$get_expire = Helpers\create_expire_time( 'day', 'update', $now_stamp );
+	$get_expire = Helpers\create_expire_time( $duration, 'update', $now_stamp );
 
 	// Handle the expires time.
 	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
@@ -133,7 +134,7 @@ function restrict_existing_user( $user_id = 0 ) {
 	// Replace the current role with 'subscriber' role.
 	$get_user_obj->set_role( 'subscriber' );
 
-	// Define a few timestamps
+	// Define a few timestamps.
 	$now_stamp  = current_datetime()->format('U');
 	$exp_stamp  = absint( $now_stamp ) - MINUTE_IN_SECONDS;
 

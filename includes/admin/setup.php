@@ -10,6 +10,7 @@ namespace Norcross\TempAdminUser\Admin\Setup;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
+use Norcross\TempAdminUser\Helpers as Helpers;
 
 /**
  * Start our engines.
@@ -123,7 +124,7 @@ function show_temp_user_badge( $output, $column_name, $user_id ) {
 	}
 
 	// Check for the flag.
-	$check_flag = get_user_meta( absint( $user_id ), Core\META_PREFIX . 'flag', true );
+	$check_flag = Helpers\confirm_user_via_plugin( $user_id );
 
 	// Return an empty string if no flag exists.
 	if ( empty( $check_flag ) ) {
