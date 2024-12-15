@@ -60,7 +60,7 @@ function query_current_temporary_users( $query_args = [] ) {
 	}
 
 	// Handle the other 3 sorting methods.
-	if ( in_array( $do_orderby, ['status', 'created', 'expires'], true ) ) {
+	if ( in_array( $do_orderby, ['status', 'created', 'expires', 'updated'], true ) ) {
 
 		// Confirm the orderby meta key.
 		$order_meta = 'status' === $do_orderby ? 'meta_value' : 'meta_value_num';

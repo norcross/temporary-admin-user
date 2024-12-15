@@ -93,6 +93,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			'email'   => __( 'Email Address', 'temporary-admin-user' ),
 			'status'  => __( 'Status', 'temporary-admin-user' ),
 			'created' => __( 'Date Created', 'temporary-admin-user' ),
+			'updated' => __( 'Last Updated', 'temporary-admin-user' ),
 			'expires' => __( 'Expiration', 'temporary-admin-user' ),
 			'actions' => __( 'Actions', 'temporary-admin-user' ),
 		];
@@ -114,6 +115,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			'status'    => [ 'status', false ],
 			'created'   => [ 'created', true ],
 			'expires'   => [ 'expires', true ],
+			'updated'   => [ 'updated', true ],
 		];
 
 		// Return the array.
@@ -303,6 +305,39 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	}
 
 	/**
+	 * The "last updated" column.
+	 *
+	 * @param  array  $item  The item from the data array.
+	 *
+	 * @return string
+	 */
+	protected function column_updated( $item ) {
+
+		// If there is no last updated, then say so.
+		if ( empty( $item['stamps']['updated'] ) ) {
+
+			// Set an accessible.
+			$setup_text = '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">' . __( 'No update time', 'temporary-admin-user' ) . '</span>';
+
+			// Return my formatted text.
+			return apply_filters( Core\HOOK_PREFIX . 'updated_date_display', $setup_text, $item, true );
+		}
+
+		// Set my stamp.
+		$stamp  = absint( $item['stamps']['updated'] );
+		$local  = gmdate( 'Y/m/d g:i:s a', $stamp );
+
+		// Set my date with the formatting.
+		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, $item['stamps']['current'] ) );
+
+		// Wrap it in an accessible tag.
+		$build  = '<abbr title="' . esc_attr( $local ) . '">' . esc_html( $show ) . '</abbr>';
+
+		// Return my formatted date.
+		return apply_filters( Core\HOOK_PREFIX . 'updated_date_display', $build, $item );
+	}
+
+	/**
 	 * The "date expires" column.
 	 *
 	 * @param  array  $item  The item from the data array.
@@ -411,6 +446,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 				'stamps' => [
 					'created' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'created', true ),
 					'expires' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'expires', true ),
+					'updated' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'updated', true ),
 					'current' => $right_now,
 				]
 			];
@@ -438,6 +474,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
 
 			case 'created' :
+			case 'updated' :
 			case 'expires' :
 				return ! empty( $dataset['stamps'][ $column_name ] ) ? $dataset['stamps'][ $column_name ] : '';
 
