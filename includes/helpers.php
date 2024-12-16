@@ -250,13 +250,21 @@ function create_user_action_args( $user_id = 0, $user_email = '' ) {
  *
  * @param  integer $user_id  The ID of the user.
  *
- * @return boolean
+ * @return mixed
  */
 function confirm_user_via_plugin( $user_id = 0 ) {
 
 	// Check for the flag.
 	$check_flag = get_user_meta( absint( $user_id ), Core\META_PREFIX . 'flag', true );
 
-	// Return a boolean based on the flag existing.
-	return ! empty( $check_flag ) ? true : false;
+	// Go false if there is no flag.
+	if ( empty( $check_flag ) ) {
+		return false;
+	}
+
+	// Now get the existing status.
+	$get_status = get_user_meta( absint( $user_id ), Core\META_PREFIX . 'status', true );
+
+	// Return the status.
+	return ! empty( $get_status ) ? $get_status : false;
 }

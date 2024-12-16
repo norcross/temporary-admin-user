@@ -197,6 +197,11 @@ class TempAdminUserCommands extends WP_CLI_Command {
 			WP_CLI::error( __( 'The requested user was not created with this plugin and cannot be modified.', 'temporary-admin-user' ) );
 		}
 
+		// Flag if the user isn't ours.
+		if ( 'active' !== $check_creation ) {
+			WP_CLI::error( __( 'The requested user is not currently active. Promote this user if you want them to regain access.', 'temporary-admin-user' ) );
+		}
+
 		// Now extend it.
 		$extend_user    = Process\extend_existing_user( $valid_user_id, $set_duration );
 
