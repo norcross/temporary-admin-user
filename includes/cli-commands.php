@@ -325,5 +325,123 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		WP_CLI::halt( 0 );
 	}
 
+	/**
+	 * Delete a current user.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--id]
+	 * : The existing user ID.
+	 *
+	 * [--email]
+	 * : The existing user email.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp tmp-admin-user delete-user --id=50
+	 *     wp tmp-admin-user delete-user --email=someone@example.com
+	 *
+	 * @alias delete-user
+	 *
+	 * @when after_wp_load
+	 */
+	function delete_current_user( $args = [], $assoc_args = [] ) {
+
+		// Parse out the associatives.
+		$parse_cli_args = wp_parse_args( $assoc_args, [
+			'id'    => 0,
+			'email' => '',
+		]);
+
+		// Make sure we have an ID or an email.
+		if ( empty( $parse_cli_args['id'] ) && empty( $parse_cli_args['email'] ) ) {
+			WP_CLI::error( __( 'An email address or user ID is required.', 'temporary-admin-user' ) );
+		}
+
+		// Set an empty.
+		$valid_user_id  = 0;
+
+		// Check by user ID first.
+		if ( ! empty( $parse_cli_args['id'] ) ) {
+
+			// Attempt to get the user.
+			$maybe_has_user = get_user_by( 'id', absint( $parse_cli_args['id'] ) );
+
+			// If it worked, we have a valid ID. So set it.
+			if ( ! empty( $maybe_has_user ) ) {
+				$valid_user_id  = $maybe_has_user->ID;
+			}
+		}
+
+		// Check by email now first.
+		if ( empty( $valid_user_id ) && ! empty( $parse_cli_args['email'] ) ) {
+
+			// Attempt to get the user.
+			$maybe_has_user = get_user_by( 'email', sanitize_email( $parse_cli_args['email'] ) );
+
+			// If it worked, we have a valid ID. So set it.
+			if ( ! empty( $maybe_has_user ) ) {
+				$valid_user_id  = $maybe_has_user->ID;
+			}
+		}
+
+		// Make sure a valid ID was determined.
+		if ( empty( $valid_user_id ) ) {
+			WP_CLI::error( __( 'A valid user could not be found with that ID or email address. Please try again.', 'temporary-admin-user' ) );
+		}
+
+		// Output the confirm.
+		WP_CLI::confirm( __( 'Are you sure you want to delete this user?', 'temporary-admin-user' ), $assoc_args );
+
+		// Check if the user is one we created.
+		$check_creation = Helpers\confirm_user_via_plugin( $valid_user_id );
+
+		// Flag if the user isn't ours.
+		if ( empty( $check_creation ) ) {
+			WP_CLI::error( __( 'The requested user was not created with this plugin and cannot be modified.', 'temporary-admin-user' ) );
+		}
+
+		// Now delete it.
+		$delete_user    = Process\delete_existing_user( $valid_user_id );
+
+		// Flag if the restriction didn't work.
+		if ( empty( $delete_user ) ) {
+			WP_CLI::error( __( 'The requested user could not be deleted. Please try again.', 'temporary-admin-user' ) );
+		}
+
+		// Tell me I did a good job.
+		WP_CLI::success( __( 'Success! The requested user was deleted.', 'temporary-admin-user' ) );
+		WP_CLI::halt( 0 );
+	}
+
+	/**
+	 * Delete all existing users.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp tmp-admin-user delete-all-users
+	 *
+	 * @alias delete-all-users
+	 *
+	 * @when after_wp_load
+	 */
+	function delete_all_users( $args = [], $assoc_args = [] ) {
+
+		// Output the confirm.
+		WP_CLI::confirm( __( 'Are you sure you want to delete all users?', 'temporary-admin-user' ), $assoc_args );
+
+		// Now delete them.
+		$delete_users   = Process\delete_all_users();
+
+		// Flag if the restriction didn't work.
+		if ( empty( $delete_users ) ) {
+			WP_CLI::error( __( 'There was an error with one or more of the users. Please check the admin area.', 'temporary-admin-user' ) );
+		}
+
+		// Tell me I did a good job.
+		WP_CLI::success( __( 'Success! All existing users have been deleted.', 'temporary-admin-user' ) );
+		WP_CLI::halt( 0 );
+	}
+
 	// End all custom CLI commands.
 }
