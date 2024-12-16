@@ -154,7 +154,7 @@ function create_expire_time( $length = 'day', $action = 'create', $current_time 
 	$length = apply_filters( Core\HOOK_PREFIX . 'active_duration', $length, $action );
 
 	// Get my data for the particular period provided.
-	$data	= get_user_durations( $length );
+	$data   = get_user_durations( $length );
 
 	// Set my range accordingly.
 	$range  = absint( $data['value'] ) > 0 ? $data['value'] : DAY_IN_SECONDS;

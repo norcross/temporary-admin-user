@@ -27,7 +27,7 @@ function create_new_user( $user_email = '', $duration = '' ) {
 	$now_stamp  = current_datetime()->format('U');
 
 	// Get the exipration.
-	$get_expire = Helpers\create_expire_time( $duration, 'create', $now_stamp );
+	$set_expire = Helpers\create_expire_time( $duration, 'create', $now_stamp );
 
 	// Set my user args.
 	$setup_user = [
@@ -44,7 +44,7 @@ function create_new_user( $user_email = '', $duration = '' ) {
 			Core\META_PREFIX . 'flag'     => true,
 			Core\META_PREFIX . 'admin_id' => get_current_user_id(),
 			Core\META_PREFIX . 'created'  => $now_stamp,
-			Core\META_PREFIX . 'expires'  => $get_expire,
+			Core\META_PREFIX . 'expires'  => $set_expire,
 			Core\META_PREFIX . 'status'   => 'active',
 			'show_welcome_panel'          => 0,
  			'dismissed_wp_pointers'       => 'wp330_toolbar,wp330_saving_widgets,wp340_choose_image_from_library,wp340_customize_current_theme_link,wp350_media,wp360_revisions,wp360_locks',
@@ -77,6 +77,49 @@ function create_new_user( $user_email = '', $duration = '' ) {
  *
  * @return void
  */
+function extend_existing_user( $user_id = 0, $duration = 'day' ) {
+
+	// Bail without a user ID.
+	if ( empty( $user_id ) ) {
+		return false;
+	}
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'before_user_extend', $user_id );
+
+	// Get my data for the particular period provided.
+	$range_data = Helpers\get_user_durations( $duration );
+	$bonus_time = ! empty( $range_data['value'] ) ? $range_data['value'] : DAY_IN_SECONDS;
+
+	// Set a stamp for now.
+	$now_stamp  = current_datetime()->format('U');
+
+	// Get the exipration.
+	$get_expire = get_user_meta( $user_id, Core\META_PREFIX . 'expires', true );
+	$set_expire = ! empty( $get_expire ) ? $get_expire : $now_stamp;
+
+	// Now bump the time up.
+	$new_expore = $set_expire + $bonus_time;
+
+	// Handle the updated times.
+	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
+	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $new_expore );
+
+	// Allow other things to hook into this process.
+	do_action( Core\HOOK_PREFIX . 'after_user_extend', $user_id );
+
+	// And return true, so we know to report back.
+	return true;
+}
+
+/**
+ * Add a pre-determined amount of time to the existing user.
+ *
+ * @param  integer $user_id   The user ID we want to restrict.
+ * @param  string  $duration  The requested duration length.
+ *
+ * @return void
+ */
 function promote_existing_user( $user_id = 0, $duration = 'day' ) {
 
 	// Bail without a user ID.
@@ -97,11 +140,11 @@ function promote_existing_user( $user_id = 0, $duration = 'day' ) {
 	$now_stamp  = current_datetime()->format('U');
 
 	// Get the exipration.
-	$get_expire = Helpers\create_expire_time( $duration, 'update', $now_stamp );
+	$set_expire = Helpers\create_expire_time( $duration, 'update', $now_stamp );
 
-	// Handle the expires time.
+	// Handle the updated times.
 	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
-	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $get_expire );
+	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $set_expire );
 	update_user_meta( $user_id, Core\META_PREFIX . 'status', 'active' );
 
 	// Allow other things to hook into this process.
@@ -138,7 +181,7 @@ function restrict_existing_user( $user_id = 0 ) {
 	$now_stamp  = current_datetime()->format('U');
 	$exp_stamp  = absint( $now_stamp ) - MINUTE_IN_SECONDS;
 
-	// Handle the expires time.
+	// Handle the updated times.
 	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
 	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $exp_stamp );
 	update_user_meta( $user_id, Core\META_PREFIX . 'status', 'inactive' );
