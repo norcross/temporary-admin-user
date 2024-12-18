@@ -71,7 +71,7 @@ function render_overview_help_tab( $echo = true ) {
  *
  * @return HTML           The HTML of the content.
  */
-function render_advanced_help_tab( $echo = true ) {
+function render_cli_help_tab( $echo = true ) {
 
 	// Create an empty.
 	$build  = '';
@@ -79,18 +79,85 @@ function render_advanced_help_tab( $echo = true ) {
 	// Begin the intro.
 	$build .= '<p class="tmp-admin-help-tab-text">' . sprintf( __( 'This plugin contains a set of WP-CLI functions to manage users via the %s command.', 'temporary-admin-user' ), '<code>' . esc_html( 'tmp-admin-user' ) . '</code>' ) . '</p>';
 
-	/*
-	new-user --email=someone@example.com
+	// Wrap the command in a paragraph.
+	$build .= '<table class="fixed widefat tmp-admin-help-tab-cmd-table">';
 
-	extend-user --id=50
-	promote-user --id=50 --duration=week
-	restrict-user --id=50
-	delete-user --id=50
+		// Our header row.
+		$build .= '<tr class="tmp-admin-help-tab-cmd-table-header-row">';
+			$build .= '<th>' . esc_html__( 'Command' , 'temporary-admin-user') . '</th>';
+			$build .= '<th>' . esc_html__( 'Usage' , 'temporary-admin-user') . '</th>';
+		$build .= '</tr>';
+
+		// The new user command.
+		$build .= '<tr>';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --email=someone@example.com', 'temporary-admin-user' ), '<strong>' . esc_html( 'new-user' ) . '</strong>' ) . '</code></td>';
+			$build .= '<td>' . esc_html__( 'Creates a new user. Requires an email address.' , 'temporary-admin-user') . '</td>';
+		$build .= '</tr>';
+
+		// The extend user command.
+		$build .= '<tr class="tmp-admin-help-tab-cmd-table-border-row">';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --id=50', 'temporary-admin-user' ), '<strong>' . esc_html( 'extend-user' ) . '</strong>' ) . '</code></td>';
+			$build .= '<td rowspan="3">' . esc_html__( 'Extends the expiration on a current user. Accepts user ID or email address. Default duration is one day.' , 'temporary-admin-user') . '</td>';
+		$build .= '</tr>';
+
+		$build .= '<tr>';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --id=50 --duration=week', 'temporary-admin-user' ), '<strong>' . esc_html( 'extend-user' ) . '</strong>' ) . '</code></td>';
+		$build .= '</tr>';
+
+		$build .= '<tr>';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --email=someone@example.com', 'temporary-admin-user' ), '<strong>' . esc_html( 'extend-user' ) . '</strong>' ) . '</code></td>';
+		$build .= '</tr>';
+
+		// The promote user command.
+		$build .= '<tr class="tmp-admin-help-tab-cmd-table-border-row">';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --id=50', 'temporary-admin-user' ), '<strong>' . esc_html( 'promote-user' ) . '</strong>' ) . '</code></td>';
+			$build .= '<td rowspan="3">' . esc_html__( 'Promotes an expired user back to admin status. Accepts user ID or email address. Default duration is one day.' , 'temporary-admin-user') . '</td>';
+		$build .= '</tr>';
+
+		$build .= '<tr>';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --id=50 --duration=week', 'temporary-admin-user' ), '<strong>' . esc_html( 'promote-user' ) . '</strong>' ) . '</code></td>';
+		$build .= '</tr>';
+
+		$build .= '<tr>';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --email=someone@example.com', 'temporary-admin-user' ), '<strong>' . esc_html( 'promote-user' ) . '</strong>' ) . '</code></td>';
+		$build .= '</tr>';
+
+		// The restrict user command.
+		$build .= '<tr class="tmp-admin-help-tab-cmd-table-border-row">';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --id=50', 'temporary-admin-user' ), '<strong>' . esc_html( 'restrict-user' ) . '</strong>' ) . '</code></td>';
+			$build .= '<td rowspan="2">' . esc_html__( 'Restrict a current user by demoting them back to subscriber status. Accepts user ID or email address.' , 'temporary-admin-user') . '</td>';
+		$build .= '</tr>';
+
+		$build .= '<tr>';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --email=someone@example.com', 'temporary-admin-user' ), '<strong>' . esc_html( 'restrict-user' ) . '</strong>' ) . '</code></td>';
+		$build .= '</tr>';
 
 
-	restrict-all-users
-	delete-all-users
-	 */
+		// The delete user command.
+		$build .= '<tr class="tmp-admin-help-tab-cmd-table-border-row">';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --id=50', 'temporary-admin-user' ), '<strong>' . esc_html( 'delete-user' ) . '</strong>' ) . '</code></td>';
+			$build .= '<td rowspan="2">' . esc_html__( 'Delete a current user completely. Accepts user ID or email address.' , 'temporary-admin-user') . '</td>';
+		$build .= '</tr>';
+
+		$build .= '<tr>';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s --email=someone@example.com', 'temporary-admin-user' ), '<strong>' . esc_html( 'delete-user' ) . '</strong>' ) . '</code></td>';
+		$build .= '</tr>';
+
+
+		// The restrict all users command.
+		$build .= '<tr class="tmp-admin-help-tab-cmd-table-border-row">';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s', 'temporary-admin-user' ), '<strong>' . esc_html( 'restrict-all-users' ) . '</strong>' ) . '</code></td>';
+			$build .= '<td>' . esc_html__( 'Restricts all users created by the plugin.' , 'temporary-admin-user') . '</td>';
+		$build .= '</tr>';
+
+		// The delete all users command.
+		$build .= '<tr class="tmp-admin-help-tab-cmd-table-border-row">';
+			$build .= '<td><code>' . sprintf( __( 'wp tmp-admin-user %s', 'temporary-admin-user' ), '<strong>' . esc_html( 'delete-all-users' ) . '</strong>' ) . '</code></td>';
+			$build .= '<td>' . esc_html__( 'Deletes all users created by the plugin.' , 'temporary-admin-user') . '</td>';
+		$build .= '</tr>';
+
+	// Close the table.
+	$build .= '</table>';
 
 	// Return the markup.
 	if ( false === $echo ) {

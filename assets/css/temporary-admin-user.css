@@ -14,6 +14,21 @@
 	margin-left: 5px;
 }
 
+.help-tab-content .tmp-admin-help-tab-cmd-table th {
+	text-align: left;
+	border-bottom: 1px solid #c3c4c7;
+	font-weight: 600;
+}
+
+.help-tab-content .tmp-admin-help-tab-cmd-table td {
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+
+.help-tab-content .tmp-admin-help-tab-cmd-table .tmp-admin-help-tab-cmd-table-border-row td {
+	border-top: 1px solid #c3c4c7;
+}
+
 .tmp-admin-user-title-wrap {
 	margin-bottom: 10px;
 }

@@ -71,16 +71,16 @@ function add_help_tab_options() {
 
 	// Add the initial help tab.
 	$screen->add_help_tab( [
-		'id'      => 'tmp_htb_overview',
+		'id'      => 'tmp-htb-overview',
 		'title'   => __( 'Overview', 'temporary-admin-user' ),
 		'content' => AdminMarkup\render_overview_help_tab( false ),
 	] );
 
 	// Add the advanced help tab.
 	$screen->add_help_tab( [
-		'id'      => 'tmp_htb_advanced',
-		'title'   => __( 'Advanced Usage', 'temporary-admin-user' ),
-		'content' => AdminMarkup\render_advanced_help_tab( false ),
+		'id'      => 'tmp-htb-wp-cli',
+		'title'   => __( 'WP-CLI Usage', 'temporary-admin-user' ),
+		'content' => AdminMarkup\render_cli_help_tab( false ),
 	] );
 }
 
