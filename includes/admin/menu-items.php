@@ -10,6 +10,7 @@ namespace Norcross\TempAdminUser\MenuItems;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
+use Norcross\TempAdminUser\Admin\Markup as AdminMarkup;
 
 /**
  * Start our engines.
@@ -33,8 +34,9 @@ function load_author_table_menu() {
 		7
 	);
 
-	// Now handle some screen options.
+	// Now handle some screen options and help tab.
 	add_action( "load-$setup_page", __NAMESPACE__ . '\add_screen_options' );
+	add_action( "load-$setup_page", __NAMESPACE__ . '\add_help_tab_options' );
 
 	// Nothing left inside this.
 }
@@ -55,6 +57,31 @@ function add_screen_options() {
 
 	// And add it to the setup.
 	add_screen_option( 'per_page', $setup_args );
+}
+
+/**
+ * Add our help tab option for the table.
+ *
+ * @return void
+ */
+function add_help_tab_options() {
+
+	// Grab the current screen object
+	$screen = get_current_screen();
+
+	// Add the initial help tab.
+	$screen->add_help_tab( [
+		'id'      => 'tmp_htb_overview',
+		'title'   => __( 'Overview', 'temporary-admin-user' ),
+		'content' => AdminMarkup\render_overview_help_tab( false ),
+	] );
+
+	// Add the advanced help tab.
+	$screen->add_help_tab( [
+		'id'      => 'tmp_htb_advanced',
+		'title'   => __( 'Advanced Usage', 'temporary-admin-user' ),
+		'content' => AdminMarkup\render_advanced_help_tab( false ),
+	] );
 }
 
 /**

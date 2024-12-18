@@ -1,4 +1,19 @@
 
+.help-tab-content ul.tmp-admin-help-tab-list {
+	list-style: none;
+	margin-top: 0;
+	padding-left: 4px;
+}
+
+.help-tab-content ul.tmp-admin-help-tab-list li.tmp-admin-help-tab-list-item {
+	list-style: none;
+	margin-left: 0;
+}
+
+.help-tab-content ul.tmp-admin-help-tab-list .tmp-admin-help-tab-list-item-text {
+	margin-left: 5px;
+}
+
 .tmp-admin-user-title-wrap {
 	margin-bottom: 10px;
 }
@@ -67,29 +82,36 @@ h3.tmp-admin-user-new-user-form-title {
 	box-shadow: none;
 }
 
-.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-extend {
-	color: #008000;
-}
-
-.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-promote {
-	color: #ffc719;
-}
-
-.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-restrict {
-	color: #565656;
-}
-
-.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-delete {
-	color: #cc0000;
-}
-
+.tmp-admin-help-tab-list-item.tmp-admin-help-tab-list-item-profile .dashicons,
 .tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-view-profile {
 	color: #6d1530;
 }
 
+.tmp-admin-help-tab-list-item.tmp-admin-help-tab-list-item-email .dashicons,
 .tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-view-email {
 	color: #153e6d;
 }
+
+.tmp-admin-help-tab-list-item.tmp-admin-help-tab-list-item-extend .dashicons,
+.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-extend {
+	color: #008000;
+}
+
+.tmp-admin-help-tab-list-item.tmp-admin-help-tab-list-item-promote .dashicons,
+.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-promote {
+	color: #ffc719;
+}
+
+.tmp-admin-help-tab-list-item.tmp-admin-help-tab-list-item-restrict .dashicons,
+.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-restrict {
+	color: #565656;
+}
+
+.tmp-admin-help-tab-list-item.tmp-admin-help-tab-list-item-delete .dashicons,
+.tmp-admin-user-existing-table .tmp-admin-user-link.tmp-admin-user-action-delete {
+	color: #cc0000;
+}
+
 
 .tmp-admin-user-existing-table .tmp-admin-user-link:visited,
 .tmp-admin-user-existing-table .tmp-admin-user-link:hover,

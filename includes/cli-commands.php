@@ -126,6 +126,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     wp tmp-admin-user extend-user --id=50
+	 *     wp tmp-admin-user extend-user --id=50 --duration=week
 	 *     wp tmp-admin-user extend-user --email=someone@example.com
 	 *
 	 * @alias extend-user
@@ -219,6 +220,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     wp tmp-admin-user promote-user --id=50
+	 *     wp tmp-admin-user promote-user --id=50 --duration=week
 	 *     wp tmp-admin-user promote-user --email=someone@example.com
 	 *
 	 * @alias promote-user

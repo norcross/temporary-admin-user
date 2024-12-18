@@ -214,36 +214,42 @@ function create_user_action_args( $user_id = 0, $user_email = '' ) {
 			'icon'  => 'id-alt',
 			'link'  => get_edit_user_link( $user_id ),
 			'blank' => true,
+			'help'  => __( 'View the complete user profile.', 'temporary-admin-user' ),
 		],
 		'email' => [
 			'label' => __( 'Email User', 'temporary-admin-user' ),
 			'icon'  => 'email',
 			'link'  => 'mailto:' . antispambot( $user_email ),
 			'blank' => false,
+			'help'  => __( 'Send an email to this user via an email client', 'temporary-admin-user' ),
 		],
 		'extend' => [
 			'label' => __( 'Extend User', 'temporary-admin-user' ),
 			'icon'  => 'clock',
 			'link'  => '',
 			'blank' => false,
+			'help'  => __( 'Extend the user expiration by one day', 'temporary-admin-user' ),
 		],
 		'promote' => [
 			'label' => __( 'Promote User', 'temporary-admin-user' ),
 			'icon'  => 'star-filled',
 			'link'  => '',
 			'blank' => false,
+			'help'  => __( 'Restore an expired user back to admin again for one day', 'temporary-admin-user' ),
 		],
 		'restrict' => [
 			'label' => __( 'Restrict User', 'temporary-admin-user' ),
 			'icon'  => 'lock',
 			'link'  => '',
 			'blank' => false,
+			'help'  => __( 'Demote the user account to the subscriber level', 'temporary-admin-user' ),
 		],
 		'delete' => [
 			'label' => __( 'Delete User', 'temporary-admin-user' ),
 			'icon'  => 'trash',
 			'link'  => '',
 			'blank' => false,
+			'help'  => __( 'Delete the user entirely', 'temporary-admin-user' ),
 		],
 	];
 

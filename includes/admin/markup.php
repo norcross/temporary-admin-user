@@ -13,6 +13,95 @@ use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
 
 /**
+ * Construct the HTML for the intro on the help tab.
+ *
+ * @param  boolean $echo  Whether to echo or return it.
+ *
+ * @return HTML           The HTML of the content.
+ */
+function render_overview_help_tab( $echo = true ) {
+
+	// Get all the actions we have.
+	$actns  = Helpers\create_user_action_args();
+
+	// Create an empty.
+	$build  = '';
+
+	// Begin the first paragraph.
+	$build .= '<p class="tmp-admin-help-tab-text">' . esc_html__( 'This screen lists all the users created with the Temporary Admin User plugin, along with a form to create a new temporary user. The sortable columns include the individual user data, along with defined set of actions.', 'temporary-admin-user' ) . '</p>';
+
+	// Wrap them in a list.
+	$build .= '<ul class="tmp-admin-help-tab-list">';
+
+	// Now loop them.
+	foreach ( $actns as $action_key => $action_args ) {
+
+		// Wrap it in a list.
+		$build .= '<li class="tmp-admin-help-tab-list-item tmp-admin-help-tab-list-item-' . esc_attr( $action_key ) . '">';
+
+			// Show the icon.
+			$build .= '<i class="dashicons dashicons-' . esc_attr( $action_args['icon'] ) . '"></i>';
+
+			// Show the text we defined.
+			$build .= '<span class="tmp-admin-help-tab-list-item-text">' . esc_html( $action_args['help'] ) . '</span>';
+
+		// Close the list item.
+		$build .= '</li>';
+	}
+
+	// Close the list.
+	$build .= '</ul>';
+
+	// Explain the list.
+	$build .= '<p class="tmp-admin-help-tab-text">' . esc_html__( 'Note that some actions are only available for users with a particular status.', 'temporary-admin-user' ) . '</p>';
+
+	// Return the markup.
+	if ( false === $echo ) {
+		return $build;
+	}
+
+	// Show it.
+	echo $build;
+}
+
+/**
+ * Construct the HTML for the CLI intructions on the help tab.
+ *
+ * @param  boolean $echo  Whether to echo or return it.
+ *
+ * @return HTML           The HTML of the content.
+ */
+function render_advanced_help_tab( $echo = true ) {
+
+	// Create an empty.
+	$build  = '';
+
+	// Begin the intro.
+	$build .= '<p class="tmp-admin-help-tab-text">' . sprintf( __( 'This plugin contains a set of WP-CLI functions to manage users via the %s command.', 'temporary-admin-user' ), '<code>' . esc_html( 'tmp-admin-user' ) . '</code>' ) . '</p>';
+
+	/*
+	new-user --email=someone@example.com
+
+	extend-user --id=50
+	promote-user --id=50 --duration=week
+	restrict-user --id=50
+	delete-user --id=50
+
+
+	restrict-all-users
+	delete-all-users
+	 */
+
+	// Return the markup.
+	if ( false === $echo ) {
+		return $build;
+	}
+
+	// Show it.
+	echo $build;
+}
+
+/**
  * Construct the HTML for the new user portion of the admin page.
  *
  * @param  boolean $echo  Whether to echo or return it.
