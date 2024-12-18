@@ -145,8 +145,12 @@ function render_user_actions_list( $table_item = [], $user_actions = [], $echo =
 		// Create my class.
 		$class  = 'tmp-admin-user-link tmp-admin-user-action tmp-admin-user-action-' . esc_attr( $user_action );
 
-		// Hide links based on status.
-		if ( 'active' === $table_item['status'] && 'promote' === $user_action || 'inactive' === $table_item['status'] && 'restrict' === $user_action ) {
+		// Hide specific links based on status.
+		if (
+			'active' === $table_item['status'] && 'promote' === $user_action ||
+			'inactive' === $table_item['status'] && 'extend' === $user_action ||
+			'inactive' === $table_item['status'] && 'restrict' === $user_action
+		) {
 
 			// Set a title.
 			$title  = sprintf( __( 'The %s action has been disabled for this user.', 'temporary-admin-user' ), esc_attr( $user_action ) );
