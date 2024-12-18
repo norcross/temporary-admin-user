@@ -119,6 +119,10 @@ function get_admin_notice_text( $return_code = '' ) {
 			return __( 'The new user could not be created. Please check your error logs.', 'temporary-admin-user' );
 			break;
 
+		case 'user-extend-error' :
+			return __( 'The expiration time for the existing user could not be updated. Please check your error logs.', 'temporary-admin-user' );
+			break;
+
 		case 'user-promote-error' :
 			return __( 'The existing user could not be promoted. Please check your error logs.', 'temporary-admin-user' );
 			break;
@@ -133,6 +137,10 @@ function get_admin_notice_text( $return_code = '' ) {
 
 		case 'new-user-created' :
 			return __( 'Success! A new temporary admin user has been created.', 'temporary-admin-user' );
+			break;
+
+		case 'user-extend-success' :
+			return __( 'Success! The requested temporary user account expiration was extended.', 'temporary-admin-user' );
 			break;
 
 		case 'user-promote-success' :

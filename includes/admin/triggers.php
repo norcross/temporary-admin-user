@@ -130,12 +130,29 @@ function modify_user_action_request() {
 	$confirm_action = filter_input( INPUT_GET, 'tmp-admin-single-user-request', FILTER_SANITIZE_SPECIAL_CHARS ); // phpcs:ignore -- the nonce check is happening soon.
 
 	// Bail without an action we can use.
-	if ( empty( $confirm_action ) || ! in_array( $confirm_action, ['promote', 'restrict', 'delete'], true ) ) {
+	if ( empty( $confirm_action ) || ! in_array( $confirm_action, ['extend', 'promote', 'restrict', 'delete'], true ) ) {
 		Helpers\redirect_admin_action_result( 'invalid-user-action' );
 	}
 
 	// Now do a switch and handle the appropriate action.
 	switch ( $confirm_action ) {
+
+		// Promote back an existing user.
+		case 'extend' :
+
+			// Attempt the restriction.
+			$attempt_change = Process\extend_existing_user( $confirm_userid );
+
+			// Handle a possible failure.
+			if ( false === $attempt_change ) {
+				Helpers\redirect_admin_action_result( 'user-extend-error' );
+			}
+
+			// We are good, so redirect with the affermative.
+			Helpers\redirect_admin_action_result( '', 'user-extend-success', true );
+
+			// Nothing else to do here.
+			break;
 
 		// Promote back an existing user.
 		case 'promote' :

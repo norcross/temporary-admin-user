@@ -99,7 +99,7 @@ function extend_existing_user( $user_id = 0, $duration = 'day' ) {
 	$set_expire = ! empty( $get_expire ) ? $get_expire : $now_stamp;
 
 	// Now bump the time up.
-	$new_expore = $set_expire + $bonus_time;
+	$new_expore = absint( $set_expire ) + absint( $bonus_time );
 
 	// Handle the updated times.
 	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );

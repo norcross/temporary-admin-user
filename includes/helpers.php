@@ -221,6 +221,12 @@ function create_user_action_args( $user_id = 0, $user_email = '' ) {
 			'link'  => 'mailto:' . antispambot( $user_email ),
 			'blank' => false,
 		],
+		'extend' => [
+			'label' => __( 'Extend User', 'temporary-admin-user' ),
+			'icon'  => 'clock',
+			'link'  => '',
+			'blank' => false,
+		],
 		'promote' => [
 			'label' => __( 'Promote User', 'temporary-admin-user' ),
 			'icon'  => 'star-filled',
