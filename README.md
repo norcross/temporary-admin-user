@@ -1,7 +1,7 @@
 Temporary Admin User
 ====================
 
-Remotely add known terms to the WordPress Comment Blacklist to manage spam.
+Create admin users for support that expire.
 
 ## Contributors
 * [Andrew Norcross](https://github.com/norcross)
