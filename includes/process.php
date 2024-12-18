@@ -60,7 +60,7 @@ function create_new_user( $user_email = '', $duration = '' ) {
 	}
 
 	// Send the new user email.
-	wp_send_new_user_notifications( $create_id, 'user' );
+	maybe_send_new_user_email( $create_id );
 
 	// Allow others to help.
 	do_action( Core\HOOK_PREFIX . 'after_user_created', $create_id, $setup_user );
@@ -281,4 +281,25 @@ function delete_all_users() {
 
 	// And return true, so we know to report back.
 	return true;
+}
+
+/**
+ * Send the new user email if we want to.
+ *
+ * @param  integer $user_id  The user ID we just make.
+ *
+ * @return void
+ */
+function maybe_send_new_user_email( $user_id = 0 ) {
+
+	// Pass our filter with a default.
+	$maybe_send = apply_filters( Core\HOOK_PREFIX . 'disable_new_user_email', false );
+
+	// Bail if the filter is passed.
+	if ( false !== $maybe_send ) {
+		return;
+	}
+
+	// Send the new user email.
+	wp_send_new_user_notifications( $user_id, 'user' );
 }

@@ -278,7 +278,7 @@ function confirm_user_via_plugin( $user_id = 0 ) {
 	$get_status = get_user_meta( absint( $user_id ), Core\META_PREFIX . 'status', true );
 
 	// Return the status.
-	return ! empty( $get_status ) ? $get_status : false;
+	return ! empty( $get_status ) ? $get_status : 'unknown';
 }
 
 /**

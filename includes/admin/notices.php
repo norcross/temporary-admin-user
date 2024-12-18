@@ -16,14 +16,15 @@ use Norcross\TempAdminUser\Admin\Markup as AdminMarkup;
 /**
  * Start our engines.
  */
-add_action( 'admin_notices', __NAMESPACE__ . '\display_admin_notices' );
+add_action( 'admin_notices', __NAMESPACE__ . '\display_table_admin_notices' );
+add_action( 'admin_notices', __NAMESPACE__ . '\display_temp_user_badge' );
 
 /**
- * Display our admin notices.
+ * Display our admin notices generated on our table.
  *
  * @return void
  */
-function display_admin_notices() {
+function display_table_admin_notices() {
 
 	// Make sure this is the correct admin page.
 	$confirm_admin  = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_SPECIAL_CHARS );
@@ -78,6 +79,55 @@ function display_admin_notices() {
 
 	// And handle the display.
 	AdminMarkup\render_admin_notice_markup( $alert_text, 'success' );
+
+	// And be done.
+	return;
+}
+
+/**
+ * Display a banner notification on users created via the plugin.
+ *
+ * @return void
+ */
+function display_temp_user_badge() {
+
+	// Make sure we have the function.
+	if ( ! function_exists( 'get_current_screen' ) ) {
+		return;
+	}
+
+	// Make sure this is the correct admin page.
+	$confirm_admin  = get_current_screen();
+
+	// Make sure it is what we want.
+	if ( ! is_object( $confirm_admin ) || empty( $confirm_admin->base ) || 'user-edit' !== $confirm_admin->base ) {
+		return;
+	}
+
+	// Grab the user ID we are on.
+	$fetch_user_id  = filter_input( INPUT_GET, 'user_id', FILTER_SANITIZE_NUMBER_INT );
+
+	// Make sure one exists.
+	if ( empty( $fetch_user_id ) ) {
+		return;
+	}
+
+	// Check if the user is one we created.
+	$check_creation = Helpers\confirm_user_via_plugin( $fetch_user_id );
+
+	// Flag if the user isn't ours.
+	if ( empty( $check_creation ) ) {
+		return;
+	}
+
+	// Get the time it was created.
+	$set_timestamp  = get_user_meta( $fetch_user_id, Core\META_PREFIX . 'created', true );
+
+	// Set my message text.
+	$message_alert  = sprintf( __( 'This user was created with the Temporary Admin User plugin on %s', 'temporary-admin-user' ), gmdate( get_option( 'date_format' ), $set_timestamp ) );
+
+	// And handle the display.
+	AdminMarkup\render_admin_notice_markup( $message_alert, 'info' );
 
 	// And be done.
 	return;
