@@ -274,3 +274,46 @@ function confirm_user_via_plugin( $user_id = 0 ) {
 	// Return the status.
 	return ! empty( $get_status ) ? $get_status : false;
 }
+
+/**
+ * Try to grab a legit user ID based on passing the items.
+ *
+ * @param  integer $user_id     The potential ID of the user.
+ * @param  string  $user_email  The potential email of the user.
+ *
+ * @return integer
+ */
+function confirm_user_id_via_cli( $user_id = 0, $user_email = '' ) {
+
+	// Bail if neither.
+	if ( empty( $user_id ) && empty( $user_email ) ) {
+		return 0;
+	}
+
+	// Check by user ID first.
+	if ( ! empty( $user_id ) ) {
+
+		// Attempt to get the user.
+		$maybe_has_user = get_user_by( 'id', absint( $user_id ) );
+
+		// If it worked, we have a valid ID. So set it.
+		if ( ! empty( $maybe_has_user ) ) {
+			return $maybe_has_user->ID;
+		}
+	}
+
+	// Check by email now first.
+	if ( ! empty( $user_email ) ) {
+
+		// Attempt to get the user.
+		$maybe_has_user = get_user_by( 'email', sanitize_email( $user_email ) );
+
+		// If it worked, we have a valid ID. So set it.
+		if ( ! empty( $maybe_has_user ) ) {
+			return $maybe_has_user->ID;
+		}
+	}
+
+	// Return empty.
+	return 0;
+}

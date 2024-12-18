@@ -157,32 +157,8 @@ class TempAdminUserCommands extends WP_CLI_Command {
 			WP_CLI::error( __( 'The provided duration was not valid. Please try again.', 'temporary-admin-user' ) );
 		}
 
-		// Set an empty.
-		$valid_user_id  = 0;
-
-		// Check by user ID first.
-		if ( ! empty( $parse_cli_args['id'] ) ) {
-
-			// Attempt to get the user.
-			$maybe_has_user = get_user_by( 'id', absint( $parse_cli_args['id'] ) );
-
-			// If it worked, we have a valid ID. So set it.
-			if ( ! empty( $maybe_has_user ) ) {
-				$valid_user_id  = $maybe_has_user->ID;
-			}
-		}
-
-		// Check by email now first.
-		if ( empty( $valid_user_id ) && ! empty( $parse_cli_args['email'] ) ) {
-
-			// Attempt to get the user.
-			$maybe_has_user = get_user_by( 'email', sanitize_email( $parse_cli_args['email'] ) );
-
-			// If it worked, we have a valid ID. So set it.
-			if ( ! empty( $maybe_has_user ) ) {
-				$valid_user_id  = $maybe_has_user->ID;
-			}
-		}
+		// Wrangle a valid user ID from what was passed.
+		$valid_user_id  = Helpers\confirm_user_id_via_cli( $parse_cli_args['id'], $parse_cli_args['email'] );
 
 		// Make sure a valid ID was determined.
 		if ( empty( $valid_user_id ) ) {
@@ -274,32 +250,8 @@ class TempAdminUserCommands extends WP_CLI_Command {
 			WP_CLI::error( __( 'The provided duration was not valid. Please try again.', 'temporary-admin-user' ) );
 		}
 
-		// Set an empty.
-		$valid_user_id  = 0;
-
-		// Check by user ID first.
-		if ( ! empty( $parse_cli_args['id'] ) ) {
-
-			// Attempt to get the user.
-			$maybe_has_user = get_user_by( 'id', absint( $parse_cli_args['id'] ) );
-
-			// If it worked, we have a valid ID. So set it.
-			if ( ! empty( $maybe_has_user ) ) {
-				$valid_user_id  = $maybe_has_user->ID;
-			}
-		}
-
-		// Check by email now first.
-		if ( empty( $valid_user_id ) && ! empty( $parse_cli_args['email'] ) ) {
-
-			// Attempt to get the user.
-			$maybe_has_user = get_user_by( 'email', sanitize_email( $parse_cli_args['email'] ) );
-
-			// If it worked, we have a valid ID. So set it.
-			if ( ! empty( $maybe_has_user ) ) {
-				$valid_user_id  = $maybe_has_user->ID;
-			}
-		}
+		// Wrangle a valid user ID from what was passed.
+		$valid_user_id  = Helpers\confirm_user_id_via_cli( $parse_cli_args['id'], $parse_cli_args['email'] );
 
 		// Make sure a valid ID was determined.
 		if ( empty( $valid_user_id ) ) {
@@ -360,32 +312,8 @@ class TempAdminUserCommands extends WP_CLI_Command {
 			WP_CLI::error( __( 'An email address or user ID is required.', 'temporary-admin-user' ) );
 		}
 
-		// Set an empty.
-		$valid_user_id  = 0;
-
-		// Check by user ID first.
-		if ( ! empty( $parse_cli_args['id'] ) ) {
-
-			// Attempt to get the user.
-			$maybe_has_user = get_user_by( 'id', absint( $parse_cli_args['id'] ) );
-
-			// If it worked, we have a valid ID. So set it.
-			if ( ! empty( $maybe_has_user ) ) {
-				$valid_user_id  = $maybe_has_user->ID;
-			}
-		}
-
-		// Check by email now first.
-		if ( empty( $valid_user_id ) && ! empty( $parse_cli_args['email'] ) ) {
-
-			// Attempt to get the user.
-			$maybe_has_user = get_user_by( 'email', sanitize_email( $parse_cli_args['email'] ) );
-
-			// If it worked, we have a valid ID. So set it.
-			if ( ! empty( $maybe_has_user ) ) {
-				$valid_user_id  = $maybe_has_user->ID;
-			}
-		}
+		// Wrangle a valid user ID from what was passed.
+		$valid_user_id  = Helpers\confirm_user_id_via_cli( $parse_cli_args['id'], $parse_cli_args['email'] );
 
 		// Make sure a valid ID was determined.
 		if ( empty( $valid_user_id ) ) {
