@@ -98,6 +98,11 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			'actions' => __( 'Actions', 'temporary-admin-user' ),
 		];
 
+		// Include the bulk action dropdown.
+		if ( ! $this->has_items() ) {
+			unset( $setup_data['cb'] );
+		}
+
 		// Return the array.
 		return apply_filters( Core\HOOK_PREFIX . 'table_columns', $setup_data );
 	}
