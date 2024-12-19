@@ -416,8 +416,8 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 			'per_page' => $per_page,
 		];
 
-		// Just handle the default return.
-		return Queries\query_current_temporary_users( $setup_args );
+		// Return the results of the query with the args.
+		return Queries\query_user_table_data( $setup_args );
 	}
 
 	/**

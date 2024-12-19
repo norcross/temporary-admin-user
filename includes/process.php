@@ -59,8 +59,11 @@ function create_new_user( $user_email = '', $duration = 'day' ) {
 		return false;
 	}
 
+	// Purge the stored transients.
+	Helpers\purge_stored_transients();
+
 	// Send the new user email.
-	maybe_send_new_user_email( $create_id );
+	Helpers\maybe_send_new_user_email( $create_id );
 
 	// Allow others to help.
 	do_action( Core\HOOK_PREFIX . 'after_user_created', $create_id, $setup_user );
@@ -105,6 +108,9 @@ function extend_existing_user( $user_id = 0, $duration = 'day' ) {
 	update_user_meta( $user_id, Core\META_PREFIX . 'updated', $now_stamp );
 	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $new_expore );
 
+	// Purge the stored transients.
+	Helpers\purge_stored_transients();
+
 	// Allow other things to hook into this process.
 	do_action( Core\HOOK_PREFIX . 'after_user_extend', $user_id );
 
@@ -147,6 +153,9 @@ function promote_existing_user( $user_id = 0, $duration = 'day' ) {
 	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $set_expire );
 	update_user_meta( $user_id, Core\META_PREFIX . 'status', 'active' );
 
+	// Purge the stored transients.
+	Helpers\purge_stored_transients();
+
 	// Allow other things to hook into this process.
 	do_action( Core\HOOK_PREFIX . 'after_user_promote', $user_id );
 
@@ -186,6 +195,9 @@ function restrict_existing_user( $user_id = 0 ) {
 	update_user_meta( $user_id, Core\META_PREFIX . 'expires', $exp_stamp );
 	update_user_meta( $user_id, Core\META_PREFIX . 'status', 'inactive' );
 
+	// Purge the stored transients.
+	Helpers\purge_stored_transients();
+
 	// Allow other things to hook into this process.
 	do_action( Core\HOOK_PREFIX . 'after_user_restrict', $user_id );
 
@@ -218,6 +230,9 @@ function restrict_all_users() {
 		return false;
 	}
 
+	// Purge the stored transients.
+	Helpers\purge_stored_transients();
+
 	// And return true, so we know to report back.
 	return true;
 }
@@ -246,6 +261,9 @@ function delete_existing_user( $user_id = 0 ) {
 	if ( empty( $maybe_delete_user ) || is_wp_error( $maybe_delete_user ) ) {
 		return false; // @@todo needs some error checking
 	}
+
+	// Purge the stored transients.
+	Helpers\purge_stored_transients();
 
 	// Allow other things to hook into this process.
 	do_action( Core\HOOK_PREFIX . 'after_user_delete', $user_id );
@@ -279,27 +297,9 @@ function delete_all_users() {
 		return false;
 	}
 
+	// Purge the stored transients.
+	Helpers\purge_stored_transients();
+
 	// And return true, so we know to report back.
 	return true;
-}
-
-/**
- * Send the new user email if we want to.
- *
- * @param  integer $user_id  The user ID we just make.
- *
- * @return void
- */
-function maybe_send_new_user_email( $user_id = 0 ) {
-
-	// Pass our filter with a default.
-	$maybe_send = apply_filters( Core\HOOK_PREFIX . 'disable_new_user_email', false );
-
-	// Bail if the filter is passed.
-	if ( false !== $maybe_send ) {
-		return;
-	}
-
-	// Send the new user email.
-	wp_send_new_user_notifications( $user_id, 'user' );
 }

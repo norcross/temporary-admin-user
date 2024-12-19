@@ -323,3 +323,36 @@ function confirm_user_id_via_cli( $user_id = 0, $user_email = '' ) {
 	// Return empty.
 	return 0;
 }
+
+/**
+ * Send the new user email if we want to.
+ *
+ * @param  integer $user_id  The user ID we just make.
+ *
+ * @return void
+ */
+function maybe_send_new_user_email( $user_id = 0 ) {
+
+	// Pass our filter with a default.
+	$maybe_send = apply_filters( Core\HOOK_PREFIX . 'disable_new_user_email', false );
+
+	// Bail if the filter is passed.
+	if ( false !== $maybe_send ) {
+		return;
+	}
+
+	// Send the new user email.
+	wp_send_new_user_notifications( $user_id, 'user' );
+}
+
+/**
+ * Purge all the stored transients as needed.
+ *
+ * @return void
+ */
+function purge_stored_transients() {
+
+	// Delete both transients to be safe.
+	delete_transient( Core\TRANSIENT_PREFIX . 'active_users' );
+	delete_transient( Core\TRANSIENT_PREFIX . 'all_users' );
+}

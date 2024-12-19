@@ -12,13 +12,13 @@ namespace Norcross\TempAdminUser\Queries;
 use Norcross\TempAdminUser as Core;
 
 /**
- * Query all of the temporary users we've created.
+ * Handle the query for the admin side user table.
  *
  * @param  array $query_args  The args to pass into the query.
  *
  * @return array              Our users, or an empty array.
  */
-function query_current_temporary_users( $query_args = [] ) {
+function query_user_table_data( $query_args = [] ) {
 
 	// Set a default offset and per-page.
 	$per_page   = ! empty( $query_args['per_page'] ) ? $query_args['per_page'] : 20;
