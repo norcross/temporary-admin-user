@@ -10,7 +10,7 @@ namespace Norcross\TempAdminUser\Activate;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
-use Norcross\TempAdminUser\Cron as Cron;
+use Norcross\TempAdminUser\Process\Cron as Cron;
 
 /**
  * Our inital setup function when activated.

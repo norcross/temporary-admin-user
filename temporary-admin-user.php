@@ -54,10 +54,12 @@ define( __NAMESPACE__ . '\MENU_ROOT', 'temporary-admin-user' );
 define( __NAMESPACE__ . '\EXPIRED_CRON', 'tmp_admin_user_expire_check' );
 
 // Load the multi-use files first.
-require_once __DIR__ . '/includes/cron.php';
 require_once __DIR__ . '/includes/helpers.php';
-require_once __DIR__ . '/includes/queries.php';
-require_once __DIR__ . '/includes/process.php';
+
+// Handle our processing files.
+require_once __DIR__ . '/includes/process/cron.php';
+require_once __DIR__ . '/includes/process/queries.php';
+require_once __DIR__ . '/includes/process/user-changes.php';
 
 // Handle our admin items.
 require_once __DIR__ . '/includes/admin/admin-bar.php';

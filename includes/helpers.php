@@ -10,7 +10,7 @@ namespace Norcross\TempAdminUser\Helpers;
 
 // Set our alias items.
 use Norcross\TempAdminUser as Core;
-use Norcross\TempAdminUser\Queries as Queries;
+use Norcross\TempAdminUser\Process\Queries as Queries;
 
 /**
  * Get the available expiration time ranges that a user can be set to.

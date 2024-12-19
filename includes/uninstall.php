@@ -10,8 +10,8 @@ namespace Norcross\TempAdminUser\Uninstall;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
-use Norcross\TempAdminUser\Cron as Cron;
-use Norcross\TempAdminUser\Process as Process;
+use Norcross\TempAdminUser\Process\Cron as Cron;
+use Norcross\TempAdminUser\Process\UserChanges as UserChanges;
 
 /**
  * Manage the cron and deleting users when deactivating the plugin.
@@ -24,6 +24,6 @@ function uninstall() {
 	Cron\modify_refresh_cron( true, false );
 
 	// Delete all the users.
-	Process\delete_all_users();
+	UserChanges\delete_all_users();
 }
 register_uninstall_hook( Core\FILE, __NAMESPACE__ . '\uninstall' );

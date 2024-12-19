@@ -11,7 +11,7 @@ namespace Norcross\TempAdminUser;
 // Set our alias items.
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
-use Norcross\TempAdminUser\Process as Process;
+use Norcross\TempAdminUser\Process\UserChanges as UserChanges;
 
 // Pull in the CLI items.
 use WP_CLI;
@@ -86,7 +86,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		}
 
 		// Now attempt the new user.
-		$maybe_new_user = Process\create_new_user( $cleaned_email, $set_duration );
+		$maybe_new_user = UserChanges\create_new_user( $cleaned_email, $set_duration );
 
 		// Handle a failed user creation.
 		if ( empty( $maybe_new_user ) ) {
@@ -180,7 +180,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		}
 
 		// Now extend it.
-		$extend_user    = Process\extend_existing_user( $valid_user_id, $set_duration );
+		$extend_user    = UserChanges\extend_existing_user( $valid_user_id, $set_duration );
 
 		// Flag if the restriction didn't work.
 		if ( empty( $extend_user ) ) {
@@ -269,7 +269,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		}
 
 		// Now promote it.
-		$promote_user   = Process\promote_existing_user( $valid_user_id, $set_duration );
+		$promote_user   = UserChanges\promote_existing_user( $valid_user_id, $set_duration );
 
 		// Flag if the restriction didn't work.
 		if ( empty( $promote_user ) ) {
@@ -331,7 +331,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		}
 
 		// Now restrict it.
-		$restrict_user  = Process\restrict_existing_user( $valid_user_id );
+		$restrict_user  = UserChanges\restrict_existing_user( $valid_user_id );
 
 		// Flag if the restriction didn't work.
 		if ( empty( $restrict_user ) ) {
@@ -360,7 +360,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		WP_CLI::confirm( __( 'Are you sure you want to restrict all users?', 'temporary-admin-user' ), $assoc_args );
 
 		// Now restrict them.
-		$restrict_users = Process\restrict_all_users();
+		$restrict_users = UserChanges\restrict_all_users();
 
 		// Flag if the restriction didn't work.
 		if ( empty( $restrict_users ) ) {
@@ -449,7 +449,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		}
 
 		// Now delete it.
-		$delete_user    = Process\delete_existing_user( $valid_user_id );
+		$delete_user    = UserChanges\delete_existing_user( $valid_user_id );
 
 		// Flag if the restriction didn't work.
 		if ( empty( $delete_user ) ) {
@@ -478,7 +478,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		WP_CLI::confirm( __( 'Are you sure you want to delete all users?', 'temporary-admin-user' ), $assoc_args );
 
 		// Now delete them.
-		$delete_users   = Process\delete_all_users();
+		$delete_users   = UserChanges\delete_all_users();
 
 		// Flag if the restriction didn't work.
 		if ( empty( $delete_users ) ) {

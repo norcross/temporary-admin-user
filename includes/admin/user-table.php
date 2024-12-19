@@ -8,9 +8,10 @@
 // Set our alias items.
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
-use Norcross\TempAdminUser\Queries as Queries;
-use Norcross\TempAdminUser\Process as Process;
 use Norcross\TempAdminUser\Admin\Markup as AdminMarkup;
+use Norcross\TempAdminUser\Process\Queries as Queries;
+use Norcross\TempAdminUser\Process\UserChanges as UserChanges;
+
 
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) exit;
@@ -356,7 +357,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 
 			// If this hasn't been handled by the cron job, restrict the account now.
 			if ( ! empty( $item['status'] ) && 'active' === $item['status'] ) {
-				Process\restrict_existing_user( $item['id'] );
+				UserChanges\restrict_existing_user( $item['id'] );
 			}
 
 			// Return my formatted text.

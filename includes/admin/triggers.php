@@ -1,6 +1,6 @@
 <?php
 /**
- * Handle the processing involves.
+ * Watch for the triggers to kick off processing.
  *
  * @package TempAdminUser
  */
@@ -11,7 +11,7 @@ namespace Norcross\TempAdminUser\Admin\Triggers;
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
-use Norcross\TempAdminUser\Process as Process;
+use Norcross\TempAdminUser\Process\UserChanges as UserChanges;
 
 /**
  * Start our engines.
@@ -69,7 +69,7 @@ function new_user_form_request() {
 	}
 
 	// OK, we got this far, now make a new user.
-	$maybe_new_user = Process\create_new_user( $confirm_email, $confirm_durtn );
+	$maybe_new_user = UserChanges\create_new_user( $confirm_email, $confirm_durtn );
 
 	// Handle a failed user creation.
 	if ( empty( $maybe_new_user ) ) {
@@ -147,7 +147,7 @@ function modify_user_action_request() {
 			$extend_range   = apply_filters( Core\HOOK_PREFIX . 'default_user_extend_range', $default_range, $confirm_userid );
 
 			// Attempt the restriction.
-			$attempt_change = Process\extend_existing_user( $confirm_userid, $extend_range );
+			$attempt_change = UserChanges\extend_existing_user( $confirm_userid, $extend_range );
 
 			// Handle a possible failure.
 			if ( false === $attempt_change ) {
@@ -167,7 +167,7 @@ function modify_user_action_request() {
 			$promote_range  = apply_filters( Core\HOOK_PREFIX . 'default_user_promote_range', $default_range, $confirm_userid );
 
 			// Attempt the restriction.
-			$attempt_change = Process\promote_existing_user( $confirm_userid, $promote_range );
+			$attempt_change = UserChanges\promote_existing_user( $confirm_userid, $promote_range );
 
 			// Handle a possible failure.
 			if ( false === $attempt_change ) {
@@ -184,7 +184,7 @@ function modify_user_action_request() {
 		case 'restrict' :
 
 			// Attempt the restriction.
-			$attempt_change = Process\restrict_existing_user( $confirm_userid );
+			$attempt_change = UserChanges\restrict_existing_user( $confirm_userid );
 
 			// Handle a possible failure.
 			if ( false === $attempt_change ) {
@@ -201,7 +201,7 @@ function modify_user_action_request() {
 		case 'delete' :
 
 			// Attempt the delete.
-			$attempt_change = Process\delete_existing_user( $confirm_userid );
+			$attempt_change = UserChanges\delete_existing_user( $confirm_userid );
 
 			// Handle a possible failure.
 			if ( false === $attempt_change ) {

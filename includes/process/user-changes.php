@@ -1,17 +1,17 @@
 <?php
 /**
- * Handle the processing involves.
+ * Handle everything regarding user changes.
  *
  * @package TempAdminUser
  */
 
 // Declare our namespace.
-namespace Norcross\TempAdminUser\Process;
+namespace Norcross\TempAdminUser\Process\UserChanges;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
-use Norcross\TempAdminUser\Queries as Queries;
+use Norcross\TempAdminUser\Process\Queries as Queries;
 
 /**
  * Create the new temporary user.

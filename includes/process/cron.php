@@ -10,8 +10,8 @@ namespace Norcross\TempAdminUser\Cron;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
-use Norcross\TempAdminUser\Process as Process;
-use Norcross\TempAdminUser\Queries as Queries;
+use Norcross\TempAdminUser\Process\Queries as Queries;
+use Norcross\TempAdminUser\Process\UserChanges as UserChanges;
 
 /**
  * Start our engines.
@@ -76,7 +76,7 @@ function check_expired_users() {
 		}
 
 		// Process the restriction.
-		Process\restrict_existing_user( $user_id );
+		UserChanges\restrict_existing_user( $user_id );
 	}
 
 	// And be done.
