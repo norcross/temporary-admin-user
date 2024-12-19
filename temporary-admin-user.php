@@ -63,6 +63,7 @@ require_once __DIR__ . '/includes/process/user-changes.php';
 
 // Handle our admin items.
 require_once __DIR__ . '/includes/admin/admin-bar.php';
+require_once __DIR__ . '/includes/admin/display.php';
 require_once __DIR__ . '/includes/admin/setup.php';
 require_once __DIR__ . '/includes/admin/markup.php';
 require_once __DIR__ . '/includes/admin/menu-items.php';
