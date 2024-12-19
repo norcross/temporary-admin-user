@@ -17,7 +17,6 @@ use Norcross\TempAdminUser\Admin\Markup as AdminMarkup;
  * Start our engines.
  */
 add_action( 'admin_menu', __NAMESPACE__ . '\load_author_table_menu', 10 );
-add_action( 'admin_menu', __NAMESPACE__ . '\modify_temp_user_menu', 999 );
 
 /**
  * Add a top-level item for getting to the user table.
@@ -106,47 +105,4 @@ function settings_page_view() {
 
 	// The actual table itself.
 	$table->display();
-}
-
-/**
- * Remove some of the admin menu options for temp users.
- *
- * @return void
- */
-function modify_temp_user_menu() {
-
-	// See if this is a temp user.
-	$maybe_temp = Helpers\confirm_user_via_plugin( get_current_user_id() );
-
-	// If this is false, no changes needed.
-	if ( false === $maybe_temp ) {
-		return;
-	}
-
-	// Call the global we need.
-	global $submenu;
-
-	// Bail without the users.
-	if ( ! isset( $submenu['users.php'] ) ) {
-		return;
-	}
-
-	// Now loop through and start removing some menu items.
-	foreach ( $submenu['users.php'] as $index => $menu_item ) {
-
-		// Remove anything tied to the "promote users" permission.
-		if ( ! empty( $menu_item[1] ) && 'promote_users' === sanitize_text_field( $menu_item[1] ) ) {
-			unset( $submenu['users.php'][ $index ] );
-		}
-
-		// Remove the "Add New" option.
-		if ( ! empty( $menu_item[2] ) && 'user-new.php' === sanitize_text_field( $menu_item[2] ) ) {
-			unset( $submenu['users.php'][ $index ] );
-		}
-
-		// We aren't looking for anything else yet.
-	}
-
-	// And be done.
-	return;
 }

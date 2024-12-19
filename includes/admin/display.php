@@ -15,8 +15,9 @@ use Norcross\TempAdminUser\Helpers as Helpers;
 /**
  * Start our engines.
  */
-add_filter( 'manage_users_columns', __NAMESPACE__ . '\add_temp_user_badge' );
-add_action( 'manage_users_custom_column', __NAMESPACE__ . '\show_temp_user_badge', 20, 3 );
+add_filter( 'user_has_cap', __NAMESPACE__ . '\modify_temporary_user_permissions', 20, 4 );
+add_filter( 'manage_users_columns', __NAMESPACE__ . '\add_temporary_user_badge_column' );
+add_action( 'manage_users_custom_column', __NAMESPACE__ . '\show_temporary_user_badge', 20, 3 );
 
 /**
  * Add a column to indicate a temporary user.
@@ -25,7 +26,7 @@ add_action( 'manage_users_custom_column', __NAMESPACE__ . '\show_temp_user_badge
  *
  * @return array $columns  The modified array of columns.
  */
-function add_temp_user_badge( $columns ) {
+function add_temporary_user_badge_column( $columns ) {
 
 	// Make our column with no label.
 	$columns['tmp-admin-badge'] = '';
@@ -43,7 +44,7 @@ function add_temp_user_badge( $columns ) {
  *
  * @return mixed
  */
-function show_temp_user_badge( $output, $column_name, $user_id ) {
+function show_temporary_user_badge( $output, $column_name, $user_id ) {
 
 	// Return whatever we have if it isn't our column.
 	if ( 'tmp-admin-badge' !== $column_name ) {
@@ -65,5 +66,39 @@ function show_temp_user_badge( $output, $column_name, $user_id ) {
 	$setup_text = sprintf( __( 'Generated from the Temporary Admin User plugin on %s', 'temporary-admin-user' ), gmdate( get_option( 'date_format' ), $timestamp ) );
 
 	// Return the icon.
-	return '<span title="' . esc_attr( $setup_text ) . '" class="dashicons dashicons-admin-network tmp-admin-badge-icon"></span>';
+	return '<span title="' . esc_attr( $setup_text ) . '" class="dashicons dashicons-hourglass tmp-admin-badge-icon"></span>';
+}
+
+/**
+ * Filter the capabilities for the temporary users.
+ *
+ * @param  array   $allcaps  All the capabilities of the user.
+ * @param  array   $cap      [0] Required capability.
+ * @param  array   $args     [0] Requested capability.
+ *                           [1] User ID.
+ *                           [2] Associated object ID.
+ *
+ * @param  WP_User $user     The user object being loaded.
+ *
+ * @return array             The potentially modified array of permissions.
+ */
+function modify_temporary_user_permissions( $allcaps, $cap, $args, $user ) {
+
+	// Check for the flag.
+	$check_flag = Helpers\confirm_user_via_plugin( $user->ID );
+
+	// Return the current array if this isn't one of our users.
+	if ( empty( $check_flag ) ) {
+		return $allcaps;
+	}
+
+	// Remove these specific permissions.
+	$allcaps['edit_users']    = 0;
+	$allcaps['remove_users']  = 0;
+	$allcaps['promote_users'] = 0;
+	$allcaps['delete_users']  = 0;
+	$allcaps['create_users']  = 0;
+
+	// Return the modified array.
+	return $allcaps;
 }
