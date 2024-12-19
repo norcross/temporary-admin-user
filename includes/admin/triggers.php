@@ -135,7 +135,7 @@ function modify_user_action_request() {
 	}
 
 	// Set a default range for all the actions that involve a time range.
-	$default_range  = apply_filters( Core\HOOK_PREFIX . 'default_user_action_range', 'day' );
+	$default_range  = apply_filters( Core\HOOK_PREFIX . 'default_user_action_range', 'day', $confirm_userid );
 
 	// Now do a switch and handle the appropriate action.
 	switch ( $confirm_action ) {
@@ -144,7 +144,7 @@ function modify_user_action_request() {
 		case 'extend' :
 
 			// Now filter the extended range on it's own.
-			$extend_range   = apply_filters( Core\HOOK_PREFIX . 'default_user_extend_range', $default_range );
+			$extend_range   = apply_filters( Core\HOOK_PREFIX . 'default_user_extend_range', $default_range, $confirm_userid );
 
 			// Attempt the restriction.
 			$attempt_change = Process\extend_existing_user( $confirm_userid, $extend_range );
@@ -164,7 +164,7 @@ function modify_user_action_request() {
 		case 'promote' :
 
 			// Now filter the promoted range on it's own.
-			$promote_range  = apply_filters( Core\HOOK_PREFIX . 'default_user_promote_range', $default_range );
+			$promote_range  = apply_filters( Core\HOOK_PREFIX . 'default_user_promote_range', $default_range, $confirm_userid );
 
 			// Attempt the restriction.
 			$attempt_change = Process\promote_existing_user( $confirm_userid, $promote_range );
