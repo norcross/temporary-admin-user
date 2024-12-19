@@ -6,7 +6,7 @@
  */
 
 // Declare our namespace.
-namespace Norcross\TempAdminUser\Cron;
+namespace Norcross\TempAdminUser\Process\Cron;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;

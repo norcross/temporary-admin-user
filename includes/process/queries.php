@@ -6,7 +6,7 @@
  */
 
 // Declare our namespace.
-namespace Norcross\TempAdminUser\Queries;
+namespace Norcross\TempAdminUser\Process\Queries;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
