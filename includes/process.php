@@ -21,7 +21,7 @@ use Norcross\TempAdminUser\Queries as Queries;
  *
  * @return integer $user_id     The newly created user ID.
  */
-function create_new_user( $user_email = '', $duration = '' ) {
+function create_new_user( $user_email = '', $duration = 'day' ) {
 
 	// Set a stamp for now.
 	$now_stamp  = current_datetime()->format('U');
