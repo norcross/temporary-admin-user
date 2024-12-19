@@ -93,69 +93,107 @@ function query_current_temporary_users( $query_args = [] ) {
 /**
  * Query all of the users we've created.
  *
- * @param  array $query_args  The args to pass into the query.
- *
- * @return array              Our users, or an empty array.
+ * @return array  Our users, or an empty array.
  */
-function query_all_temporary_users( $query_args = [] ) {
+function query_all_temporary_users() {
 
-	// Set my args.
-	$setup_args = [
-		'fields'     => 'ID',
-		'number'     => 99999,
-		'meta_query' => [
-			[
-				'key'   => Core\META_PREFIX . 'flag',
-				'value' => true,
-			],
-		]
-	];
+	// Set the key to use in our transient.
+	$ky = Core\TRANSIENT_PREFIX . 'all_users';
 
-	// Run the user query.
-	$get_users  = new \WP_User_Query( $setup_args );
-
-	// Bail if we errored out or don't have any users.
-	if ( is_wp_error( $get_users ) || empty( $get_users->results ) ) {
-		return [];
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		delete_transient( $ky );
 	}
 
-	// Return the resulting user IDs if we have them.
-	return $get_users->results;
+	// Attempt to get the data from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Set my args.
+		$setup_args = [
+			'fields'     => 'ID',
+			'number'     => 99999,
+			'meta_query' => [
+				[
+					'key'   => Core\META_PREFIX . 'flag',
+					'value' => true,
+				],
+			]
+		];
+
+		// Run the user query.
+		$get_users  = new \WP_User_Query( $setup_args );
+
+		// Bail if we errored out or don't have any users.
+		if ( is_wp_error( $get_users ) || empty( $get_users->results ) ) {
+			return [];
+		}
+
+		// Set our transient with our data for a minute.
+		set_transient( $ky, $get_users->results, MINUTE_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $get_users->results;
+	}
+
+	// And return the resulting.
+	return $cached_dataset;
 }
 
 /**
  * Query all of the currently active users we've created.
  *
- * @param  array $query_args  The args to pass into the query.
- *
- * @return array              Our users, or an empty array.
+ * @return array  Our users, or an empty array.
  */
-function query_all_active_temporary_users( $query_args = [] ) {
+function query_all_active_temporary_users() {
 
-	// Set my args.
-	$setup_args = [
-		'fields'     => 'ID',
-		'number'     => 99999,
-		'meta_query' => [
-			[
-				'key'   => Core\META_PREFIX . 'flag',
-				'value' => true,
-			],
-			[
-				'key'   => Core\META_PREFIX . 'status',
-				'value' => 'active',
-			],
-		]
-	];
+	// Set the key to use in our transient.
+	$ky = Core\TRANSIENT_PREFIX . 'active_users';
 
-	// Run the user query.
-	$get_users  = new \WP_User_Query( $setup_args );
-
-	// Bail if we errored out or don't have any users.
-	if ( is_wp_error( $get_users ) || empty( $get_users->results ) ) {
-		return [];
+	// If we don't want the cache'd version, delete the transient first.
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		delete_transient( $ky );
 	}
 
-	// Return the resulting user IDs if we have them.
-	return $get_users->results;
+	// Attempt to get the data from the cache.
+	$cached_dataset = get_transient( $ky );
+
+	// If we have none, do the things.
+	if ( false === $cached_dataset ) {
+
+		// Set my args.
+		$setup_args = [
+			'fields'     => 'ID',
+			'number'     => 99999,
+			'meta_query' => [
+				[
+					'key'   => Core\META_PREFIX . 'flag',
+					'value' => true,
+				],
+				[
+					'key'   => Core\META_PREFIX . 'status',
+					'value' => 'active',
+				],
+			]
+		];
+
+		// Run the user query.
+		$get_users  = new \WP_User_Query( $setup_args );
+
+		// Bail if we errored out or don't have any users.
+		if ( is_wp_error( $get_users ) || empty( $get_users->results ) ) {
+			return [];
+		}
+
+		// Set our transient with our data for a minute.
+		set_transient( $ky, $get_users->results, MINUTE_IN_SECONDS );
+
+		// And change the variable to do the things.
+		$cached_dataset = $get_users->results;
+	}
+
+	// And return the resulting.
+	return $cached_dataset;
 }

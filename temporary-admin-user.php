@@ -3,7 +3,7 @@
  * Plugin Name: Temporary Admin User
  * Plugin URI:  https://github.com/norcross/temporary-admin-user
  * Description: Create admin users for support that expire.
- * Version:     0.0.2
+ * Version:     1.0.0
  * Author:      Andrew Norcross
  * Author URI:  https://andrewnorcross.com
  * Text Domain: temporary-admin-user
@@ -24,7 +24,7 @@ use WP_CLI;
 if ( ! defined( 'ABSPATH' ) ) exit;
 
 // Define our plugin version.
-define( __NAMESPACE__ . '\VERS', '0.0.2' );
+define( __NAMESPACE__ . '\VERS', '1.0.0' );
 
 // Plugin root file.
 define( __NAMESPACE__ . '\FILE', __FILE__ );
@@ -45,7 +45,6 @@ define( __NAMESPACE__ . '\INCLUDES_PATH', __DIR__ . '/includes' );
 define( __NAMESPACE__ . '\HOOK_PREFIX', 'temporary_admin_user_' );
 define( __NAMESPACE__ . '\META_PREFIX', '_tmp_admin_user_' );
 define( __NAMESPACE__ . '\NONCE_PREFIX', 'tempaa_nonce_' );
-define( __NAMESPACE__ . '\OPTION_PREFIX', 'tempaa_setting_' );
 define( __NAMESPACE__ . '\TRANSIENT_PREFIX', 'tempaa_tr_' );
 
 // Set our menu root.
