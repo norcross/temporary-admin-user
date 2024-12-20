@@ -1,4 +1,4 @@
-# Manage Inactive Authors Change Log
+# Temporary Admin User Change Log
 
 All notable changes to this project will be documented in this file, according to [the Keep a Changelog standards](http://keepachangelog.com/).
 
