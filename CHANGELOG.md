@@ -8,7 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 * bow howdy, what didn't get updated? consider this the actual first release.
 
-##[0.0.1] ??/??/2021
+##[0.0.1] ??/??/????
 
-* initial sorta release. wasn't fully baked tbh.
+* had released from 2014 until 2021 but dang it needed to be refactored.
 
