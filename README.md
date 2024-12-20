@@ -17,7 +17,7 @@ Create a temporary WordPress admin user to provide access on support issues, etc
 * Available actions and filters for modifying default values
 * A suite of CLI commands
 
-### Frequenty Asked Questions
+## Frequenty Asked Questions
 
 #### Do user accounts expire automatically?
 
@@ -42,7 +42,7 @@ Sure can. There is a filter that impacts both promoting and extending a user, an
 
 ~~~php
 /**
- * Change the default times for user actions.
+ * Change the default times for extending and promoting user actions.
  *
  * @param  string  $duration  The current duration range. Default is 'day'.
  * @param  integer $user_id   The individual user ID being updated.
@@ -70,10 +70,29 @@ function prefix_set_default_extend_range( $duration, $user_id ) {
 add_filter( 'temporary_admin_user_default_user_extend_range', 'prefix_set_default_extend_range', 10, 2 );
 ~~~
 
+~~~php
+/**
+ * Change the default times for promoting, but not extending users.
+ *
+ * @param  string  $duration  The current duration range. Default is 'day'.
+ * @param  integer $user_id   The individual user ID being updated.
+ *
+ * @return string             One of the ranges to get a timestamp from.
+ */
+function prefix_set_default_promote_range( $duration, $user_id ) {
+	return 'week';
+}
+add_filter( 'temporary_admin_user_default_user_promote_range', 'prefix_set_default_promote_range', 10, 2 );
+~~~
+
 #### Are there other hooks in the plugin?
 
-You betcha. I would suggest reading the source code to get a better idea of what else can be done. And I am open to suggestions.
+You betcha. I would suggest reading the source code to get a better idea of what else can be done until I'm able to find time to document them all.
 
 #### How do the CLI commands work?
 
 Check in the Help Tab above the admin table, and all the commands and their options are explained. You can also type `wp tmp-admin-user` in the connected terminal and all the commands are shown.
+
+#### I found a bug or have a feature request. How should I handle it?
+
+Open a new issue in this repository and I'll see what I can do.
