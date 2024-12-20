@@ -84,6 +84,11 @@ function show_temporary_user_badge( $output, $column_name, $user_id ) {
  */
 function modify_temporary_user_permissions( $allcaps, $cap, $args, $user ) {
 
+	// Allow users to edit other users via this filter.
+	if ( false !== apply_filters( Core\HOOK_PREFIX . 'enable_user_management', false ) ) {
+		return $allcaps;
+	}
+
 	// Check for the flag.
 	$check_flag = Helpers\confirm_user_via_plugin( $user->ID );
 
