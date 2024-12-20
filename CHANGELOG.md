@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file, according t
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-##[0.0.2] 12/10/2024
+##[1.0.0] 12/20/2024
 
-* Bow howdy, what didn't get updated? Consider this the actual release.
+* bow howdy, what didn't get updated? consider this the actual first release.
 
 ##[0.0.1] ??/??/2021
 
