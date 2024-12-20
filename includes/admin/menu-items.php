@@ -16,20 +16,20 @@ use Norcross\TempAdminUser\Admin\Markup as AdminMarkup;
 /**
  * Start our engines.
  */
-add_action( 'admin_menu', __NAMESPACE__ . '\load_author_table_menu', 10 );
+add_action( 'admin_menu', __NAMESPACE__ . '\load_temporary_users_table_menu', 10 );
 
 /**
- * Add a top-level item for getting to the user table.
+ * Add a submenu item to the primary users menu.
  *
  * @return void
  */
-function load_author_table_menu() {
+function load_temporary_users_table_menu() {
 
 	// Handle loading the initial menu.
 	$setup_page = add_users_page(
 		__( 'Temporary Admin Users', 'temporary-admin-user' ),
 		__( 'Temporary Admins', 'temporary-admin-user' ),
-		'promote_users',
+		'create_users',
 		Core\MENU_ROOT,
 		__NAMESPACE__ . '\settings_page_view',
 		7
@@ -38,8 +38,6 @@ function load_author_table_menu() {
 	// Now handle some screen options and help tab.
 	add_action( "load-$setup_page", __NAMESPACE__ . '\add_screen_options' );
 	add_action( "load-$setup_page", __NAMESPACE__ . '\add_help_tab_options' );
-
-	// Nothing left inside this.
 }
 
 /**
@@ -61,7 +59,7 @@ function add_screen_options() {
 }
 
 /**
- * Add our help tab option for the table.
+ * Add our help tab options for the table.
  *
  * @return void
  */
@@ -70,14 +68,14 @@ function add_help_tab_options() {
 	// Grab the current screen object
 	$screen = get_current_screen();
 
-	// Add the initial help tab.
+	// Add the overview tab explaining the icons.
 	$screen->add_help_tab( [
 		'id'      => 'tmp-htb-overview',
 		'title'   => __( 'Overview', 'temporary-admin-user' ),
 		'content' => AdminMarkup\render_overview_help_tab( false ),
 	] );
 
-	// Add the advanced help tab.
+	// Add the list of available CLI commands.
 	$screen->add_help_tab( [
 		'id'      => 'tmp-htb-wp-cli',
 		'title'   => __( 'WP-CLI Usage', 'temporary-admin-user' ),
@@ -86,14 +84,14 @@ function add_help_tab_options() {
 }
 
 /**
- * Handle loading our custom settings page.
+ * Handle loading our custom settings page, which includes the table.
  *
  * @return HTML
  */
 function settings_page_view() {
 
 	// Bail if we shouldn't be here.
-	if ( ! current_user_can( 'promote_users' ) ) {
+	if ( ! current_user_can( 'create_users' ) ) {
 		wp_die( esc_html__( 'You are not permitted to view this page.', 'temporary-admin-user' ) );
 	}
 

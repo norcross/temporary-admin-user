@@ -15,10 +15,10 @@ use Norcross\TempAdminUser\Helpers as Helpers;
 /**
  * Start our engines.
  */
-add_action( 'admin_bar_menu', __NAMESPACE__ . '\add_admin_bar_link', 999 );
+add_action( 'admin_bar_menu', __NAMESPACE__ . '\add_admin_bar_link', 77 );
 
 /**
- * Add a menu item under the "new content" for new users.
+ * Add a menu item under the "new content" for creating new users.
  *
  * @param  WP_Admin_Bar $wp_admin_bar  The global WP_Admin_Bar object.
  *
@@ -27,7 +27,7 @@ add_action( 'admin_bar_menu', __NAMESPACE__ . '\add_admin_bar_link', 999 );
 function add_admin_bar_link( \WP_Admin_Bar $wp_admin_bar ) {
 
 	// Bail if current user doesnt have cap.
-	if ( ! current_user_can( 'promote_users' ) ) {
+	if ( ! current_user_can( 'create_users' ) ) {
 		return;
 	}
 
@@ -35,11 +35,11 @@ function add_admin_bar_link( \WP_Admin_Bar $wp_admin_bar ) {
 	$wp_admin_bar->add_node(
 		[
 			'id'        => 'tmp-admin-user-new',
-			'title'     => __( 'Temporary User', 'temporary-admin-user' ),
+			'title'     => __( 'Temporary Admin', 'temporary-admin-user' ),
 			'href'      => Helpers\get_admin_menu_link(),
 			'parent'    => 'new-content',
 			'meta'      => [
-				'title' => __( 'Temporary User', 'temporary-admin-user' ),
+				'title' => __( 'Temporary Admin', 'temporary-admin-user' ),
 			],
 		]
 	);

@@ -35,7 +35,7 @@ function new_user_form_request() {
 	}
 
 	// Bail on a non authorized user.
-	if ( ! current_user_can( 'promote_users' ) ) { // phpcs:ignore -- the nonce check is happening soon.
+	if ( ! current_user_can( 'create_users' ) ) { // phpcs:ignore -- the nonce check is happening soon.
 		wp_die( esc_html__( 'You are not authorized to perform this function.', 'temporary-admin-user' ), __( 'Temporary Admin Users', 'temporary-admin-user' ), [ 'back_link' => true ] );
 	}
 
@@ -76,7 +76,7 @@ function new_user_form_request() {
 		Helpers\redirect_admin_action_result( 'failed-new-user' );
 	}
 
-	// We are good, so redirect with the affermative.
+	// We are good, so redirect with the affirmative.
 	Helpers\redirect_admin_action_result( '', 'new-user-created', true );
 }
 
@@ -87,7 +87,7 @@ function new_user_form_request() {
  */
 function modify_user_action_request() {
 
-	// Confirm we are on the proper page..
+	// Confirm we are on the proper page.
 	$confirm_admin  = filter_input( INPUT_GET, 'page', FILTER_SANITIZE_SPECIAL_CHARS ); // phpcs:ignore -- the nonce check is happening soon.
 
 	// Make sure it is what we want.
@@ -104,7 +104,7 @@ function modify_user_action_request() {
 	}
 
 	// Bail on a non authorized user.
-	if ( ! current_user_can( 'promote_users' ) ) { // phpcs:ignore -- the nonce check is happening soon.
+	if ( ! current_user_can( 'create_users' ) ) { // phpcs:ignore -- the nonce check is happening soon.
 		wp_die( esc_html__( 'You are not authorized to perform this function.', 'temporary-admin-user' ), __( 'Temporary Admin Users', 'temporary-admin-user' ), [ 'back_link' => true ] );
 	}
 
@@ -154,7 +154,7 @@ function modify_user_action_request() {
 				Helpers\redirect_admin_action_result( 'user-extend-error' );
 			}
 
-			// We are good, so redirect with the affermative.
+			// We are good, so redirect with the affirmative.
 			Helpers\redirect_admin_action_result( '', 'user-extend-success', true );
 
 			// Nothing else to do here.
@@ -174,7 +174,7 @@ function modify_user_action_request() {
 				Helpers\redirect_admin_action_result( 'user-promote-error' );
 			}
 
-			// We are good, so redirect with the affermative.
+			// We are good, so redirect with the affirmative.
 			Helpers\redirect_admin_action_result( '', 'user-promote-success', true );
 
 			// Nothing else to do here.
@@ -191,7 +191,7 @@ function modify_user_action_request() {
 				Helpers\redirect_admin_action_result( 'user-restrict-error' );
 			}
 
-			// We are good, so redirect with the affermative.
+			// We are good, so redirect with the affirmative.
 			Helpers\redirect_admin_action_result( '', 'user-restrict-success', true );
 
 			// Nothing else to do here.
@@ -208,7 +208,7 @@ function modify_user_action_request() {
 				Helpers\redirect_admin_action_result( 'user-delete-error' );
 			}
 
-			// We are good, so redirect with the affermative.
+			// We are good, so redirect with the affirmative.
 			Helpers\redirect_admin_action_result( '', 'user-delete-success', true );
 
 			// Nothing else to do here.

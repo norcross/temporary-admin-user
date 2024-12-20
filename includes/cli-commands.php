@@ -1,6 +1,6 @@
 <?php
 /**
- * The functionality tied to the WP-CLI stuff.
+ * All of our CLI commands related to user management.
  *
  * @package TempAdminUser
  */
@@ -42,6 +42,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 	 *   - week
 	 *   - month
 	 *   - year
+	 *   - custom (added via filter)
 	 * ---
 	 *
 	 * ## EXAMPLES
@@ -121,6 +122,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 	 *   - week
 	 *   - month
 	 *   - year
+	 *   - custom (added via filter)
 	 * ---
 	 *
 	 * ## EXAMPLES
@@ -174,7 +176,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 			WP_CLI::error( __( 'The requested user was not created with this plugin and cannot be modified.', 'temporary-admin-user' ) );
 		}
 
-		// Flag if the user isn't ours.
+		// Flag if the user isn't active.
 		if ( 'active' !== $check_creation ) {
 			WP_CLI::error( __( 'The requested user is not currently active. Promote this user if you want them to regain access.', 'temporary-admin-user' ) );
 		}
@@ -215,6 +217,7 @@ class TempAdminUserCommands extends WP_CLI_Command {
 	 *   - week
 	 *   - month
 	 *   - year
+	 *   - custom (added via filter)
 	 * ---
 	 *
 	 * ## EXAMPLES
@@ -266,6 +269,11 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		// Flag if the user isn't ours.
 		if ( empty( $check_creation ) ) {
 			WP_CLI::error( __( 'The requested user was not created with this plugin and cannot be modified.', 'temporary-admin-user' ) );
+		}
+
+		// Flag if the user is active.
+		if ( 'active' === $check_creation ) {
+			WP_CLI::error( __( 'The requested user is currently active. Extend this user if you want them to have more time.', 'temporary-admin-user' ) );
 		}
 
 		// Now promote it.

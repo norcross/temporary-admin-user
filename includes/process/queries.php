@@ -18,7 +18,7 @@ use Norcross\TempAdminUser as Core;
  *
  * @return array              Our users, or an empty array.
  */
-function query_user_table_data( $query_args = [] ) {
+function query_admin_user_table_data( $query_args = [] ) {
 
 	// Set a default offset and per-page.
 	$per_page   = ! empty( $query_args['per_page'] ) ? $query_args['per_page'] : 20;
@@ -52,11 +52,11 @@ function query_user_table_data( $query_args = [] ) {
 	 * Set the rest of the args based on the orderby.
 	 */
 
-	// Handle email sorting, which is just one key change.
-	if ( 'email' === $do_orderby ) {
+	// Handle ID or email sorting, which is just one key change.
+	if ( 'ID' === $do_orderby || 'email' === $do_orderby ) {
 
 		// Update the orderby.
-		$setup_args['orderby'] = 'user_email';
+		$setup_args['orderby'] = $do_orderby;
 	}
 
 	// Handle the other 3 sorting methods.
@@ -91,7 +91,7 @@ function query_user_table_data( $query_args = [] ) {
 }
 
 /**
- * Query all of the users we've created.
+ * Query all of the users we've created, regardless of current status.
  *
  * @return array  Our users, or an empty array.
  */
@@ -113,9 +113,10 @@ function query_all_temporary_users() {
 
 		// Set my args.
 		$setup_args = [
-			'fields'     => 'ID',
-			'number'     => 99999,
-			'meta_query' => [
+			'fields'      => 'ID',
+			'number'      => 99999,
+			'count_total' => false,
+			'meta_query'  => [
 				[
 					'key'   => Core\META_PREFIX . 'flag',
 					'value' => true,
@@ -165,9 +166,10 @@ function query_all_active_temporary_users() {
 
 		// Set my args.
 		$setup_args = [
-			'fields'     => 'ID',
-			'number'     => 99999,
-			'meta_query' => [
+			'fields'      => 'ID',
+			'number'      => 99999,
+			'count_total' => false,
+			'meta_query'  => [
 				[
 					'key'   => Core\META_PREFIX . 'flag',
 					'value' => true,

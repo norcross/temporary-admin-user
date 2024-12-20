@@ -15,21 +15,21 @@ use Norcross\TempAdminUser\Process\Queries as Queries;
 /**
  * Get the available expiration time ranges that a user can be set to.
  *
- * @param  string  $single  Optional to fetch one item from the array.
- * @param  boolean $keys    Whether to return just the keys.
+ * @param  string  $single_range  Optional to fetch one item from the array.
+ * @param  boolean $keys_only     Whether to return just the keys.
  *
- * @return array            An array of the time data.
+ * @return array                  An array of the time data.
  */
-function get_user_durations( $single = '', $keys = false ) {
+function get_user_durations( $single_range = '', $keys_only = false ) {
 
 	// Set my ranges. All values are in seconds.
-	$ranges = [
+	$range_value_args   = [
 		'fifteen' => [
-			'value' => 900,
+			'value' => ( MINUTE_IN_SECONDS * 15 ),
 			'label' => __( 'Fifteen Minutes', 'temporary-admin-user' ),
 		],
 		'halfhour' => [
-			'value' => 1800,
+			'value' => ( MINUTE_IN_SECONDS * 30 ),
 			'label' => __( 'Thirty Minutes', 'temporary-admin-user' ),
 		],
 		'hour' => [
@@ -55,25 +55,25 @@ function get_user_durations( $single = '', $keys = false ) {
 	];
 
 	// Allow it filtered.
-	$ranges = apply_filters( Core\HOOK_PREFIX . 'expire_ranges', $ranges );
+	$range_value_args   = apply_filters( Core\HOOK_PREFIX . 'user_duration_args', $range_value_args );
 
 	// Bail if no data exists.
-	if ( empty( $ranges ) ) {
+	if ( empty( $range_value_args ) ) {
 		return false;
 	}
 
 	// Return just the array keys.
-	if ( ! empty( $keys ) ) {
-		return array_keys( $ranges );
+	if ( false !== $keys_only ) {
+		return array_keys( $range_value_args );
 	}
 
 	// Return the entire array if no key requested.
-	if ( empty( $single ) ) {
-		return $ranges;
+	if ( empty( $single_range ) ) {
+		return $range_value_args;
 	}
 
-	// Return the single key item.
-	return isset( $ranges[ $single ] ) ? $ranges[ $single ] : false;
+	// Return the single key item, or false.
+	return isset( $range_value_args[ $single_range ] ) ? $range_value_args[ $single_range ] : false;
 }
 
 /**
@@ -91,20 +91,13 @@ function get_admin_menu_link() {
 	// Set the root menu page and the admin base.
 	$set_menu_root  = trim( Core\MENU_ROOT );
 
-	// If we're doing Ajax, build it manually.
-	if ( wp_doing_ajax() ) {
+	// If we're doing Ajax or don't have our function, build it manually.
+	if ( wp_doing_ajax() || ! function_exists( 'menu_page_url' ) ) {
 		return add_query_arg( [ 'page' => $set_menu_root ], admin_url( 'users.php' ) );
 	}
 
-	// Use the `menu_page_url` function if we have it.
-	if ( function_exists( 'menu_page_url' ) ) {
-
-		// Return using the function.
-		return menu_page_url( $set_menu_root, false );
-	}
-
-	// Build out the link if we don't have our function.
-	return add_query_arg( [ 'page' => $set_menu_root ], admin_url( 'users.php' ) );
+	// Use the `menu_page_url` function and return it.
+	return menu_page_url( $set_menu_root, false );
 }
 
 /**
@@ -118,9 +111,6 @@ function get_admin_menu_link() {
  */
 function redirect_admin_action_result( $error = '', $result = 'failed', $success = false ) {
 
-	// Set our base redirect link.
-	$base_redirect  = get_admin_menu_link();
-
 	// Set up my redirect args.
 	$redirect_args  = [
 		'tmp-admin-users-success'         => $success,
@@ -129,10 +119,12 @@ function redirect_admin_action_result( $error = '', $result = 'failed', $success
 	];
 
 	// Add the error code if we have one.
-	$redirect_args  = ! empty( $error ) ? wp_parse_args( $redirect_args, [ 'tmp-admin-users-error-code' => esc_attr( $error ) ] ) : $redirect_args;
+	if ( ! empty( $error ) ) {
+		$redirect_args['tmp-admin-users-error-code'] = esc_attr( $error );
+	}
 
 	// Now set my redirect link.
-	$redirect_link  = add_query_arg( $redirect_args, $base_redirect );
+	$redirect_link  = add_query_arg( $redirect_args, get_admin_menu_link() );
 
 	// Do the redirect.
 	wp_safe_redirect( $redirect_link );
@@ -228,21 +220,21 @@ function create_user_action_args( $user_id = 0, $user_email = '' ) {
 			'icon'  => 'clock',
 			'link'  => '',
 			'blank' => false,
-			'help'  => __( 'Extend the user expiration by one day', 'temporary-admin-user' ),
+			'help'  => __( 'Extend the time until account expiration', 'temporary-admin-user' ),
 		],
 		'promote' => [
 			'label' => __( 'Promote User', 'temporary-admin-user' ),
 			'icon'  => 'star-filled',
 			'link'  => '',
 			'blank' => false,
-			'help'  => __( 'Restore an expired user back to admin again for one day', 'temporary-admin-user' ),
+			'help'  => __( 'Restores the expired user back to admin again', 'temporary-admin-user' ),
 		],
 		'restrict' => [
 			'label' => __( 'Restrict User', 'temporary-admin-user' ),
 			'icon'  => 'lock',
 			'link'  => '',
 			'blank' => false,
-			'help'  => __( 'Demote the user account to the subscriber level', 'temporary-admin-user' ),
+			'help'  => __( 'Demotes the user account to the subscriber level', 'temporary-admin-user' ),
 		],
 		'delete' => [
 			'label' => __( 'Delete User', 'temporary-admin-user' ),
@@ -255,6 +247,22 @@ function create_user_action_args( $user_id = 0, $user_email = '' ) {
 
 	// Return them filtered.
 	return apply_filters( Core\HOOK_PREFIX . 'user_action_args', $setup_args, $user_id, $user_email );
+}
+
+/**
+ * Generate the text used on the admin notice and user table.
+ *
+ * @param  integer $user_id  The user ID being checked.
+ *
+ * @return string
+ */
+function generate_user_creation_text( $user_id = 0 ) {
+
+	// Get the time it was created.
+	$set_timestamp  = get_user_meta( absint( $user_id ), Core\META_PREFIX . 'created', true );
+
+	// Set my message text.
+	return sprintf( __( 'This user was created with the Temporary Admin User plugin on %s', 'temporary-admin-user' ), gmdate( get_option( 'date_format' ), $set_timestamp ) );
 }
 
 /**

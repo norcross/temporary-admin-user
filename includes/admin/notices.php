@@ -120,11 +120,8 @@ function display_temp_user_badge() {
 		return;
 	}
 
-	// Get the time it was created.
-	$set_timestamp  = get_user_meta( $fetch_user_id, Core\META_PREFIX . 'created', true );
-
 	// Set my message text.
-	$message_alert  = sprintf( __( 'This user was created with the Temporary Admin User plugin on %s', 'temporary-admin-user' ), gmdate( get_option( 'date_format' ), $set_timestamp ) );
+	$message_alert  = Helpers\generate_user_creation_text( $fetch_user_id );
 
 	// And handle the display.
 	AdminMarkup\render_admin_notice_markup( $message_alert, 'info' );

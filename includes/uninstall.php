@@ -14,7 +14,7 @@ use Norcross\TempAdminUser\Process\Cron as Cron;
 use Norcross\TempAdminUser\Process\UserChanges as UserChanges;
 
 /**
- * Manage the cron and deleting users when deactivating the plugin.
+ * Manage the cron and deleting users when deleting the plugin.
  *
  * @return void
  */

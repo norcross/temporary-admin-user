@@ -117,6 +117,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 
 		// Build our array of sortable columns.
 		$setup_data = [
+			'id'        => [ 'id', false ],
 			'email'     => [ 'email', false ],
 			'status'    => [ 'status', false ],
 			'created'   => [ 'created', true ],
@@ -271,7 +272,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 * @return HTML
 	 */
 	protected function extra_tablenav( $which ) {
-		return '';
+		return apply_filters( Core\HOOK_PREFIX . 'extra_tablenav', '', $which );
 	}
 
 	/**
@@ -297,11 +298,11 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	protected function column_created( $item ) {
 
 		// Set my stamp.
-		$stamp  = absint( $item['stamps']['created'] );
+		$stamp  = absint( $item['created'] );
 		$local  = gmdate( 'Y/m/d g:i:s a', $stamp );
 
 		// Set my date with the formatting.
-		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, $item['stamps']['current'] ) );
+		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, $item['current'] ) );
 
 		// Wrap it in an accessible tag.
 		$build  = '<abbr title="' . esc_attr( $local ) . '">' . esc_html( $show ) . '</abbr>';
@@ -320,7 +321,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	protected function column_updated( $item ) {
 
 		// If there is no last updated, then say so.
-		if ( empty( $item['stamps']['updated'] ) ) {
+		if ( empty( $item['updated'] ) ) {
 
 			// Set an accessible.
 			$setup_text = '<span aria-hidden="true">&#8212;</span><span class="screen-reader-text">' . __( 'No update time', 'temporary-admin-user' ) . '</span>';
@@ -330,11 +331,11 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		}
 
 		// Set my stamp.
-		$stamp  = absint( $item['stamps']['updated'] );
+		$stamp  = absint( $item['updated'] );
 		$local  = gmdate( 'Y/m/d g:i:s a', $stamp );
 
 		// Set my date with the formatting.
-		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, $item['stamps']['current'] ) );
+		$show   = sprintf( _x( '%s ago', '%s = human-readable time difference', 'temporary-admin-user' ), human_time_diff( $stamp, $item['current'] ) );
 
 		// Wrap it in an accessible tag.
 		$build  = '<abbr title="' . esc_attr( $local ) . '">' . esc_html( $show ) . '</abbr>';
@@ -353,10 +354,10 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	protected function column_expires( $item ) {
 
 		// Handle determining if the timestamp expired.
-		if ( absint( $item['stamps']['current'] ) >= absint( $item['stamps']['expires'] ) ) {
+		if ( absint( $item['current'] ) >= absint( $item['expires'] ) ) {
 
 			// If this hasn't been handled by the cron job, restrict the account now.
-			if ( ! empty( $item['status'] ) && 'active' === $item['status'] ) {
+			if ( ! empty( $item['status'] ) && 'inactive' !== $item['status'] ) {
 				UserChanges\restrict_existing_user( $item['id'] );
 			}
 
@@ -365,7 +366,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		}
 
 		// Set my stamps, both local and GMT.
-		$stamp  = absint( $item['stamps']['expires'] );
+		$stamp  = absint( $item['expires'] );
 		$local  = gmdate( 'Y/m/d g:i:s a', $stamp );
 
 		// Do my date logicals.
@@ -393,11 +394,8 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	 */
 	protected function column_actions( $item ) {
 
-		// First get my user actions.
-		$setup_actions  = Helpers\create_user_action_args( $item['id'], $item['email'] );
-
 		// Pass it over to the larger HTML builder.
-		return AdminMarkup\render_user_actions_list( $item, $setup_actions, false );
+		return AdminMarkup\render_user_actions_list( $item, false );
 	}
 
 	/**
@@ -418,7 +416,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 		];
 
 		// Return the results of the query with the args.
-		return Queries\query_user_table_data( $setup_args );
+		return Queries\query_admin_user_table_data( $setup_args );
 	}
 
 	/**
@@ -446,15 +444,13 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 
 			// Adding to the array of arrays.
 			$list_data[] = [
-				'id'     => $user_obj->ID,
-				'email'  => $user_obj->user_email,
-				'status' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'status', true ),
-				'stamps' => [
-					'created' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'created', true ),
-					'expires' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'expires', true ),
-					'updated' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'updated', true ),
-					'current' => $right_now,
-				]
+				'id'      => $user_obj->ID,
+				'email'   => $user_obj->user_email,
+				'status'  => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'status', true ),
+				'created' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'created', true ),
+				'expires' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'expires', true ),
+				'updated' => get_user_meta( $user_obj->ID, Core\META_PREFIX . 'updated', true ),
+				'current' => $right_now,
 			];
 		}
 
@@ -463,7 +459,7 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 	}
 
 	/**
-	 * Define what data to show on each column of the table.
+	 * Define what default data to show on each column of the table.
 	 *
 	 * @param  array  $dataset      Our entire dataset.
 	 * @param  string $column_name  Current column name.
@@ -477,12 +473,10 @@ class Temporary_Admin_Users_List extends WP_List_Table {
 
 			case 'id' :
 			case 'email' :
-				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
-
 			case 'created' :
 			case 'updated' :
 			case 'expires' :
-				return ! empty( $dataset['stamps'][ $column_name ] ) ? $dataset['stamps'][ $column_name ] : '';
+				return ! empty( $dataset[ $column_name ] ) ? $dataset[ $column_name ] : '';
 
 			case 'status' :
 				return ! empty( $dataset[ $column_name ] ) ? ucfirst( $dataset[ $column_name ] ) : '';

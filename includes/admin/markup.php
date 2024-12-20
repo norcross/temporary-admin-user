@@ -1,6 +1,6 @@
 <?php
 /**
- * Set up and render the markup pieces.
+ * Handle constructing the larger sections of HTML.
  *
  * @package TempAdminUser
  */
@@ -13,7 +13,7 @@ use Norcross\TempAdminUser as Core;
 use Norcross\TempAdminUser\Helpers as Helpers;
 
 /**
- * Construct the HTML for the intro on the help tab.
+ * Construct the HTML for the overview section on the help tab.
  *
  * @param  boolean $echo  Whether to echo or return it.
  *
@@ -53,7 +53,7 @@ function render_overview_help_tab( $echo = true ) {
 	$build .= '</ul>';
 
 	// Explain the list.
-	$build .= '<p class="tmp-admin-help-tab-text">' . esc_html__( 'Note that some actions are only available for users with a particular status.', 'temporary-admin-user' ) . '</p>';
+	$build .= '<p class="tmp-admin-help-tab-text">' . esc_html__( 'Note that some actions are only available for users with a particular status, and any unavailable actions will be disabled for that user.', 'temporary-admin-user' ) . '</p>';
 
 	// Return the markup.
 	if ( false === $echo ) {
@@ -61,7 +61,7 @@ function render_overview_help_tab( $echo = true ) {
 	}
 
 	// Show it.
-	echo $build;
+	echo $build; // WPCS: XSS ok.
 }
 
 /**
@@ -165,7 +165,7 @@ function render_cli_help_tab( $echo = true ) {
 	}
 
 	// Show it.
-	echo $build;
+	echo $build; // WPCS: XSS ok.
 }
 
 /**
@@ -204,14 +204,14 @@ function render_new_user_form( $echo = true ) {
 			// Close the email wrapper.
 			$build .= '</div>';
 
-		// Show a column section if we have ranged.
+		// Show a column section if we have ranges.
 		if ( ! empty( $ranges ) ) {
 
 			// Handle the range field.
 			$build .= '<div class="tmp-admin-new-user-form-single-column tmp-admin-new-user-form-range-column">';
 
 				// Show the label for the field.
-				$build .= '<label for="tmp-admin-new-user-duration">' . esc_html__( 'Expiration Length', 'temporary-admin-user' ) . '</label>';
+				$build .= '<label for="tmp-admin-new-user-duration">' . esc_html__( 'Duration', 'temporary-admin-user' ) . '</label>';
 
 				// Output the select field.
 				$build .= '<select name="tmp-admin-new-user-duration" id="tmp-admin-new-user-duration" class="tmp-admin-user-select">';
@@ -219,7 +219,7 @@ function render_new_user_form( $echo = true ) {
 				// Add the "empty" one.
 				$build .= '<option value="0">' . esc_html__( '(Select)', 'temporary-admin-user' ) . '</option>';
 
-				// Loop my frequencies to make the select field.
+				// Loop my frequencies to make the individual option fields.
 				foreach ( $ranges as $range => $args ) {
 					$build .= '<option value="' . esc_attr( $range ) . '">' . esc_html( $args['label'] ) . '</option>';
 				}
@@ -248,10 +248,10 @@ function render_new_user_form( $echo = true ) {
 			// Close the submit wrapper.
 			$build .= '</div>';
 
-		// Close the div wrapper.
+		// Close the overall div wrapper.
 		$build .= '</div>';
 
-	// Close the  markup for the wrapper on the field box.
+	// Close the markup for the wrapper on the field box.
 	$build .= '</form>';
 
 	// Return the markup.
@@ -260,24 +260,26 @@ function render_new_user_form( $echo = true ) {
 	}
 
 	// Show it.
-	echo $build;
+	echo $build; // WPCS: XSS ok.
 }
 
 /**
  * Handle building the HTML for each user action.
  *
- * @param  array   $table_item    The various actions we have.
- * @param  array   $user_actions  The various actions we have.
- * @param  boolean $echo          Whether to echo out the markup or return it.
+ * @param  array   $table_item  The various actions we have.
+ * @param  boolean $echo        Whether to echo out the markup or return it.
  *
- * @return HTML                   Nice icon based list.
+ * @return HTML                 Nice icon based list.
  */
-function render_user_actions_list( $table_item = [], $user_actions = [], $echo = true ) {
+function render_user_actions_list( $table_item = [], $echo = true ) {
 
-	// Return an empty string if no actions or data exist.
-	if ( empty( $user_actions ) || empty( $table_item ) ) {
+	// Return an empty string if no table item data exists.
+	if ( empty( $table_item ) ) {
 		return '';
 	}
+
+	// First get my user actions.
+	$user_actions   = Helpers\create_user_action_args( $table_item['id'], $table_item['email'] );
 
 	// Set my empty.
 	$build  = '';
@@ -342,7 +344,7 @@ function render_user_actions_list( $table_item = [], $user_actions = [], $echo =
 	}
 
 	// Show it.
-	echo $build;
+	echo $build; // WPCS: XSS ok.
 }
 
 /**
@@ -386,11 +388,11 @@ function render_admin_notice_markup( $notice = '', $result = 'error', $dismiss =
 	// And close the div.
 	$build .= '</div>';
 
-	// Echo it if requested.
-	if ( ! empty( $echo ) ) {
-		echo $build; // WPCS: XSS ok.
+	// Return the markup.
+	if ( false === $echo ) {
+		return $build;
 	}
 
-	// Just return it.
-	return $build;
+	// Show it.
+	echo $build; // WPCS: XSS ok.
 }

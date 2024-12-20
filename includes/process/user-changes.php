@@ -17,7 +17,7 @@ use Norcross\TempAdminUser\Process\Queries as Queries;
  * Create the new temporary user.
  *
  * @param  string  $user_email  The supplied email.
- * @param  string  $duration    The supplied expiration
+ * @param  string  $duration    The supplied duration length.
  *
  * @return integer $user_id     The newly created user ID.
  */
@@ -32,7 +32,7 @@ function create_new_user( $user_email = '', $duration = 'day' ) {
 	// Set my user args.
 	$setup_user = [
 		'user_login'   => Helpers\create_username( $user_email ),
-		'user_pass'    => apply_filters( Core\HOOK_PREFIX . 'random_password', wp_generate_password( 16, true, false ) ),
+		'user_pass'    => wp_generate_password( 16, true, false ),
 		'user_email'   => sanitize_email( $user_email, true ),
 		'user_url'     => home_url(),
 		'role'         => 'administrator',
@@ -62,7 +62,7 @@ function create_new_user( $user_email = '', $duration = 'day' ) {
 	// Purge the stored transients.
 	Helpers\purge_stored_transients();
 
-	// Send the new user email.
+	// Send the new user email. Maybe.
 	Helpers\maybe_send_new_user_email( $create_id );
 
 	// Allow others to help.
@@ -73,12 +73,12 @@ function create_new_user( $user_email = '', $duration = 'day' ) {
 }
 
 /**
- * Add a pre-determined amount of time to the existing user.
+ * Add a pre-determined amount of time to an existing user.
  *
- * @param  integer $user_id   The user ID we want to restrict.
+ * @param  integer $user_id   The user ID we want to extend.
  * @param  string  $duration  The requested duration length.
  *
- * @return void
+ * @return boolean
  */
 function extend_existing_user( $user_id = 0, $duration = 'day' ) {
 
@@ -119,12 +119,12 @@ function extend_existing_user( $user_id = 0, $duration = 'day' ) {
 }
 
 /**
- * Add a pre-determined amount of time to the existing user.
+ * Move a previously expired user back into an admin.
  *
- * @param  integer $user_id   The user ID we want to restrict.
+ * @param  integer $user_id   The user ID we want to promote.
  * @param  string  $duration  The requested duration length.
  *
- * @return void
+ * @return boolean
  */
 function promote_existing_user( $user_id = 0, $duration = 'day' ) {
 
@@ -164,7 +164,7 @@ function promote_existing_user( $user_id = 0, $duration = 'day' ) {
 }
 
 /**
- * Take the existing user and restrict them.
+ * Take an existing user and restrict them.
  *
  * @param  integer $user_id  The user ID we want to restrict.
  *
@@ -238,7 +238,7 @@ function restrict_all_users() {
 }
 
 /**
- * Take the existing user and delete them.
+ * Take an existing user and delete them.
  *
  * @param  integer $user_id  The user ID we want to delete.
  *

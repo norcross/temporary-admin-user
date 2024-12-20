@@ -10,13 +10,14 @@ namespace Norcross\TempAdminUser\Admin\Setup;
 
 // Set our aliases.
 use Norcross\TempAdminUser as Core;
+use Norcross\TempAdminUser\Helpers as Helpers;
 
 /**
  * Start our engines.
  */
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_admin_core_assets', 10 );
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\load_user_table_css' );
-add_filter( 'removable_query_args', __NAMESPACE__ . '\add_removable_args' );
+add_filter( 'user_has_cap', __NAMESPACE__ . '\modify_temporary_user_permissions', 20, 4 );
 
 /**
  * Load our admin side CSS.
@@ -68,22 +69,40 @@ function load_user_table_css() {
 }
 
 /**
- * Add our custom strings to the vars.
+ * Filter the capabilities for the temporary users.
  *
- * @param  array $args  The existing array of args.
+ * @param  array   $allcaps  All the capabilities of the user.
+ * @param  array   $cap      [0] Required capability.
+ * @param  array   $args     [0] Requested capability.
+ *                           [1] User ID.
+ *                           [2] Associated object ID.
  *
- * @return array $args  The modified array of args.
+ * @param  WP_User $user     The user object being loaded.
+ *
+ * @return array             The potentially modified array of permissions.
  */
-function add_removable_args( $args ) {
+function modify_temporary_user_permissions( $allcaps, $cap, $args, $user ) {
 
-	// Set the array of new args.
-	$setup_custom_args  = [
-		'tmp-admin-users-success',
-		'tmp-admin-users-action-complete',
-		'tmp-admin-users-action-result',
-		'tmp-admin-users-error-code',
-	];
+	// Allow users to edit other users via this filter.
+	if ( false !== apply_filters( Core\HOOK_PREFIX . 'enable_user_management', false ) ) {
+		return $allcaps;
+	}
 
-	// Include my new args and return.
-	return wp_parse_args( $setup_custom_args, $args );
+	// Check for the flag.
+	$check_flag = Helpers\confirm_user_via_plugin( $user->ID );
+
+	// Return the current array if this isn't one of our users.
+	if ( empty( $check_flag ) ) {
+		return $allcaps;
+	}
+
+	// Remove these specific permissions.
+	$allcaps['edit_users']    = 0;
+	$allcaps['remove_users']  = 0;
+	$allcaps['promote_users'] = 0;
+	$allcaps['delete_users']  = 0;
+	$allcaps['create_users']  = 0;
+
+	// Return the modified array.
+	return apply_filters( Core\HOOK_PREFIX . 'allowed_user_permissions', $allcaps );
 }
