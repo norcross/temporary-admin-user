@@ -1,55 +1,98 @@
 Temporary Admin User
 ====================
 
-**Contributors:** norcross
+Create admin users for support that expire.
 
-**Donate link:** https://andrewnorcross.com/donate
+## Contributors
+* [Andrew Norcross](https://github.com/norcross)
 
-**Tags:** user accounts, support
+## About
 
-**Requires at least:** 4.0
+Create a temporary WordPress admin user to provide access on support issues, etc. Allows for extending, restricting, and deleting users created by the plugin.
 
-**Tested up to:** 4.0.1
+## Features
 
-**Stable tag:** 0.0.1
+* Dedicated table for users created with the plugin
+* Built-in processes to manage existing users
+* Available actions and filters for modifying default values
+* A suite of CLI commands
 
+## Frequenty Asked Questions
 
-### Description ###
+#### Do user accounts expire automatically?
 
-Create a temporary WordPress admin user to provide access on support issues, etc. This is
-still very much in beta, so please use with care.
+Yes. There is a built in WP-Cron job that will check the user accounts created by the plugin and compare the stored expiration date. Users that have expired will be automatically set to "Subscriber".
 
-**Features**
+#### I don't want to send the new user email. Can I prevent that?
 
-* user is automatically set to 'subscriber' after the pre-determined time limit
-* users can be demoted or deleted directly from settings page
-* numerous filters to customize aspects
+Absolutely! There's a filter.
 
-### Installation ###
+~~~php
+/**
+ * Don't send the new user email when creating a new user.
+ *
+ * @return boolean
+ */
+add_filter( 'temporary_admin_user_disable_new_user_email', '__return_true' );
+~~~
 
-This section describes how to install the plugin and get it working.
+#### Can I change the default ranges?
 
-1. Upload `temporary-admin-user` to the `/wp-content/plugins/` directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. Create users as needed
+Sure can. There is a filter that impacts both promoting and extending a user, and then a more specific one for each action.
 
-### Frequently Asked Questions ###
+~~~php
+/**
+ * Change the default times for extending and promoting user actions.
+ *
+ * @param  string  $duration  The current duration range. Default is 'day'.
+ * @param  integer $user_id   The individual user ID being updated.
+ *
+ * @return string             One of the ranges to get a timestamp from.
+ */
+function prefix_set_default_action_range( $duration, $user_id ) {
+	return 'week';
+}
+add_filter( 'temporary_admin_user_default_user_action_range', 'prefix_set_default_action_range', 10, 2 );
+~~~
 
-#### Why do I need this? ####
+~~~php
+/**
+ * Change the default times for extending, but not promoting users.
+ *
+ * @param  string  $duration  The current duration range. Default is 'day'.
+ * @param  integer $user_id   The individual user ID being updated.
+ *
+ * @return string             One of the ranges to get a timestamp from.
+ */
+function prefix_set_default_extend_range( $duration, $user_id ) {
+	return 'week';
+}
+add_filter( 'temporary_admin_user_default_user_extend_range', 'prefix_set_default_extend_range', 10, 2 );
+~~~
 
-If you have to make user accounts for people to provide support, this will make it easier
+~~~php
+/**
+ * Change the default times for promoting, but not extending users.
+ *
+ * @param  string  $duration  The current duration range. Default is 'day'.
+ * @param  integer $user_id   The individual user ID being updated.
+ *
+ * @return string             One of the ranges to get a timestamp from.
+ */
+function prefix_set_default_promote_range( $duration, $user_id ) {
+	return 'week';
+}
+add_filter( 'temporary_admin_user_default_user_promote_range', 'prefix_set_default_promote_range', 10, 2 );
+~~~
 
+#### Are there other hooks in the plugin?
 
-### Screenshots ###
+You betcha. I would suggest reading the source code to get a better idea of what else can be done until I'm able to find time to document them all.
 
+#### How do the CLI commands work?
 
-### Changelog ###
+Check in the Help Tab above the admin table, and all the commands and their options are explained. You can also type `wp tmp-admin-user` in the connected terminal and all the commands are shown.
 
-**0.0.1**
-* Initial release
+#### I found a bug or have a feature request. How should I handle it?
 
-
-### Upgrade Notice ###
-
-**0.0.1**
-Initial release
+Open a new issue in this repository and I'll see what I can do.

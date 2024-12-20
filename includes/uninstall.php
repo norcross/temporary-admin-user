@@ -1,21 +1,29 @@
 <?php
 /**
- * Delete various options when uninstalling the plugin.
+ * Our uninstall call.
+ *
+ * @package TempAdminUser
+ */
+
+// Declare our namespace.
+namespace Norcross\TempAdminUser\Uninstall;
+
+// Set our aliases.
+use Norcross\TempAdminUser as Core;
+use Norcross\TempAdminUser\Process\Cron as Cron;
+use Norcross\TempAdminUser\Process\UserChanges as UserChanges;
+
+/**
+ * Manage the cron and deleting users when deleting the plugin.
  *
  * @return void
  */
-function tmp_admin_user_uninstall() {
+function uninstall() {
 
-	// Include our action so that we may add to this later.
-	do_action( 'tmp_admin_user_uninstall_process' );
+	// Pull in our scheduled cron and unschedule it.
+	Cron\modify_refresh_cron( true, false );
 
-	// If we added the filter, delete everyone on plugin uninstall.
-	if ( false !== $check = apply_filters( 'tmp_admin_user_delete_on_uninstall', false ) ) {
-		TempAdminUser_Users::update_all_users( 'delete' );
-	}
-
-	// And flush our rewrite rules.
-	flush_rewrite_rules();
+	// Delete all the users.
+	UserChanges\delete_all_users();
 }
-register_uninstall_hook( TMP_ADMIN_USER_FILE, 'tmp_admin_user_uninstall' );
-
+register_uninstall_hook( Core\FILE, __NAMESPACE__ . '\uninstall' );
