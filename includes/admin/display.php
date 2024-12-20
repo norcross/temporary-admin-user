@@ -105,5 +105,5 @@ function modify_temporary_user_permissions( $allcaps, $cap, $args, $user ) {
 	$allcaps['create_users']  = 0;
 
 	// Return the modified array.
-	return $allcaps;
+	return apply_filters( Core\HOOK_PREFIX . 'allowed_user_permissions', $allcaps );
 }
