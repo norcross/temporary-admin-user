@@ -498,5 +498,46 @@ class TempAdminUserCommands extends WP_CLI_Command {
 		WP_CLI::halt( 0 );
 	}
 
+	/**
+	 * Generate a list of all the users.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--format]
+	 * : How to display the data.
+	 * ---
+	 * default: table
+	 * options:
+	 *   - table
+	 *   - json
+	 *   - csv
+	 *   - yaml
+	 *   - ids
+	 *   - count
+	 * ---
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp tmp-admin-user list-users
+	 *     wp tmp-admin-user list-users --format=json
+	 *
+	 * @alias list-users
+	 *
+	 * @when after_wp_load
+	 */
+	function list_all_users( $args = [], $assoc_args = [] ) {
+
+		// Parse out the associatives.
+		$parse_cli_args = wp_parse_args( $assoc_args, [
+			'format' => 'table',
+		]);
+
+		// Make sure we have a valid format.
+		if ( empty( $parse_cli_args['format'] ) || ! in_array( $parse_cli_args['format'], ['table', 'json', 'csv', 'yaml', 'ids', 'count'] , true ) ) {
+			WP_CLI::error( __( 'An email address or user ID is required.', 'temporary-admin-user' ) );
+		}
+
+	}
+
 	// End all custom CLI commands.
 }
